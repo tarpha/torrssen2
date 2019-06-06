@@ -14,9 +14,9 @@ module.exports = {
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' }
     ]
   },
-  env: {
-    baseUrl: process.env.BASE_URL || 'http://localhost:8080'
-  },
+  // env: {
+  //   baseUrl: process.env.BASE_URL || 'http://localhost:8080'
+  // },
   plugins: [
     '~/plugins/vuetify.js'
   ],
