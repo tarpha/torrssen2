@@ -1,0 +1,47 @@
+plugins {
+	id 'org.springframework.boot' version '2.1.5.RELEASE'
+	id "io.freefair.lombok" version "3.6.4"
+	id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.tarpha'
+version = '0.4.1'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+	jcenter()
+}
+
+ext {
+	swaggerVersion = '2.9.2'
+	romeVersion = '1.12.0'
+	httpclientVersion = '4.5.8'
+	commonsLangVersion = '3.9'
+	commonsIoVersion = '2.6'
+	commonsCodecVersion = '1.12'
+	jsonVersion = '20180813'
+	jsonSmartVersion = '2.3'
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
+	implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
+	implementation "com.rometools:rome:${romeVersion}"
+	implementation "org.apache.httpcomponents:httpclient:${httpclientVersion}"
+	implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+	implementation "org.json:json:${jsonVersion}"
+	implementation "commons-io:commons-io:${commonsIoVersion}"
+	implementation "commons-codec:commons-codec:${commonsCodecVersion}"
+	implementation "net.minidev:json-smart:${jsonSmartVersion}"
+	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'com.h2database:h2'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
