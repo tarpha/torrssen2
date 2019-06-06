@@ -73,10 +73,8 @@ public class TransmissionService {
 
     }
 
-    // @PostConstruct
     public void initialize() {
         username = settingService.getSettingValue("TRANSMISSION_USERNAME");
-        // password = settingService.getSettingValue("TRANSMISSION_PASSWORD");
         try {
             password = cryptoService.decrypt(settingService.getSettingValue("TRANSMISSION_PASSWORD"));
         } catch (UnsupportedEncodingException | GeneralSecurityException e) {
@@ -159,9 +157,11 @@ public class TransmissionService {
 
         } catch (IOException | ParseException | JSONException e) {
             logger.error(e.getMessage());
-        } finally {
             HttpClientUtils.closeQuietly(response);
-        }
+            HttpClientUtils.closeQuietly(httpClient);
+            httpClient = null;
+        } 
+        HttpClientUtils.closeQuietly(response);
 
         return ret;
     }

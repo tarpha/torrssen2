@@ -3,6 +3,7 @@
     <nuxt-download-dialog />
     <v-snackbar
       v-model="show"
+      :timeout=3500
       top
     >
       {{ this.$store.state.snackbar.text }}
@@ -40,7 +41,6 @@
 
 <script>
   import axios from '~/plugins/axios'
-  import stompClient from '~/plugins/stomp'
   import NuxtFeed from '~/components/Feed'
   import NuxtDownloadDialog from '~/components/DownloadDialog'
 
@@ -60,6 +60,12 @@
       },
       toggle () {
         return this.$store.state.toolbar.toggle
+      },
+      downloadToggle () {
+        return this.$store.state.download.toggle
+      },
+      download () {
+        return this.$store.state.download.download
       }
     },
     watch: {
@@ -89,35 +95,11 @@
           }
           this.stomps = stomps
         })
+      },
+      downloadToggle: function (val) {
+        this.stomps[this.download.vueIndex].active = this.download.active
+        this.stomps[this.download.vueIndex].id = this.download.id
       }
-    },
-    beforeMount () {
-      stompClient.connect({}, frame => {
-        stompClient.subscribe('/topic/rate', frame => {
-          const body = JSON.parse(frame.body)
-          const vueIndex = body.vueItemIndex
-          this.stomps[vueIndex].active = !body.done
-          this.stomps[vueIndex].percentDone = body.percentDone
-          this.stomps[vueIndex].id = body.id
-          this.stomps[vueIndex].delete = false
-        }, error => {
-          console.error(error)
-        })
-        stompClient.subscribe('/topic/remove', frame => {
-          const body = JSON.parse(frame.body)
-          const vueIndex = body.vueItemIndex
-          this.stomps[vueIndex].active = false
-          this.stomps[vueIndex].delete = true
-        }, error => {
-          console.error(error)
-        })
-        stompClient.subscribe('/topic/rate/list', frame => {
-          console.log(frame)
-          this.$store.commit('setting/setDownloadStatus', JSON.parse(frame.body))
-        }, error => {
-          console.error(error)
-        })
-      }, err => { console.log(err) })
     },
     mounted () {
       axios.get('/api/setting/INIT').then(res => {

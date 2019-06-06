@@ -59,7 +59,7 @@
 
 <script>
 import axios from '~/plugins/axios'
-import stompClient from '~/plugins/stomp'
+// import stompClient from '~/plugins/stomp'
 
 export default {
   data () {
@@ -126,8 +126,14 @@ export default {
           this.successClass = 'o-circle c-container__circle o-circle__sign--failure'
         }
         this.$store.commit('download/setResult', true)
+        // this.$store.commit('download/setVueIndex', this.$store.state.download.data.vueItemIndex)
+        this.$store.commit('download/toggle', {
+          active: true,
+          vueIndex: this.$store.state.download.data.vueItemIndex,
+          id: ret.data
+        })
 
-        stompClient.send('/app/rate', ret.data, {})
+        // stompClient.send('/app/rate', ret.data, {})
 
         setTimeout(() => {
           this.close()

@@ -147,9 +147,11 @@ public class DownloadStationService {
             }
         } catch (IOException | URISyntaxException | ParseException | JSONException e) {
             logger.error(e.getMessage());
-        } finally {
             HttpClientUtils.closeQuietly(response);
-        }
+            HttpClientUtils.closeQuietly(httpClient);
+            httpClient = null;
+        } 
+        HttpClientUtils.closeQuietly(response);
 
         return ret;
     }
@@ -196,9 +198,11 @@ public class DownloadStationService {
 
         } catch (IOException | URISyntaxException | ParseException | JSONException e) {
             logger.error(e.getMessage());
-        } finally {
             HttpClientUtils.closeQuietly(response);
+            HttpClientUtils.closeQuietly(httpClient);
+            httpClient = null;
         }
+        HttpClientUtils.closeQuietly(response);
 
         return ret;
     }

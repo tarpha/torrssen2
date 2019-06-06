@@ -1,5 +1,9 @@
 import axios from 'axios'
 
-export default axios.create({
-  // baseURL: process.env.baseUrl
-})
+let options = {}
+
+if (process.env.NODE_ENV !== 'production') {
+  options = { baseURL: process.env.baseUrl }
+}
+
+export default axios.create(options)

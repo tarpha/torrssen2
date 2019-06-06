@@ -4,7 +4,13 @@ export const state = () => ({
   auto: false,
   text: '',
   path: [],
-  data: {}
+  data: {},
+  toggle: false,
+  download: {
+    active: false,
+    vueIndex: -1,
+    id: 0
+  }
 })
 
 export const mutations = {
@@ -27,5 +33,11 @@ export const mutations = {
   },
   setShow (state, value) {
     state.show = value
+  },
+  toggle (state, obj) {
+    state.toggle = !state.toggle
+    state.download.active = obj.active
+    state.download.vueIndex = obj.vueIndex
+    state.download.id = obj.id
   }
 }

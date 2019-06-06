@@ -12,8 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -30,10 +30,12 @@ public class WebSocketController {
     @Autowired
     private TransmissionService transmissionService;
 
-    @MessageMapping("/rate")
-    @SendTo("/topic/rate")
-    public DownloadList downloadRate(Long id) throws Exception {
+    @MessageMapping("/rate/{sid}")
+    public DownloadList downloadRate(@DestinationVariable String sid) throws Exception {
         DownloadList ret = null;
+        Long id = Long.valueOf(sid);
+
+        logger.debug("id:" + sid);
         
         String app = settingService.getDownloadApp();
         if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
@@ -52,7 +54,6 @@ public class WebSocketController {
     }
 
     @MessageMapping("/rate/list")
-    @SendTo("/topic/rate/list")
     public List<DownloadList> downloadRateList() {
         List<DownloadList> ret = null;
         logger.debug("downloadList");
@@ -68,7 +69,6 @@ public class WebSocketController {
     }
 
     @MessageMapping("/remove")
-    @SendTo("/topic/remove")
     public DownloadList remove(DownloadList download) {
         boolean ret = false;
 

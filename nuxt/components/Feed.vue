@@ -38,16 +38,13 @@
         >
 					<v-icon color="blue-grey darken-2">get_app</v-icon>
 				</v-btn>
-        <v-progress-circular
+        <nuxt-progress 
           v-else
-          :rotate="-90"
-          :size="50"
-          :width="7"
-          :value="stomp.percentDone"
-          color="teal"
-        >
-          {{ stomp.percentDone }}
-        </v-progress-circular>
+          :id="stomp.id"
+          :index="index"
+          :stop="stop"
+          :title="item.title"
+        />
 			</v-list-tile-action>
 		</v-list-tile>
 	</div>
@@ -55,9 +52,13 @@
 
 <script>
 import axios from '~/plugins/axios'
-import stompClient from '~/plugins/stomp'
+// import stompClient from '~/plugins/stomp'
+import NuxtProgress from '~/components/Progress'
 
 export default {
+  components: {
+    NuxtProgress
+  },
   props: {
     item: {
       type: Object,
@@ -74,37 +75,13 @@ export default {
   },
   data () {
     return {
-      intervalObj: ''
-    }
-  },
-  watch: {
-    'stomp.active': function (val) {
-      if (val) {
-        this.$nextTick(() => {
-          this.intervalObj = setInterval(() => {
-            stompClient.send('/app/rate', this.stomp.id, {})
-          }, 1000)
-        })
-      } else {
-        if (this.intervalObj !== '') {
-          clearInterval(this.intervalObj)
-        }
-        const msg = this.stomp.delete ? 'Delete: ' : 'Complete: '
-        this.$store.commit('snackbar/show', msg + this.item.title)
-      }
+      intervalObj: '',
+      stop: false
     }
   },
   methods: {
     downloadShow: function (item, index) {
-      // const downloadPath = await axios.get('/api/setting/download-path')
-      // const seasonPrefix = await axios.get('/api/setting/SEASON_PREFIX')
-      // downloadPath.data.forEach(element => {
-      //   pathList.push({
-      //     path: element.path + (element.useTitle ? '/' + item.rssTitle : '') + (element.useSeason ? '/' + seasonPrefix.data + item.rssSeason : ''),
-      //     name: element.name
-      //   })
-      // })
-
+      this.stop = false
       axios.get('/api/setting/download-path/compute', {
         params: {
           'title': item.rssTitle,
@@ -116,18 +93,22 @@ export default {
       })
     },
     remove: async function (id) {
-      stompClient.send('/app/remove', JSON.stringify({
-        'id': id,
-        'vueItemIndex': this.index
-      }), {})
+      axios.post('/api/download/remove', { 'id': id }).then(res => {
+        let msg = 'DELETE: '
+        if (res.status !== 200) {
+          msg = 'DELETE FAIL: '
+        }
+        this.stop = true
+        this.$store.commit('snackbar/show', msg + this.item.title)
+      })
     },
     validURL: function (str) {
       var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
-    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-    '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
       return !!pattern.test(str)
     },
     getSubTitle: function (item) {

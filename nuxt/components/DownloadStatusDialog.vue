@@ -74,6 +74,7 @@ export default {
   data () {
     return {
       dialog: false,
+      intervalObj: '',
       headers: [
         { text: '제목', value: 'title', sortable: false },
         { text: '다운로드 경로', value: 'downloadPath', sortable: false },
@@ -82,7 +83,31 @@ export default {
       ]
     }
   },
+  beforeMount () {
+    // stompClient.connect({}, frame => {
+    if (stompClient.connected === true) {
+      this.subscribe()
+    } else {
+      stompClient.connect({}, frame => {
+        this.subscribe()
+      })
+    }
+    // })
+  },
+  // mounted () {
+  //   this.intervalObj = setInterval(() => {
+  //     stompClient.send('/app/rate/list', {}, {})
+  //   }, 1000)
+  // },
   methods: {
+    subscribe: function () {
+      stompClient.subscribe('/topic/rate/list', frame => {
+        console.log(frame)
+        this.$store.commit('setting/setDownloadStatus', JSON.parse(frame.body))
+      }, error => {
+        console.error(error)
+      })
+    },
     close: function () {
       this.editedIndex = -1
       this.regexShow = false

@@ -177,5 +177,11 @@ SELECT 'TV_TITLE' name
      , true  use_title
      , false use_season
      , CURRENT_TIMESTAMP create_dt
+UNION ALL
+SELECT 'TV_TITLE_SEASON' name
+     , '/video/TV' path
+     , true  use_title
+     , true use_season
+     , CURRENT_TIMESTAMP create_dt
 ) x
 WHERE  NOT EXISTS(SELECT * FROM DOWNLOAD_PATH);
