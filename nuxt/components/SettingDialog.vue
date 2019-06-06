@@ -143,6 +143,9 @@ export default {
           for (let k = 0; k < this.oris.length; k++) {
             if (this.oris[k].key === tabs[i].arr[j].key && this.oris[k].value !== tabs[i].arr[j].value) {
               items.push(tabs[i].arr[j])
+            } else if (tabs[i].arr[j].key === 'INIT' && tabs[i].arr[j].value === 'FALSE') {
+              tabs[i].arr[j].value = 'TRUE'
+              items.push(tabs[i].arr[j])
             }
           }
         }
