@@ -162,6 +162,9 @@ export default {
           msg = '저장하지 못했습니다.'
         }
         this.$store.commit('snackbar/show', msg)
+        axios.get('/api/setting/DARK_THEME').then(res => {
+          this.$store.commit('setDark', res.data === 'TRUE')
+        })
         this.close()
       })
     }

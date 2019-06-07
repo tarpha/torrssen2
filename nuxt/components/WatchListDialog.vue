@@ -119,11 +119,9 @@
 						</v-flex>
 						<v-flex xs12>
 							<v-combobox
-								v-model="editedItem.downloadPath" 
+								v-model.lazy="editedItem.downloadPath" 
 								label="다운로드 경로" 
 								:items="pathList"
-								item-text="name"
-								item-value="name"
 								required
 							></v-combobox>
 						</v-flex>
@@ -181,7 +179,10 @@ export default {
           this.items = res.data
         })
         axios.get('/api/setting/path').then(res => {
-          this.pathList = res.data
+          this.pathList = []
+          for (let i = 0; i < res.data.length; i++) {
+            this.pathList.push(res.data[i].name)
+          }
         })
       }
     }
@@ -258,7 +259,7 @@ export default {
       }
     },
     save: function () {
-      this.editedItem.downloadPath = this.editedItem.downloadPath.name
+      // this.editedItem.downloadPath = this.editedItem.downloadPath.name
       axios.post('/api/setting/watch-list', this.editedItem).then(res => {
         let msg = '저장하였습니다.'
         if (res.status !== 200) {

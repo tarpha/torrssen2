@@ -108,6 +108,9 @@
           this.$store.commit('setting/setShowSetting', true)
         }
       })
+      axios.get('/api/setting/DARK_THEME').then(res => {
+        this.$store.commit('setDark', res.data === 'TRUE')
+      })
     },
     data () {
       return {

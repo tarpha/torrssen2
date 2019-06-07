@@ -45,6 +45,15 @@ SELECT 'DONE_DELETE' key
      , 2
      , CURRENT_TIMESTAMP create_dt
 UNION ALL
+SELECT 'DARK_THEME' key
+     , 'FALSE' value
+     , 'boolean' type
+     , true required
+     , '다크 테마'
+     , '일반'
+     , 5
+     , CURRENT_TIMESTAMP create_dt
+UNION ALL
 SELECT 'SEND_TELEGRAM' key
      , 'TRUE' value
      , 'boolean' type

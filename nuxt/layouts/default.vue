@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app :dark="dark">
     <v-content>
       <nuxt-toolbar />
       <nuxt />
@@ -16,6 +16,11 @@
     },
     data () {
       return {
+      }
+    },
+    computed: {
+      dark: function () {
+        return this.$store.state.dark
       }
     }
   }
