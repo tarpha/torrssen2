@@ -1,11 +1,11 @@
 /* RSS Feed List DB 기초 데이터 생성 */
-INSERT INTO RSS_LIST(name, url, use_db, link_key, create_dt)
-SELECT 'TORRENTWAL' name
-    , 'https://torrentwal.net/bbs//rss.php?b=torrent_tv' url
-     , true use_db
-     , 'link' link_key
-     , CURRENT_TIMESTAMP create_dt
-WHERE  NOT EXISTS(SELECT * FROM RSS_LIST);
+-- INSERT INTO RSS_LIST(name, url, use_db, link_key, create_dt)
+-- SELECT 'TORRENTWAL' name
+--     , 'https://torrentwal.net/bbs//rss.php?b=torrent_tv' url
+--      , true use_db
+--      , 'link' link_key
+--      , CURRENT_TIMESTAMP create_dt
+-- WHERE  NOT EXISTS(SELECT * FROM RSS_LIST);
 
 /* SETTING 기초 데이터 생성 */
 INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
