@@ -5,7 +5,20 @@
 		max-width="550"
 	>
 		<v-card style="overflow: hidden;">
-			<v-card-title class="headline" v-html="'다운로드 요청' + $store.state.download.text"></v-card-title>
+      <v-toolbar flat extended>
+        <v-btn icon @click="close">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title v-html="'다운로드 요청' + $store.state.download.text"></v-toolbar-title>
+        <template v-slot:extension>
+          <v-checkbox 
+            v-model="checkWatch"
+            label="자동 다운로드" 
+            color="primary"
+          ></v-checkbox>
+        </template>
+      </v-toolbar>
+			<!-- <v-card-title class="headline" v-html="'다운로드 요청' + $store.state.download.text"></v-card-title> -->
 
 			<div v-if="$store.state.download.result">
         <div :class="successClass">
@@ -14,10 +27,10 @@
 			</div>
       <div v-else>
 			<v-card flat>
-       	<v-list subheader two-line>
-          <v-subheader style="text-weight: bold">
+       	<v-list two-line>
+          <!-- <v-subheader style="text-weight: bold">
             <v-checkbox v-model="checkWatch" label="자동 다운로드" color="primary"></v-checkbox>
-          </v-subheader>
+          </v-subheader> -->
 					<v-list-tile v-for="(item, index) in paths" :key="index"
 						@click="if(item.useSeason === false && item.useTitle === false) download(item.path)"
 					>
@@ -55,7 +68,7 @@
 				</v-list>
 			</v-card>
       </div>
-			<v-card-actions>
+			<!-- <v-card-actions>
 				<v-spacer></v-spacer>
 
 				<v-btn
@@ -66,7 +79,7 @@
 				>
 					닫기
 				</v-btn>
-			</v-card-actions>
+			</v-card-actions> -->
 
 		</v-card>
 	</v-dialog>

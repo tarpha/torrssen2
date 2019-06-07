@@ -24,16 +24,23 @@
             </template>
           </v-list>
         </v-card>
-        <div xs12 sm4 text-xs-center style="text-align:center">
-        <v-btn 
-          flat
-          :loading="loading"
-          :disabled="loading"
-          @click="next()"
+        <v-alert
+          v-if="items.length === 0"
+          :value="true"
+          type="info"
         >
-          MORE
-        </v-btn>
-      </div>
+          검색 결과가 없습니다.
+        </v-alert>
+        <div xs12 sm4 text-xs-center style="text-align:center">
+          <v-btn 
+            flat
+            :loading="loading"
+            :disabled="loading"
+            @click="next()"
+          >
+            MORE
+          </v-btn>
+        </div>
       </v-flex>
     </v-layout>
   </div>
@@ -86,11 +93,13 @@
           this.items = res.data.content
           let stomps = []
           for (var i = 0; i < res.data.content.length; i++) {
+            const obj = res.data.content[i]
             stomps.push({
-              percentDone: -1,
-              active: false,
+              percentDone: obj.downloading === true ? 0 : -1,
+              active: obj.downloading === true,
+              stop: false,
               delete: false,
-              id: 0
+              id: obj.downloading === true ? obj.downloadId : 0
             })
           }
           this.stomps = stomps
@@ -130,12 +139,13 @@
       })
       let stomps = []
       for (var i = 0; i < res.data.content.length; i++) {
+        const obj = res.data.content[i]
         stomps.push({
-          percentDone: -1,
-          active: false,
+          percentDone: obj.downloading === true ? 0 : -1,
+          active: obj.downloading === true,
           stop: false,
           delete: false,
-          id: 0
+          id: obj.downloading === true ? obj.downloadId : 0
         })
       }
       return {
@@ -155,13 +165,15 @@
           }
         }).then(res => {
           for (var i = 0; i < res.data.content.length; i++) {
+            const obj = res.data.content[i]
             this.stomps.push({
-              percentDone: -1,
-              active: false,
+              percentDone: obj.downloading === true ? 0 : -1,
+              active: obj.downloading === true,
+              stop: false,
               delete: false,
-              id: 0
+              id: obj.downloading === true ? obj.downloadId : 0
             })
-            this.items.push(res.data.content[i])
+            this.items.push(obj)
           }
           this.loading = false
           if (this.page >= res.data.totalPages) {

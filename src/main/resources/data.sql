@@ -91,7 +91,7 @@ SELECT 'DOWNLOAD_APP' key
      , CURRENT_TIMESTAMP create_dt
 UNION ALL
 SELECT 'TRANSMISSION_HOST' key
-     , '10.0.1.10' value
+     , '127.0.0.1' value
      , 'text' type
      , false required
      , '호스트'
@@ -127,7 +127,7 @@ SELECT 'TRANSMISSION_PASSWORD' key
      , CURRENT_TIMESTAMP create_dt
 UNION ALL
 SELECT 'DS_HOST' key
-     , '10.0.1.10' value
+     , '127.0.0.1' value
      , 'text' type
      , false required
      , '호스트'

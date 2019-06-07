@@ -40,6 +40,10 @@ public class RssFeed {
     private String rssSite;
 
     private String rssPoster;
+
+    private Long downloadId;
+
+    private Boolean downloading = false;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();

@@ -8,6 +8,7 @@ import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.domain.WatchList;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.WatchListRepository;
+import com.tarpha.torrssen2.service.DownloadService;
 import com.tarpha.torrssen2.service.DownloadStationService;
 import com.tarpha.torrssen2.service.SettingService;
 import com.tarpha.torrssen2.service.TransmissionService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -48,6 +50,9 @@ public class DownloadController {
     @Autowired
     private SettingService settingService;
 
+    @Autowired
+    private DownloadService downloadService;
+
     @CrossOrigin("*")
     @GetMapping(value = "/app")
     public String getApp() {
@@ -56,23 +61,8 @@ public class DownloadController {
 
     @CrossOrigin("*")
     @GetMapping(value = "/id/{id}")
-    public DownloadList feedList(@PathVariable("id") long id) {
-        String app = settingService.getDownloadApp();
-        if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
-            Optional<DownloadList> down = downloadListRepository.findById(id);
-            if(down.isPresent()) {
-                return downloadStationService.getInfo(down.get().getDbid());
-            }
-        } else if(StringUtils.equals(app, "TRANSMISSION")) {
-            List<Long> ids = new ArrayList<Long>();
-            ids.add(id);
-            List<DownloadList> list = transmissionService.torrentGet(ids);
-            if(list.size() > 0) {
-                return list.get(0);
-            }
-        }
-
-        return null;
+    public DownloadList getDownload(@PathVariable("id") long id) {
+        return downloadService.getInfo(id);
     }
 
     @CrossOrigin("*")
@@ -138,6 +128,18 @@ public class DownloadController {
         }
 
         return ret;
+    }
+
+    @CrossOrigin("*")
+    @GetMapping(value = "/magnet")
+    public DownloadList downloadStatus(@RequestParam("magnet") String magnet) {
+        Optional<DownloadList> download = downloadListRepository.findFirstByUriAndDoneOrderByCreateDtDesc(magnet, false);
+        if(download.isPresent()) {
+            if(getDownload(download.get().getId()) != null) {
+                return download.get();
+            }
+        }
+        return null;
     }
     
 }

@@ -85,6 +85,24 @@ export default {
       }
     }
   },
+  // mounted () {
+  //   axios.get('/api/download/magnet', {
+  //     params: {
+  //       'magnet': this.item.link
+  //     }
+  //   }).then(res => {
+  //     console.log('feed mounted')
+  //     console.log(res.data)
+  //     if (res.data) {
+  //       this.$store.commit('download/toggle', {
+  //         active: true,
+  //         stop: false,
+  //         vueIndex: this.index,
+  //         id: res.data.id
+  //       })
+  //     }
+  //   })
+  // },
   methods: {
     downloadShow: function (item, index) {
       this.stop = false

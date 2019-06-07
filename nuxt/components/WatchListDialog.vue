@@ -5,9 +5,33 @@
 		v-model="show"
 		persistent
 		max-width="650"
+		:fullscreen="windowWidth < 400"
 	>
 		<v-card>
-			<v-card-title class="headline" v-html="'자동 다운로드 관리'"></v-card-title>
+			<v-toolbar flat extended>
+        <v-btn icon @click="close">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>자동 다운로드 관리</v-toolbar-title>
+        <template v-slot:extension>
+          <v-spacer></v-spacer>
+					<v-btn
+						color="primary"
+						flat="flat"
+						@click="execute"
+					>
+						지금 실행
+					</v-btn>
+          <v-btn
+						color="primary"
+						flat="flat"
+						@click="add"
+					>
+						추가
+					</v-btn>
+        </template>
+      </v-toolbar>
+			<!-- <v-card-title class="headline" v-html="'자동 다운로드 관리'"></v-card-title> -->
 				<v-data-table
 					:headers="headers"
 					:items="items"
@@ -36,36 +60,55 @@
 				</v-data-table>
 			<v-card-actions>
 				<v-spacer></v-spacer>
-				<v-btn
+				<!-- <v-btn
 					color="primary"
 					flat="flat"
 					@click="close"
 				>
 					닫기
-				</v-btn>
-					<v-btn
+				</v-btn> -->
+				<!-- <v-btn
 					color="primary"
 					flat="flat"
 					@click="execute"
 				>
 					지금 실행
-				</v-btn>
-				<v-btn
+				</v-btn> -->
+				<!-- <v-btn
 					color="primary"
 					flat="flat"
 					@click="add"
 				>
 					추가
-				</v-btn>
+				</v-btn> -->
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
-	<v-dialog v-model="dialog" max-width="550px">
+	<v-dialog 
+		v-model="dialog"
+		max-width="650px"
+		:fullscreen="windowWidth < 400"
+	>
 		<v-card>
-			<v-card-title>
+			<v-toolbar flat extended>
+        <v-btn icon @click="editClose">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>{{ formTitle }}</v-toolbar-title>
+        <template v-slot:extension>
+          <v-spacer></v-spacer>
+          <v-btn
+						color="primary"
+						flat="flat"
+						@click="save"
+					>
+						저장
+					</v-btn>
+        </template>
+      </v-toolbar>
+			<!-- <v-card-title>
 				<span class="headline">{{ formTitle }}</span>
-			</v-card-title>
-
+			</v-card-title> -->
 			<v-card-text>
 				<v-container grid-list-md>
 					<v-layout wrap>
@@ -148,11 +191,11 @@
 				</v-container>
 			</v-card-text>
 
-			<v-card-actions>
+			<!-- <v-card-actions>
 				<v-spacer></v-spacer>
 				<v-btn color="primary" flat @click="editClose">취소</v-btn>
 				<v-btn color="primary" flat @click="save">저장</v-btn>
-			</v-card-actions>
+			</v-card-actions> -->
 		</v-card>
 	</v-dialog>
 	</div>
@@ -197,6 +240,7 @@ export default {
       editedIndex: -1,
       regexItems: [],
       regexShow: false,
+      windowWidth: 0,
       defaultItem: {
         title: '',
         use: true,
@@ -219,6 +263,9 @@ export default {
       ]
     }
   },
+  mounted () {
+    this.windowWidth = window.innerWidth
+  },
   methods: {
     close: function () {
       this.editedIndex = -1
@@ -227,7 +274,7 @@ export default {
     },
     add: function () {
       this.dialog = true
-      this.formTitle = 'New Item'
+      this.formTitle = '자동 다운로드 추가'
       this.editedIndex = -1
       this.editedItem = Object.assign({}, this.defaultItem)
     },
@@ -243,6 +290,7 @@ export default {
     editItem: function (item) {
       this.editedIndex = this.items.indexOf(item)
       this.editedItem = Object.assign({}, item)
+      this.formTitle = '자동 다운로드 편집'
       this.dialog = true
     },
     deleteItem: function (item) {

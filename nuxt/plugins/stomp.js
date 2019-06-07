@@ -22,8 +22,8 @@ client.onStompError = function (frame) {
   // Bad login/passcode typically will cause an error
   // Complaint brokers will set `message` header with a brief message. Body may contain details.
   // Compliant brokers will terminate the connection after any error
-  console.log('Broker reported error: ' + frame.headers['message'])
-  console.log('Additional details: ' + frame.body)
+  console.error('Broker reported error: ' + frame.headers['message'])
+  console.error('Additional details: ' + frame.body)
 }
 
 client.activate()
@@ -31,6 +31,6 @@ client.activate()
 export default {
   subscribe: (destination, callback) => client.subscribe(destination, callback),
   publish: (destination, body) => client.publish({ destination: destination, body: body }),
-  connect: () => client.activate(),
+  activate: () => client.activate(),
   connected: () => client.connected
 }

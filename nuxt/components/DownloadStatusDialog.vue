@@ -5,9 +5,16 @@
 		v-model="show"
 		persistent
 		max-width="650"
+    :fullscreen="windowWidth < 400"
 	>
 		<v-card>
-			<v-card-title class="headline" v-html="'다운로드 상태 보기'"></v-card-title>
+      <v-toolbar flat>
+        <v-btn icon @click="close">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>다운로드 상태 보기</v-toolbar-title>
+      </v-toolbar>
+			<!-- <v-card-title class="headline" v-html="'다운로드 상태 보기'"></v-card-title> -->
 				<v-data-table
 					:headers="headers"
 					:items="downloadStatus"
@@ -27,7 +34,7 @@
 						</td>
 					</template>
 				</v-data-table>
-			<v-card-actions>
+			<!-- <v-card-actions>
 				<v-spacer></v-spacer>
 				<v-btn
 					color="primary"
@@ -36,7 +43,7 @@
 				>
 					닫기
 				</v-btn>
-			</v-card-actions>
+			</v-card-actions> -->
 		</v-card>
 	</v-dialog>
 	</div>
@@ -63,9 +70,22 @@ export default {
   watch: {
     show: function (val) {
       if (val === true) {
-        this.subscription = this.subscribe()
+        if (stompClient.connected() === true) {
+          this.subscription = this.subscribe()
+        }
         this.intervalObj = setInterval(() => {
-          stompClient.publish('/app/rate/list', '')
+          if (stompClient.connected() === false) {
+            this.subscription.unsubscribe()
+          }
+          if (stompClient.connected() === true) {
+            if (this.count < 3) {
+              stompClient.publish('/app/rate/list', '')
+              this.count++
+            } else {
+              this.subscription = this.subscribe()
+              this.count = 0
+            }
+          }
         }, 1000)
       } else {
         this.subscription.unsubscribe()
@@ -78,6 +98,8 @@ export default {
       dialog: false,
       intervalObj: '',
       subscription: '',
+      windowWidth: 0,
+      count: 0,
       headers: [
         { text: '제목', value: 'title', sortable: false },
         { text: '다운로드 경로', value: 'downloadPath', sortable: false },
@@ -87,11 +109,16 @@ export default {
     }
   },
   mounted () {
+    this.windowWidth = window.innerWidth
+  },
+  beforeDestroy () {
+    this.subscription.unsubscribe()
+    clearInterval(this.intervalObj)
   },
   methods: {
     subscribe: function () {
       return stompClient.subscribe('/topic/rate/list', frame => {
-        console.log(frame)
+        this.count--
         this.$store.commit('setting/setDownloadStatus', JSON.parse(frame.body))
       })
     },

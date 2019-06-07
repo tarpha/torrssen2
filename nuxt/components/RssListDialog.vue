@@ -4,9 +4,47 @@
 		v-model="show"
 		persistent
 		max-width="650"
+		:fullscreen="windowWidth < 400"
 	>
 		<v-card>
-			<v-card-title class="headline" v-html="'RSS 사이트 관리'"></v-card-title>
+			<v-toolbar flat extended>
+        <v-btn icon @click="close">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>RSS 사이트 관리</v-toolbar-title>
+        <template v-slot:extension>
+					<v-spacer></v-spacer>
+          <!-- <v-btn
+						color="primary"
+						flat="flat"
+						@click="reload"
+					>
+						RSS 갱신
+					</v-btn> -->
+					<v-btn
+						color="primary"
+						flat="flat"
+						@click="deleteTab(currentItem)"
+					>
+						삭제
+					</v-btn>
+					<v-btn
+						color="primary"
+						flat="flat"
+						@click="add"
+					>
+						추가
+					</v-btn>
+					<v-btn
+						color="primary"
+						flat="flat"
+						@click="save"
+					>
+						저장
+					</v-btn>
+        </template>
+      </v-toolbar>
+			<!-- <v-card-title class="headline" v-html="'RSS 사이트 관리'"></v-card-title> -->
 			<v-tabs>
 				<v-tab
 					v-for="(item, index) in items"
@@ -61,21 +99,21 @@
 			</v-tabs>
 			<v-card-actions>
 				<v-spacer></v-spacer>
-				<v-btn
+				<!-- <v-btn
 					color="primary"
 					flat="flat"
 					@click="close"
 				>
 					닫기
-				</v-btn>
-					<v-btn
-					color="primary"
-					flat="flat"
-					@click="reload"
+				</v-btn> -->
+				<v-btn
+				color="primary"
+				flat="flat"
+				@click="reload"
 				>
 					RSS 갱신
 				</v-btn>
-				<v-btn
+				<!-- <v-btn
 					color="primary"
 					flat="flat"
 					@click="deleteTab(currentItem)"
@@ -95,7 +133,7 @@
 					@click="save"
 				>
 					저장
-				</v-btn>
+				</v-btn> -->
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -108,6 +146,7 @@ export default {
   data () {
     return {
       currentItem: 0,
+      windowWidth: 0,
       items: []
     }
   },
@@ -129,6 +168,9 @@ export default {
         })
       }
     }
+  },
+  mounted () {
+    this.windowWidth = window.innerWidth
   },
   methods: {
     close: function () {

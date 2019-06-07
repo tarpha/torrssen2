@@ -35,6 +35,7 @@ export default {
   watch: {
     stop: function (val) {
       if (val === true) {
+        this.count = 0
         this.subscription.unsubscribe()
         clearInterval(this.intervalObj)
         this.$store.commit('download/toggle', {
@@ -50,19 +51,37 @@ export default {
     return {
       percentDone: 0,
       intervalObj: '',
-      subscription: ''
+      subscription: '',
+      count: 0
     }
   },
   mounted () {
-    this.subscription = this.subscribe()
+    if (stompClient.connected() === true) {
+      this.subscription = this.subscribe()
+    }
     this.intervalObj = setInterval(() => {
-      stompClient.publish('/app/rate/' + this.id, '')
-      this.count++
+      if (stompClient.connected() === false) {
+        this.subscription.unsubscribe()
+      }
+      if (stompClient.connected() === true) {
+        if (this.count < 3) {
+          stompClient.publish('/app/rate/' + this.id, '')
+          this.count++
+        } else {
+          this.subscription = this.subscribe()
+          this.count = 0
+        }
+      }
     }, 1000)
+  },
+  beforeDestroy () {
+    this.subscription.unsubscribe()
+    clearInterval(this.intervalObj)
   },
   methods: {
     subscribe: function () {
       return stompClient.subscribe('/topic/rate/' + this.id, frame => {
+        this.count--
         const body = JSON.parse(frame.body)
         this.percentDone = body.percentDone
         if (body.done === true) {

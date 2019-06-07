@@ -1,9 +1,13 @@
 package com.tarpha.torrssen2.controller;
 
 import java.util.List;
+import java.util.Optional;
 
+import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.domain.RssFeed;
+import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.RssFeedRepository;
+import com.tarpha.torrssen2.service.DownloadService;
 import com.tarpha.torrssen2.service.RssLoadService;
 
 import org.slf4j.Logger;
@@ -31,18 +35,42 @@ public class RssController {
     private RssFeedRepository rssFeedRepository;
 
     @Autowired
+    private DownloadListRepository downloadListRepository;
+
+    @Autowired
     private RssLoadService rssLoadService;
+
+    @Autowired
+    private DownloadService downloadService;
+
+    private void setDownloadInfo(RssFeed feed) {
+        Optional<DownloadList> download = downloadListRepository.findFirstByUriAndDoneOrderByCreateDtDesc(feed.getLink(), false);
+        if(download.isPresent()) {
+            if(downloadService.getInfo(download.get().getId()) != null) {
+                feed.setDownloadId(download.get().getId());
+                feed.setDownloading(true);
+            }
+        }
+    }
 
     @CrossOrigin("*")
     @GetMapping(value = "/feed/list")
     public Page<RssFeed> feedList(Pageable pageable) {
-        return rssFeedRepository.findAll(pageable);
+        Page<RssFeed> feedList = rssFeedRepository.findAll(pageable);
+        for(RssFeed feed: feedList) {
+            setDownloadInfo(feed);
+        }
+        return feedList;
     }
 
     @CrossOrigin("*")
     @GetMapping(value = "/feed/search")
     public Page<RssFeed> searchList(@RequestParam("title") String title, Pageable pageable) {
-        return rssFeedRepository.findByTitleContaining(title, pageable);
+        Page<RssFeed> feedList = rssFeedRepository.findByTitleContaining(title, pageable);
+        for(RssFeed feed: feedList) {
+            setDownloadInfo(feed);
+        }
+        return feedList;
     }
 
     @CrossOrigin("*")

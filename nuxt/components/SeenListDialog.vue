@@ -5,9 +5,26 @@
 		v-model="show"
 		persistent
 		max-width="650"
+    :fullscreen="windowWidth < 400"
 	>
 		<v-card>
-			<v-card-title class="headline" v-html="'자동 다운로드 이력'"></v-card-title>
+      <v-toolbar flat extended>
+        <v-btn icon @click="close">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>자동 다운로드 이력</v-toolbar-title>
+        <template v-slot:extension>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            flat="flat"
+            @click="deleteAll"
+          >
+            전체 삭제
+          </v-btn>
+        </template>
+      </v-toolbar>
+			<!-- <v-card-title class="headline" v-html="'자동 다운로드 이력'"></v-card-title> -->
 				<v-data-table
 					:headers="headers"
 					:items="items"
@@ -27,7 +44,7 @@
 						</td>
 					</template>
 				</v-data-table>
-			<v-card-actions>
+			<!-- <v-card-actions>
 				<v-spacer></v-spacer>
 				<v-btn
 					color="primary"
@@ -43,7 +60,7 @@
 				>
 					전체 삭제
 				</v-btn>
-			</v-card-actions>
+			</v-card-actions> -->
 		</v-card>
 	</v-dialog>
 	</div>
@@ -76,6 +93,7 @@ export default {
     return {
       items: [],
       dialog: false,
+      windowWidth: 0,
       headers: [
         { text: '제목', value: 'title', sortable: false },
         { text: '다운로드 경로', value: 'downloadPath', sortable: false },
@@ -83,6 +101,9 @@ export default {
         { text: '동작', value: 'title', sortable: false }
       ]
     }
+  },
+  mounted () {
+    this.windowWidth = window.innerWidth
   },
   methods: {
     close: function () {

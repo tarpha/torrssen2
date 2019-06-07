@@ -4,9 +4,40 @@
 		v-model="show"
 		persistent
 		max-width="650"
+		:fullscreen="windowWidth < 400"
 	>
 		<v-card>
-			<v-card-title class="headline" v-html="'다운로드 경로 관리'"></v-card-title>
+			<v-toolbar flat extended>
+        <v-btn icon @click="close">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>다운로드 경로 관리</v-toolbar-title>
+        <template v-slot:extension>
+          <v-spacer></v-spacer>
+          <v-btn
+						color="primary"
+						flat="flat"
+						@click="deleteTab(currentItem)"
+					>
+						삭제
+					</v-btn>
+					<v-btn
+						color="primary"
+						flat="flat"
+						@click="add"
+					>
+						추가
+					</v-btn>
+					<v-btn
+						color="primary"
+						flat="flat"
+						@click="save"
+					>
+						저장
+					</v-btn>
+        </template>
+      </v-toolbar>
+			<!-- <v-card-title class="headline" v-html="'다운로드 경로 관리'"></v-card-title> -->
 			<v-tabs>
 				<v-tab
 					v-for="(item, index) in items"
@@ -61,7 +92,7 @@
 					</v-tab-item>
 				</v-tabs-items>
 			</v-tabs>
-			<v-card-actions>
+			<!-- <v-card-actions>
 				<v-spacer></v-spacer>
 				<v-btn
 					color="primary"
@@ -91,7 +122,7 @@
 				>
 					저장
 				</v-btn>
-			</v-card-actions>
+			</v-card-actions> -->
 		</v-card>
 	</v-dialog>
 </template>
@@ -122,8 +153,12 @@ export default {
   data () {
     return {
       items: [],
-      currentItem: 0
+      currentItem: 0,
+      windowWidth: 0
     }
+  },
+  mounted () {
+    this.windowWidth = window.innerWidth
   },
   methods: {
     close: function () {
