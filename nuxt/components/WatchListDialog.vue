@@ -96,14 +96,6 @@
 								<span>일치 항목 검사</span>
 							</v-tooltip>
 						</v-flex>
-						<!-- <v-flex xs12 v-if="regexShow">
-							<li style="font-size: medium;"
-									v-for="(regex, index) in regexItems" 
-									:key="index"
-								>
-									{{ regex.title }}
-							</li>
-						</v-flex> -->
 						<v-data-table
 							v-if="regexShow"
 							hide-headers

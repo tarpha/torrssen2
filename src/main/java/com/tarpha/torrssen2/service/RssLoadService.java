@@ -131,6 +131,26 @@ public class RssLoadService {
                     rssFeed.getRssEpisode()) > 0) {
                 logger.info("Rejected by Seen: " + rssFeed.getTitle());
             } else {
+                try{
+                    int startSeason = Integer.parseInt(watchList.getStartSeason());
+                    int endSeason = Integer.parseInt(watchList.getEndSeason());
+                    int startEpisode = Integer.parseInt(watchList.getStartEpisode());
+                    int endEpisode = Integer.parseInt(watchList.getEndEpisode());
+                    int currSeason = Integer.parseInt(rssFeed.getRssSeason());
+                    int currEpisode = Integer.parseInt(rssFeed.getRssEpisode());
+
+                    if(currSeason < startSeason || currSeason > endSeason) {
+                        logger.info("Rejected by Season: Start: " + startSeason + " End: " + endSeason + " Feed: " + currSeason);
+                        return;
+                    }
+                    if(currEpisode < startEpisode || currEpisode > endEpisode) {
+                        logger.info("Rejected by Episode: Start: " + startEpisode + " End: " + endEpisode + " Feed: " + currEpisode);
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    logger.info(e.getMessage());
+                }
+
                 logger.info("Download Repuest: " + rssFeed.getTitle());
 
                 String path = downloadPathRepository.computedPath(watchList.getDownloadPath(), rssFeed.getRssTitle(), rssFeed.getRssSeason());

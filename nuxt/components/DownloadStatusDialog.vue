@@ -63,10 +63,12 @@ export default {
   watch: {
     show: function (val) {
       if (val === true) {
+        this.subscription = this.subscribe()
         this.intervalObj = setInterval(() => {
-          stompClient.send('/app/rate/list', {}, {})
+          stompClient.publish('/app/rate/list', '')
         }, 1000)
       } else {
+        this.subscription.unsubscribe()
         clearInterval(this.intervalObj)
       }
     }
@@ -75,6 +77,7 @@ export default {
     return {
       dialog: false,
       intervalObj: '',
+      subscription: '',
       headers: [
         { text: '제목', value: 'title', sortable: false },
         { text: '다운로드 경로', value: 'downloadPath', sortable: false },
@@ -83,29 +86,13 @@ export default {
       ]
     }
   },
-  beforeMount () {
-    // stompClient.connect({}, frame => {
-    if (stompClient.connected === true) {
-      this.subscribe()
-    } else {
-      stompClient.connect({}, frame => {
-        this.subscribe()
-      })
-    }
-    // })
+  mounted () {
   },
-  // mounted () {
-  //   this.intervalObj = setInterval(() => {
-  //     stompClient.send('/app/rate/list', {}, {})
-  //   }, 1000)
-  // },
   methods: {
     subscribe: function () {
-      stompClient.subscribe('/topic/rate/list', frame => {
+      return stompClient.subscribe('/topic/rate/list', frame => {
         console.log(frame)
         this.$store.commit('setting/setDownloadStatus', JSON.parse(frame.body))
-      }, error => {
-        console.error(error)
       })
     },
     close: function () {
@@ -118,10 +105,19 @@ export default {
       if (confirm('이 항목을 삭제하시겠습니까?')) {
         axios.post('/api/download/remove', { 'id': id }).then(res => {
           let msg = '삭제되었습니다.'
-          if (res.status !== 200) {
+          if (res.status !== 200 || res.data === -1) {
             msg = '삭제하지 못했습니다.'
           }
           this.$store.commit('snackbar/show', msg)
+
+          if (res.data >= 0) {
+            this.$store.commit('download/toggle', {
+              active: true,
+              stop: true,
+              vueIndex: res.data,
+              id: 0
+            })
+          }
         })
       }
     }

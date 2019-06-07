@@ -35,9 +35,11 @@ export default {
   watch: {
     stop: function (val) {
       if (val === true) {
+        this.subscription.unsubscribe()
         clearInterval(this.intervalObj)
         this.$store.commit('download/toggle', {
           active: false,
+          stop: false,
           vueIndex: this.index,
           id: 0
         })
@@ -47,39 +49,32 @@ export default {
   data () {
     return {
       percentDone: 0,
-      intervalObj: ''
-    }
-  },
-  beforeMount () {
-    if (stompClient.connected === true) {
-      this.subscribe()
-    } else {
-      stompClient.connect({}, frame => {
-        this.subscribe()
-      })
+      intervalObj: '',
+      subscription: ''
     }
   },
   mounted () {
+    this.subscription = this.subscribe()
     this.intervalObj = setInterval(() => {
-      stompClient.send('/app/rate/' + this.id, {}, {})
+      stompClient.publish('/app/rate/' + this.id, '')
+      this.count++
     }, 1000)
   },
   methods: {
     subscribe: function () {
-      stompClient.subscribe('/topic/rate/' + this.id, frame => {
+      return stompClient.subscribe('/topic/rate/' + this.id, frame => {
         const body = JSON.parse(frame.body)
         this.percentDone = body.percentDone
         if (body.done === true) {
           clearInterval(this.intervalObj)
-          this.$store.commit('snackbar/show', 'COMPLETE: ' + this.title)
+          this.$store.commit('snackbar/show', '완료: ' + this.title)
           this.$store.commit('download/toggle', {
             active: false,
+            stop: false,
             vueIndex: this.index,
             id: 0
           })
         }
-      }, error => {
-        console.error(error)
       })
     }
   }

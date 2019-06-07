@@ -113,18 +113,28 @@ public class DownloadController {
 
     @CrossOrigin("*")
     @PostMapping(value = "/remove")
-    public boolean remove(@RequestBody DownloadList download) {
-        boolean ret = false;
+    public int remove(@RequestBody DownloadList download) {
+        int ret = -1;
+        boolean res = false;
 
         String app = settingService.getDownloadApp();
         if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
             List<String> ids = new ArrayList<>();
             ids.add(downloadStationService.getDbId(download.getId()));
-            ret = downloadStationService.delete(ids);
+            res = downloadStationService.delete(ids);
         } else if(StringUtils.equals(app, "TRANSMISSION")) {
             List<Long> ids = new ArrayList<>();
             ids.add(download.getId());
-            ret = transmissionService.torrentRemove(ids);
+            res = transmissionService.torrentRemove(ids);
+        }
+
+        if(res) {
+            Optional<DownloadList> down = downloadListRepository.findById(download.getId());
+            if(down.isPresent()) {
+                ret = down.get().getVueItemIndex();
+            } else {
+                ret = -2;
+            }
         }
 
         return ret;

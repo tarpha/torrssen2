@@ -49,8 +49,6 @@
 </template>
 
 <script>
-import stompClient from '~/plugins/stomp'
-
 import NuxtSettingDialog from '~/components/SettingDialog'
 import NuxtRssListDialog from '~/components/RssListDialog'
 import NuxtDownloadPathDialog from '~/components/DownloadPathDialog'
@@ -102,7 +100,6 @@ export default {
           icon: 'playlist_play',
           method: () => {
             this.$store.commit('setting/setShowDownloadStatus', true)
-            stompClient.send('/app/rate/list', {}, {})
           }
         },
         {

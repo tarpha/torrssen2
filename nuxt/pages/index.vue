@@ -98,6 +98,7 @@
       },
       downloadToggle: function (val) {
         this.stomps[this.download.vueIndex].active = this.download.active
+        this.stomps[this.download.vueIndex].stop = this.download.stop
         this.stomps[this.download.vueIndex].id = this.download.id
       }
     },
@@ -129,6 +130,7 @@
         stomps.push({
           percentDone: -1,
           active: false,
+          stop: false,
           delete: false,
           id: 0
         })

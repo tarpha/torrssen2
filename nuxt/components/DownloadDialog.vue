@@ -18,15 +18,26 @@
           <v-subheader style="text-weight: bold">
             <v-checkbox v-model="checkWatch" label="자동 다운로드" color="primary"></v-checkbox>
           </v-subheader>
-					<v-list-tile v-for="(item, index) in pathList" :key="index"
-						@click="download(item.path)"
+					<v-list-tile v-for="(item, index) in paths" :key="index"
+						@click="if(item.useSeason === false && item.useTitle === false) download(item.path)"
 					>
 						<v-list-tile-action >
-							<v-icon color="blue-grey darken-2">get_app</v-icon>
+							<v-icon 
+                color="blue-grey darken-2"
+                @click="if(item.useSeason === true || item.useTitle === true) download(item.path)"
+              >get_app</v-icon>
 						</v-list-tile-action>
-						<v-list-tile-content>
+						<v-list-tile-content v-if="!item.useSeason && !item.useTitle">
 							<v-list-tile-title>{{ item.name }}</v-list-tile-title>
 							<v-list-tile-sub-title>{{ item.path }}</v-list-tile-sub-title>
+						</v-list-tile-content>
+            <v-list-tile-content v-else>
+							<v-text-field 
+                v-model="item.path"
+                :label="item.name"
+                style="width: 90%"
+                @keyup.enter="download(item.path)"
+              ></v-text-field>
 						</v-list-tile-content>
 					</v-list-tile>
           <v-list-tile>
@@ -34,7 +45,11 @@
 							<v-icon @click="download(customPath)" color="blue-grey darken-2">get_app</v-icon>
 						</v-list-tile-action>
 						<v-list-tile-content>
-							<v-text-field v-model="customPath" label="사용자 지정 경로"></v-text-field>
+							<v-text-field 
+                v-model="customPath" 
+                label="사용자 지정 경로"
+                style="width: 90%"
+              ></v-text-field>
 						</v-list-tile-content>
 					</v-list-tile>
 				</v-list>
@@ -59,13 +74,14 @@
 
 <script>
 import axios from '~/plugins/axios'
-// import stompClient from '~/plugins/stomp'
 
 export default {
   data () {
     return {
       successClass: 'o-circle c-container__circle o-circle__sign--success',
-      customPath: ''
+      seasonPath: '',
+      customPath: '',
+      paths: []
     }
   },
   computed: {
@@ -95,7 +111,10 @@ export default {
   watch: {
     show: function (val) {
       if (val === false) {
+        this.seasonPath = ''
         this.customPath = ''
+      } else {
+        this.paths = JSON.parse(JSON.stringify(this.pathList))
       }
     }
   },
@@ -110,7 +129,7 @@ export default {
         'uri': this.$store.state.download.data.link,
         'rssTitle': this.$store.state.download.data.rssTitle,
         'rssReleaseGroup': this.$store.state.download.data.rssReleaseGroup,
-        'vueItemIndex': this.$store.state.download.data.vueItemIndex,
+        'vueItemIndex': this.$store.state.download.index,
         'downloadPath': path,
         'auto': this.$store.state.download.auto
       }).then(ret => {
@@ -129,7 +148,8 @@ export default {
         // this.$store.commit('download/setVueIndex', this.$store.state.download.data.vueItemIndex)
         this.$store.commit('download/toggle', {
           active: true,
-          vueIndex: this.$store.state.download.data.vueItemIndex,
+          stop: false,
+          vueIndex: this.$store.state.download.index,
           id: ret.data
         })
 

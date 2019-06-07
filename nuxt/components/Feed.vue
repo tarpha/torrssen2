@@ -52,7 +52,6 @@
 
 <script>
 import axios from '~/plugins/axios'
-// import stompClient from '~/plugins/stomp'
 import NuxtProgress from '~/components/Progress'
 
 export default {
@@ -79,6 +78,13 @@ export default {
       stop: false
     }
   },
+  watch: {
+    'stomp.stop': function (val) {
+      if (val === true) {
+        this.stop = true
+      }
+    }
+  },
   methods: {
     downloadShow: function (item, index) {
       this.stop = false
@@ -88,15 +94,14 @@ export default {
           'season': item.rssSeason
         }
       }).then(res => {
-        item['vueItemIndex'] = index
-        this.$store.commit('download/show', { data: item, path: res.data })
+        this.$store.commit('download/show', { data: item, path: res.data, index: index })
       })
     },
     remove: async function (id) {
       axios.post('/api/download/remove', { 'id': id }).then(res => {
-        let msg = 'DELETE: '
+        let msg = '삭제: '
         if (res.status !== 200) {
-          msg = 'DELETE FAIL: '
+          msg = '삭제 실패: '
         }
         this.stop = true
         this.$store.commit('snackbar/show', msg + this.item.title)
