@@ -226,7 +226,7 @@ BODY {
 }
 
 .c-container__circle {
-  margin: 0 auto 1.7rem;
+  margin: 20px auto;
 }
 
 /*=======================
@@ -357,7 +357,6 @@ BODY {
 }
 
 
-
 /*+++++++++++++++++++
     @Media Queries
 +++++++++++++++++++++*/
@@ -366,11 +365,5 @@ BODY {
   
   HTML { font-size: 1.5625em; } /* 25 / 16 = 1.5625 */
   
-}
-
-@media (min-width: 370px) and (max-width: 385px) {
-  .c-container__circle {
-    margin: 70px auto 70px;
-  }
 }
 </style>

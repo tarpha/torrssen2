@@ -4,8 +4,8 @@
 		v-if="show"
 		v-model="show"
 		persistent
-		max-width="650"
-    :fullscreen="windowWidth < 400"
+		:max-width="$store.state.modalWidth"
+    :fullscreen="windowWidth < $store.state.modalWidth"
 	>
 		<v-card>
       <v-toolbar flat>

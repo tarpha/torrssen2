@@ -1,5 +1,6 @@
 export const state = () => ({
   input: '',
+  modalWidth: 650,
   dark: false
 })
 
