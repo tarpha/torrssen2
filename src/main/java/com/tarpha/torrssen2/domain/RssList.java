@@ -20,6 +20,8 @@ public class RssList {
 
     private Boolean useDb = true;
 
+    private Boolean show = true;
+
     private String linkKey = "link";
     
     @Temporal(TemporalType.TIMESTAMP)

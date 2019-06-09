@@ -19,6 +19,31 @@
         @keyup.enter="submit"
         @click:clear="clear"
       ></v-text-field>
+     <v-menu offset-y :close-on-content-click="false">
+        <template v-slot:activator="{ on }">
+          <v-btn
+            icon
+            v-on="on"
+          >
+            <v-icon>rss_feed</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-tile
+            v-for="(item, index) in rss"
+            :key="index"
+          >
+            <v-list-tile-content>
+              <v-checkbox 
+                v-model="rssList" 
+                :label="item.name" 
+                :value="item.name" 
+                color="primary"
+              ></v-checkbox>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </v-menu>
       <v-menu offset-y>
         <template v-slot:activator="{ on }">
           <v-btn
@@ -49,6 +74,7 @@
 </template>
 
 <script>
+import axios from '~/plugins/axios'
 import NuxtSettingDialog from '~/components/SettingDialog'
 import NuxtRssListDialog from '~/components/RssListDialog'
 import NuxtDownloadPathDialog from '~/components/DownloadPathDialog'
@@ -69,6 +95,7 @@ export default {
   },
   data () {
     return {
+      rss: [],
       items: [
         {
           title: '환경 설정',
@@ -118,7 +145,50 @@ export default {
       set (value) {
         this.$store.commit('toolbar/setSearchText', value)
       }
+    },
+    rssList: {
+      get () {
+        return this.$store.state.setting.rssList
+      },
+      set (array) {
+        this.$store.commit('setting/setRssList', array)
+      }
     }
+  },
+  watch: {
+    rssList: {
+      handler: function (array) {
+        let showList = JSON.parse(JSON.stringify(this.rss))
+        for (let i = 0; i < showList.length; i++) {
+          showList[i].show = false
+          for (let j = 0; j < this.rssList.length; j++) {
+            if (showList[i].name === this.rssList[j]) {
+              showList[i].show = true
+              break
+            }
+          }
+        }
+        axios.post('/api/setting/rss-list', showList).then(res => {
+          if (res.status !== 200) {
+            this.$store.commit('snackbar/show', 'RSS 리스트 설정 중 오류가 발생하였습니다.')
+          }
+          this.$store.commit('toolbar/toggle')
+        })
+      },
+      deep: true
+    }
+  },
+  mounted () {
+    axios.get('/api/setting/rss-list').then(res => {
+      this.rss = res.data
+      let list = []
+      for (let i = 0; i < res.data.length; i++) {
+        if (res.data[i].show === true) {
+          list.push(res.data[i].name)
+        }
+      }
+      this.$store.commit('setting/setRssList', list)
+    })
   },
   methods: {
     submit: function () {

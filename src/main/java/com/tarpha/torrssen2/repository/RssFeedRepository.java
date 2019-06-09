@@ -13,7 +13,13 @@ import org.springframework.data.jpa.repository.Query;
 public interface RssFeedRepository extends JpaRepository<RssFeed, Long> {
 
     public Page<RssFeed> findAll(Pageable pageable);
+
     public Page<RssFeed> findByTitleContaining(String title, Pageable pageable);
+
+    public Page<RssFeed> findByRssSiteIn(List<String> rssSite, Pageable pageable);
+
+    public Page<RssFeed> findByTitleContainingAndRssSiteIn(String title, List<String> rssSite, Pageable pageable);
+
     public Optional<RssFeed> findByLink(String link);
 
     @Query(

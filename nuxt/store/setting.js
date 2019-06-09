@@ -6,7 +6,8 @@ export const state = () => ({
   showSeenList: false,
   showDownloadList: false,
   showDownloadStatus: false,
-  downloadStatus: []
+  downloadStatus: [],
+  rssList: []
 })
 
 export const mutations = {
@@ -33,5 +34,8 @@ export const mutations = {
   },
   setDownloadStatus (state, array) {
     state.downloadStatus = array
+  },
+  setRssList (state, array) {
+    state.rssList = array
   }
 }

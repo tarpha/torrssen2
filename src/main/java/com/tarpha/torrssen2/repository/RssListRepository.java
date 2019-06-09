@@ -10,4 +10,6 @@ public interface RssListRepository extends JpaRepository<RssList, Long> {
 
     public List<RssList> findByUseDb(boolean useDb);
 
+    public List<RssList> findByShow(boolean show);
+
 }

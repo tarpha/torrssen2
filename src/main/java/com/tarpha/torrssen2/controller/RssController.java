@@ -1,12 +1,15 @@
 package com.tarpha.torrssen2.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.domain.RssFeed;
+import com.tarpha.torrssen2.domain.RssList;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.RssFeedRepository;
+import com.tarpha.torrssen2.repository.RssListRepository;
 import com.tarpha.torrssen2.service.DownloadService;
 import com.tarpha.torrssen2.service.RssLoadService;
 
@@ -35,6 +38,9 @@ public class RssController {
     private RssFeedRepository rssFeedRepository;
 
     @Autowired
+    private RssListRepository rssListRepository;
+
+    @Autowired
     private DownloadListRepository downloadListRepository;
 
     @Autowired
@@ -53,10 +59,22 @@ public class RssController {
         }
     }
 
+    private List<String> rssSite() {
+        List<String> ret = new ArrayList<>();
+        List<RssList> list = rssListRepository.findByShow(true);
+        for(RssList rss: list) {
+            if(rss.getShow()) {
+                ret.add(rss.getName());
+            }
+        }
+        return ret;
+    }
+
     @CrossOrigin("*")
     @GetMapping(value = "/feed/list")
     public Page<RssFeed> feedList(Pageable pageable) {
-        Page<RssFeed> feedList = rssFeedRepository.findAll(pageable);
+        // Page<RssFeed> feedList = rssFeedRepository.findAll(pageable);
+        Page<RssFeed> feedList = rssFeedRepository.findByRssSiteIn(rssSite(), pageable);
         for(RssFeed feed: feedList) {
             setDownloadInfo(feed);
         }
@@ -66,7 +84,8 @@ public class RssController {
     @CrossOrigin("*")
     @GetMapping(value = "/feed/search")
     public Page<RssFeed> searchList(@RequestParam("title") String title, Pageable pageable) {
-        Page<RssFeed> feedList = rssFeedRepository.findByTitleContaining(title, pageable);
+        // Page<RssFeed> feedList = rssFeedRepository.findByTitleContaining(title, pageable);
+        Page<RssFeed> feedList = rssFeedRepository.findByTitleContainingAndRssSiteIn(title, rssSite(), pageable);
         for(RssFeed feed: feedList) {
             setDownloadInfo(feed);
         }
