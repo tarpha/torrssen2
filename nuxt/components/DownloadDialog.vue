@@ -36,9 +36,11 @@
 					>
 						<v-list-tile-action >
 							<v-icon 
-                color="blue-grey darken-2"
+                :color="dark !== true ? 'blue-grey darken-2' : 'grey lighten-4'"
                 @click="if(item.useSeason === true || item.useTitle === true) download(item.path)"
-              >get_app</v-icon>
+              >
+                get_app
+              </v-icon>
 						</v-list-tile-action>
 						<v-list-tile-content v-if="!item.useSeason && !item.useTitle">
 							<v-list-tile-title>{{ item.name }}</v-list-tile-title>
@@ -55,7 +57,12 @@
 					</v-list-tile>
           <v-list-tile>
 						<v-list-tile-action>
-							<v-icon @click="download(customPath)" color="blue-grey darken-2">get_app</v-icon>
+							<v-icon 
+                @click="download(customPath)" 
+                :color="dark !== true ? 'blue-grey darken-2' : 'grey lighten-4'"
+              >
+                get_app
+              </v-icon>
 						</v-list-tile-action>
 						<v-list-tile-content>
 							<v-text-field 
@@ -119,6 +126,9 @@ export default {
     },
     data () {
       return this.$store.state.download.data
+    },
+    dark: function () {
+      return this.$store.state.dark
     }
   },
   watch: {

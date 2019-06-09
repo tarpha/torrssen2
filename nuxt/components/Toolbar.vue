@@ -12,7 +12,7 @@
         v-model="searchText"
         hide-details
         prepend-inner-icon="search"
-        background-color="#f5f5f5"
+        :background-color="dark !== true ? '#f5f5f5' : '#333333'"
         solo
         clearable
         flat
@@ -153,6 +153,9 @@ export default {
       set (array) {
         this.$store.commit('setting/setRssList', array)
       }
+    },
+    dark: function () {
+      return this.$store.state.dark
     }
   },
   watch: {

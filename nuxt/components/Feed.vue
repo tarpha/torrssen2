@@ -36,7 +36,9 @@
           icon
           @click="downloadShow(item, index)"
         >
-					<v-icon color="blue-grey darken-2">get_app</v-icon>
+					<v-icon 
+            :color="dark !== true ? 'blue-grey darken-2' : 'grey lighten-4'"
+          >get_app</v-icon>
 				</v-btn>
         <nuxt-progress 
           v-else
@@ -78,6 +80,11 @@ export default {
       stop: false
     }
   },
+  computed: {
+    dark: function () {
+      return this.$store.state.dark
+    }
+  },
   watch: {
     'stomp.stop': function (val) {
       if (val === true) {
@@ -85,24 +92,6 @@ export default {
       }
     }
   },
-  // mounted () {
-  //   axios.get('/api/download/magnet', {
-  //     params: {
-  //       'magnet': this.item.link
-  //     }
-  //   }).then(res => {
-  //     console.log('feed mounted')
-  //     console.log(res.data)
-  //     if (res.data) {
-  //       this.$store.commit('download/toggle', {
-  //         active: true,
-  //         stop: false,
-  //         vueIndex: this.index,
-  //         id: res.data.id
-  //       })
-  //     }
-  //   })
-  // },
   methods: {
     downloadShow: function (item, index) {
       this.stop = false
