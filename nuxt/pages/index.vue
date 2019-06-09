@@ -38,7 +38,7 @@
             :disabled="loading"
             @click="next()"
           >
-            MORE
+            더 보기
           </v-btn>
         </div>
       </v-flex>

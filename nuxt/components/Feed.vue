@@ -141,7 +141,7 @@ export default {
     },
     getSubTime: function (time) {
       const now = new Date()
-      const dt = new Date(time)
+      const dt = Date.parse(time.substring(0, 23) + 'Z')
       const diff = now - dt
       const seconds = parseInt(diff) / 1000
       const minutes = seconds / 60
