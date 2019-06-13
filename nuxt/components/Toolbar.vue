@@ -34,7 +34,8 @@
             :key="index"
           >
             <v-list-tile-content>
-              <v-checkbox 
+              <v-checkbox
+                style="padding-top: 0 !important;"
                 v-model="rssList" 
                 :label="item.name" 
                 :value="item.name" 
