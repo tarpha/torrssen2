@@ -41,6 +41,8 @@ public class RssFeed {
 
     private String rssPoster;
 
+    private String rssDate;
+
     private Long downloadId;
 
     private Boolean downloading = false;
@@ -129,6 +131,19 @@ public class RssFeed {
         }
 
         this.rssReleaseGroup = rssReleaseGroup;
+    }
+
+    public void setRssDateBytitle(String title) {
+        Pattern pattern = Pattern.compile(".*(\\d{6,8}).*", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(title);
+
+        String rssDate = "";
+
+        if (matcher.matches()) {
+            rssDate = matcher.group(1);
+        }
+
+        this.rssDate = rssDate;
     }
 
     public void setLinkByKey(String key, SyndEntry syndEntry) {

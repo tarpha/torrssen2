@@ -126,7 +126,8 @@ export default {
     getSubTitle: function (item) {
       return '<span class=\'text--primary\'>S' + item.rssSeason +
       ' E' + item.rssEpisode + '</span> &mdash; ' +
-      item.rssQuality + ' ' + item.rssReleaseGroup
+      ' ' + (item.rssDate !== null ? item.rssDate : '') +
+      ' ' + item.rssQuality + ' ' + item.rssReleaseGroup
     },
     getSubTime: function (time) {
       const now = new Date()

@@ -187,7 +187,28 @@ export default {
       this.currentItem = 'tab-' + (this.items.length - 1)
     },
     deleteTab: function (index) {
-      this.$delete(this.items, parseInt(index.replace('tab-', '')))
+      const itemIndex = parseInt(index.replace('tab-', ''))
+      const delItem = JSON.parse(JSON.stringify(this.items[itemIndex]))
+      if (confirm('삭제하시겠습니까?')) {
+        this.$delete(this.items, itemIndex)
+        axios.post('/api/setting/rss-list', this.items).then(res => {
+          let msg = '삭제하였습니다..'
+          if (res.status !== 200) {
+            msg = '삭제하지 못했습니다.'
+          }
+          if (confirm('이 RSS의 데이터를 삭제하시겠습니까?')) {
+            axios.post('/api/rss/feed/delete/rss-site', delItem).then(res => {
+              let msg = '삭제하였습니다.'
+              if (res.status !== 200) {
+                msg = '삭제하지 못했습니다.'
+              }
+              this.$store.commit('snackbar/show', msg)
+            })
+          } else {
+            this.$store.commit('snackbar/show', msg)
+          }
+        })
+      }
     },
     save: function () {
       axios.post('/api/setting/rss-list', this.items).then(res => {

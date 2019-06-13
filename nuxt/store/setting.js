@@ -1,6 +1,7 @@
 export const state = () => ({
   showSetting: false,
   showRssList: false,
+  // showRssFeed: false,
   showDownloadPath: false,
   showWatchList: false,
   showSeenList: false,
@@ -17,6 +18,9 @@ export const mutations = {
   setShowRssList (state, value) {
     state.showRssList = value
   },
+  // setShowRssFeed (state, value) {
+  //   state.showRssFeed = value
+  // },
   setShowDownloadPath (state, value) {
     state.showDownloadPath = value
   },

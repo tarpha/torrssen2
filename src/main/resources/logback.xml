@@ -32,14 +32,14 @@
         </rollingPolicy>
     </appender>
      
-    <!-- LOG everything at INFO level -->
-    <root level="info">
+    <!-- LOG everything at ERROR level -->
+    <root level="error">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </root>
  
-    <!-- LOG "com.baeldung*" at TRACE level -->
-    <logger name="com.tarpha" level="trace" additivity="false">
+    <!-- LOG "com.baeldung*" at ERROR level -->
+    <logger name="com.tarpha" level="error" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </logger>

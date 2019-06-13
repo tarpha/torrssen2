@@ -121,7 +121,11 @@ public class DownloadController {
         if(res) {
             Optional<DownloadList> down = downloadListRepository.findById(download.getId());
             if(down.isPresent()) {
-                ret = down.get().getVueItemIndex();
+                try {
+                    ret = down.get().getVueItemIndex();
+                } catch (NullPointerException e) {
+                    logger.error(e.getMessage());
+                }
             } else {
                 ret = -2;
             }

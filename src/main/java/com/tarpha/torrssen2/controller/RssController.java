@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -99,6 +100,20 @@ public class RssController {
     }
 
     @CrossOrigin("*")
+    @PostMapping(value = "/feed/delete/rss-site")
+    public void deleteFeedByRssSite(@RequestBody RssList rssList) {
+        rssFeedRepository.deleteByRssSite(rssList.getName());
+    }
+
+    @CrossOrigin("*")
+    @PostMapping(value = "/feed/delete/rss-site/list")
+    public void deleteFeedByRssSiteList(@RequestBody List<String> rssSiteList) {
+        for(String rssSite: rssSiteList) {
+            rssFeedRepository.deleteByRssSite(rssSite);
+        }
+    }
+
+    @CrossOrigin("*")
     @PostMapping(value = "/reload")
     public String reLoad() {
         rssLoadService.asyncLoadRss();
@@ -109,6 +124,12 @@ public class RssController {
     @GetMapping(value = "/feed/regex/test")
     public List<RssFeed> regexTest(@RequestParam("title") String title) {
         return rssFeedRepository.testRegexTitle(title);
+    }
+
+    @CrossOrigin("*")
+    @GetMapping(value = "/rss-site/distinct")
+    public List<String> distinctRssSite() {
+        return rssFeedRepository.distinctRssSite();
     }
       
 }

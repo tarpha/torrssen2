@@ -107,6 +107,11 @@ export default {
           icon: 'rss_feed',
           method: () => this.$store.commit('setting/setShowRssList', true)
         },
+        // {
+        //   title: 'RSS Feed 관리',
+        //   icon: 'list',
+        //   method: () => this.$store.commit('setting/setShowRssFeed', true)
+        // },
         {
           title: '자동 다운로드 관리',
           icon: 'playlist_add',

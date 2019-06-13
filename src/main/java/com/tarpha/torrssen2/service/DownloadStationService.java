@@ -78,7 +78,7 @@ public class DownloadStationService {
             settingService.getSettingValue("DS_PORT") +
             "/webapi";
 
-        if (StringUtils.isEmpty(sid)) {
+        if (StringUtils.isEmpty(this.sid)) {
             try {
                 URIBuilder builder = new URIBuilder(this.baseUrl + "/auth.cgi");
                 builder.setParameter("api", "SYNO.API.Auth").setParameter("version", "2")
@@ -117,6 +117,7 @@ public class DownloadStationService {
         CloseableHttpResponse response = null;
 
         if(httpClient == null) {
+            this.sid = null;
             initialize();;
         }
 
@@ -136,11 +137,13 @@ public class DownloadStationService {
                             httpClient.close();
                             initialize();
         
-                            response.close();
-                            builder.setParameter("_sid", this.sid);
-                            httpGet = new HttpGet(builder.build());
-                            response = httpClient.execute(httpGet);
-                            ret = new JSONObject(EntityUtils.toString(response.getEntity()));
+                            if(httpClient != null) {
+                                response.close();
+                                builder.setParameter("_sid", this.sid);
+                                httpGet = new HttpGet(builder.build());
+                                response = httpClient.execute(httpGet);
+                                ret = new JSONObject(EntityUtils.toString(response.getEntity()));
+                            }
                         }
                     }
                 }
@@ -161,6 +164,7 @@ public class DownloadStationService {
         CloseableHttpResponse response = null;
 
         if(httpClient == null) {
+            this.sid = null;
             initialize();;
         }
 
@@ -210,32 +214,34 @@ public class DownloadStationService {
     private DownloadList setInfo(JSONObject json) throws JSONException {
         DownloadList down = new DownloadList();
 
-        boolean done = StringUtils.equals(json.getString("status"), "finished");
+        if(json.has("id")) {
+            boolean done = StringUtils.equals(json.getString("status"), "finished");
 
-        Long id = Long.parseLong(StringUtils.remove(json.getString("id"), "dbid_"));
+            Long id = Long.parseLong(StringUtils.remove(json.getString("id"), "dbid_"));
 
-        down.setId(id);
-        down.setDbid(json.getString("id"));
-        down.setDone(done);
-        down.setName(json.getString("title"));
-        down.setFileName(json.getString("title"));
-        down.setUri(json.getJSONObject("additional").getJSONObject("detail").getString("uri"));
-        down.setDownloadPath(json.getJSONObject("additional").getJSONObject("detail").getString("destination"));
+            down.setId(id);
+            down.setDbid(json.getString("id"));
+            down.setDone(done);
+            down.setName(json.getString("title"));
+            down.setFileName(json.getString("title"));
+            down.setUri(json.getJSONObject("additional").getJSONObject("detail").getString("uri"));
+            down.setDownloadPath(json.getJSONObject("additional").getJSONObject("detail").getString("destination"));
 
-        Optional<DownloadList> info = downloadListRepository.findById(id);
-        if(info.isPresent()) {
-            down.setVueItemIndex(info.get().getVueItemIndex());
-        }
-
-        try {
-            Long sizeDownloaded = json.getJSONObject("additional").getJSONObject("transfer").getLong("size_downloaded");
-            Long fileSize = json.getLong("size");
-            logger.debug("percent-done: " + sizeDownloaded.toString() + " / " + fileSize.toString() + " = " + String.valueOf(((double)sizeDownloaded / (double)fileSize) * 100));
-            if(fileSize > 0L) {
-                down.setPercentDone((int)(((double)sizeDownloaded / (double)fileSize) * 100));
+            Optional<DownloadList> info = downloadListRepository.findById(id);
+            if(info.isPresent()) {
+                down.setVueItemIndex(info.get().getVueItemIndex());
             }
-        } catch (ArithmeticException ae) {
-            logger.error(ae.getMessage());
+
+            try {
+                Long sizeDownloaded = json.getJSONObject("additional").getJSONObject("transfer").getLong("size_downloaded");
+                Long fileSize = json.getLong("size");
+                logger.debug("percent-done: " + sizeDownloaded.toString() + " / " + fileSize.toString() + " = " + String.valueOf(((double)sizeDownloaded / (double)fileSize) * 100));
+                if(fileSize > 0L) {
+                    down.setPercentDone((int)(((double)sizeDownloaded / (double)fileSize) * 100));
+                }
+            } catch (ArithmeticException ae) {
+                logger.error(ae.getMessage());
+            }
         }
 
         return down;
@@ -252,14 +258,21 @@ public class DownloadStationService {
                     .setParameter("_sid", this.sid);
 
             JSONObject resJson = executeGet(builder);
-            logger.debug("list: " + resJson.toString());
 
-            if(Boolean.parseBoolean(resJson.get("success").toString())) {
-                JSONArray jsonArray = resJson.getJSONObject("data").getJSONArray("tasks");
+            if(resJson != null) {
+                if(resJson.has("success")) {
+                    if(Boolean.parseBoolean(resJson.get("success").toString())) {
+                        if(resJson.has("data")) {
+                            if(resJson.getJSONObject("data").has("tasks")) {
+                                JSONArray jsonArray = resJson.getJSONObject("data").getJSONArray("tasks");
 
-                for(int i = 0; i < jsonArray.length(); i ++) {
-                    DownloadList down = setInfo(jsonArray.getJSONObject(i));
-                    ret.add(down);
+                                for(int i = 0; i < jsonArray.length(); i ++) {
+                                    DownloadList down = setInfo(jsonArray.getJSONObject(i));
+                                    ret.add(down);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -281,12 +294,15 @@ public class DownloadStationService {
                     .setParameter("id", id).setParameter("_sid", this.sid);
 
             JSONObject resJson = executeGet(builder);
-            logger.debug("getInfo: " + resJson.toString());
 
-            if(Boolean.parseBoolean(resJson.get("success").toString())) {
-                JSONArray jsonArray = resJson.getJSONObject("data").getJSONArray("tasks");
+            if(resJson != null) {
+                if(resJson.has("success")) {
+                    if(Boolean.parseBoolean(resJson.get("success").toString())) {
+                        JSONArray jsonArray = resJson.getJSONObject("data").getJSONArray("tasks");
 
-                ret = setInfo(jsonArray.getJSONObject(0));
+                        ret = setInfo(jsonArray.getJSONObject(0));
+                    }
+                }
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
@@ -307,13 +323,14 @@ public class DownloadStationService {
                     .setParameter("id", StringUtils.join(ids, ",")).setParameter("_sid", this.sid);
 
             JSONObject resJson = executeGet(builder);
-            logger.debug("getInfo: " + resJson.toString());
 
-            if(Boolean.parseBoolean(resJson.get("success").toString())) {
-                JSONArray jsonArray = resJson.getJSONObject("data").getJSONArray("tasks");
+            if(resJson != null) {
+                if(Boolean.parseBoolean(resJson.get("success").toString())) {
+                    JSONArray jsonArray = resJson.getJSONObject("data").getJSONArray("tasks");
 
-                for(int i = 0; i < jsonArray.length(); i++) {
-                    ret.add(setInfo(jsonArray.getJSONObject(i)));
+                    for(int i = 0; i < jsonArray.length(); i++) {
+                        ret.add(setInfo(jsonArray.getJSONObject(i)));
+                    }
                 }
             }
 
@@ -341,19 +358,17 @@ public class DownloadStationService {
             }
         }
 
-        logger.debug("form: " + form.toString());
-
         JSONObject resJson = executePost(form);
 
-        logger.debug("responase: " + resJson.toString());
-
-        try {
-            if(Boolean.parseBoolean(resJson.get("success").toString())) {
-                ret = true;
+        if(resJson != null) {
+            try {
+                if(Boolean.parseBoolean(resJson.get("success").toString())) {
+                    ret = true;
+                } 
+            } catch (JSONException e) {
+                logger.error(e.getMessage());
             } 
-        } catch (JSONException e) {
-            logger.error(e.getMessage());
-        } 
+        }
 
         return ret;
     }
@@ -370,13 +385,19 @@ public class DownloadStationService {
 
             JSONObject resJson = executeGet(builder);
             
-            if(resJson.has("data")) {
-                if(resJson.getJSONObject("data").has("error")) {
-                    if(resJson.getJSONObject("data").getInt("error") > 0) {
-                        ret = false;
+            if(resJson != null) {
+                if(resJson.has("data")) {
+                    JSONArray jarray = resJson.getJSONArray("data");
+                    for(int i = 0; i <jarray.length(); i++) {
+                        if(jarray.getJSONObject(i).has("error")) {
+                            if(jarray.getJSONObject(i).getInt("error") > 0) {
+                                ret = false;
+                                break;
+                            }
+                        }
                     }
-                }
-            } 
+                } 
+            }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
             logger.error(e.getMessage());

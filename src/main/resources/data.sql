@@ -194,3 +194,27 @@ SELECT 'TV_TITLE_SEASON' name
      , CURRENT_TIMESTAMP create_dt
 ) x
 WHERE  NOT EXISTS(SELECT * FROM DOWNLOAD_PATH);
+
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'USE_LIMIT' key
+     , 'TRUE' value
+     , 'boolean' type
+     , true required
+     , '건 수 제한 여부'
+     , 'FEED 관리'
+     , 40
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'USE_LIMIT');
+
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'LIMIT_COUNT' key
+     , '10000' value
+     , 'number' type
+     , true required
+     , '제한 건 수'
+     , 'FEED 관리'
+     , 41
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'LIMIT_COUNT');

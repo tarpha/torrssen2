@@ -7,7 +7,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.tarpha'
-version = '0.5.0'
+version = '0.5.5'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -20,23 +20,32 @@ ext {
 	romeVersion = '1.12.0'
 	httpclientVersion = '4.5.8'
 	commonsLangVersion = '3.9'
+	commonsCollectionVersion = '4.3'
 	commonsIoVersion = '2.6'
 	commonsCodecVersion = '1.12'
 	jsonVersion = '20180813'
 	jsonSmartVersion = '2.3'
 }
 
+configurations {
+	implementation {
+		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+	}
+}
+
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	// implementation 'org.springframework.boot:spring-boot-starter-data-rest'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-undertow'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
 	implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
 	implementation "com.rometools:rome:${romeVersion}"
 	implementation "org.apache.httpcomponents:httpclient:${httpclientVersion}"
 	implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+	implementation "org.apache.commons:commons-collections4:${commonsCollectionVersion}"
 	implementation "org.json:json:${jsonVersion}"
 	implementation "commons-io:commons-io:${commonsIoVersion}"
 	implementation "commons-codec:commons-codec:${commonsCodecVersion}"

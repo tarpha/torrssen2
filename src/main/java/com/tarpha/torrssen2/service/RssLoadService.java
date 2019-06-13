@@ -69,6 +69,8 @@ public class RssLoadService {
     public void loadRss() {
         logger.info("=== Load RSS ===");
 
+        deleteFeed();
+
         List<RssFeed> rssFeedList = new ArrayList<RssFeed>();
 
         for (RssList rss : rssListRepository.findByUseDb(true)) {
@@ -77,7 +79,9 @@ public class RssLoadService {
                 SyndFeedInput input = new SyndFeedInput();
                 SyndFeed feedList = input.build(new XmlReader(feedSource));
 
-                for (SyndEntry feed : feedList.getEntries()) {
+                // for (SyndEntry feed : feedList.getEntries()) {
+                for(int i = feedList.getEntries().size() -1; i >= 0; i--) {
+                    SyndEntry feed = feedList.getEntries().get(i);
                     RssFeed rssFeed = new RssFeed();
 
                     if (!rssFeedRepository.findByLink(rssFeed.getLinkByKey(rss.getLinkKey(), feed)).isPresent()) {
@@ -90,6 +94,7 @@ public class RssLoadService {
                         rssFeed.setRssSeasonByTitle(feed.getTitle());
                         rssFeed.setRssQualityBytitle(feed.getTitle());
                         rssFeed.setRssReleaseGroupByTitle(feed.getTitle());
+                        rssFeed.setRssDateBytitle(feed.getTitle());
                         rssFeed.setLinkByKey(rss.getLinkKey(), feed);
                         rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
 
@@ -225,6 +230,18 @@ public class RssLoadService {
         }
 
         downloadListRepository.save(download);
+    }
+
+    private void deleteFeed() {
+        Optional<Setting> optionalSetting = settingRepository.findByKey("USE_LIMIT");
+        if(optionalSetting.isPresent()) {
+            if(Boolean.parseBoolean(optionalSetting.get().getValue())) {
+                Optional<Setting> limitCnt = settingRepository.findByKey("LIMIT_COUNT");
+                if(limitCnt.isPresent()) {
+                    rssFeedRepository.deleteByLimitCount(Integer.parseInt(limitCnt.get().getValue()));
+                }
+            }
+        }
     }
     
 }

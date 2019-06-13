@@ -23,7 +23,6 @@
           </v-btn>
         </template>
       </v-toolbar>
-			<!-- <v-card-title class="headline" v-html="'환경 설정'"></v-card-title> -->
 			<v-tabs>
 				<v-tab
 					v-for="(item, tabIndex) in tabs"
@@ -43,11 +42,6 @@
 							<v-container grid-list-md style="padding-top: 0; padding-bottom: 0">
 								<v-layout wrap>
 									<v-flex xs12 v-for="(item, index) in item.arr" :key="index">
-									<!-- <v-flex xs12 v-for="(item, index) in items" :key="index">
-										<v-subheader 
-											v-if="index > 0 && items[index -1].groupLabel != item.groupLabel"
-											style="padding: 0; color: #1976d2 !important;"
-										>{{ item.groupLabel }}</v-subheader> -->
 										<v-text-field 
 											v-if="item.type == 'text' || item.type == 'number' || item.type == 'password'"
 											v-model="item.value" 
@@ -70,30 +64,31 @@
 											:required="item.required"
 										></v-combobox>
 									</v-flex>
+                  <template v-if="item.name === 'FEED 관리'">
+                  <!-- <v-flex xs12 sm11> -->
+                    <v-select
+                      v-model="selected" 
+                      :items="siteList"
+                      label="FEED를 삭제할 RSS 사이트"
+                      multiple
+                      chips
+                    ></v-select>
+                  <!-- </v-flex> -->
+                  <v-flex xs12 sm1 style="margin-top: 0.4rem">
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-icon v-on="on" @click="deleteFeed">delete</v-icon>
+                      </template>
+                      <span>선택 항목 삭제</span>
+                    </v-tooltip>
+                  </v-flex>
+                  </template>
 								</v-layout>
 							</v-container>
 						</v-card-text>
 					</v-tab-item>
 				</v-tabs-items>
 			</v-tabs>
-			<!-- <v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn
-					color="primary"
-					flat="flat"
-					@click="close"
-				>
-					닫기
-				</v-btn>
-				<v-btn
-					color="primary"
-					flat="flat"
-					@click="save(tabs)"
-				>
-					저장
-				</v-btn>
-			</v-card-actions> -->
-
 		</v-card>
 	</v-dialog>
 </template>
@@ -106,6 +101,8 @@ export default {
     return {
       oris: [],
       tabs: [],
+      selected: [],
+      siteList: [],
       currentItem: 0,
       windowWidth: 0
     }
@@ -124,6 +121,7 @@ export default {
     showSetting: function (val) {
       if (val === true) {
         this.tabs = []
+        this.selected = []
         axios.get('/api/setting/list?sort=orderId,key').then(res => {
           this.oris = res.data
           let arr = []
@@ -146,6 +144,10 @@ export default {
               arr: JSON.parse(JSON.stringify(arr))
             })
           }
+        })
+        this.siteList = []
+        axios.get('/api/rss/rss-site/distinct').then(res => {
+          this.siteList = res.data
         })
       }
     }
@@ -188,6 +190,17 @@ export default {
         })
         this.close()
       })
+    },
+    deleteFeed: function () {
+      if (confirm('삭제하시겠습니까?')) {
+        axios.post('/api/rss/feed/delete/rss-site/list', this.selected).then(res => {
+          let msg = '삭제하였습니다..'
+          if (res.status !== 200) {
+            msg = '삭제하지 못했습니다.'
+          }
+          this.$store.commit('snackbar/show', msg)
+        })
+      }
     }
   }
 }
