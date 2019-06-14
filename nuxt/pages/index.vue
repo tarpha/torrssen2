@@ -170,7 +170,7 @@
           this.loading = false
           if (this.page >= res.data.totalPages) {
             this.page = res.data.totalPages
-            this.$store.commit('snackbar/show', 'End of Page')
+            this.$store.commit('snackbar/show', '마지막 페이지입니다.')
           }
         })
       },
@@ -178,6 +178,7 @@
         return stompClient.subscribe('/topic/feed/update', frame => {
           if (frame.body === 'true') {
             this.executeToggle()
+            this.$store.commit('snackbar/show', '목록이 갱신되었습니다.')
           }
         })
       },

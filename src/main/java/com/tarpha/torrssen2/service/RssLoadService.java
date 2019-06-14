@@ -100,8 +100,20 @@ public class RssLoadService {
                         rssFeed.setRssReleaseGroupByTitle(feed.getTitle());
                         rssFeed.setRssDateBytitle(feed.getTitle());
                         rssFeed.setLinkByKey(rss.getLinkKey(), feed);
-                        rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
 
+                        String[] rssTitleSplit = StringUtils.split(rssFeed.getRssTitle());
+                        for(int j = rssTitleSplit.length -1; j > 0; j--) {
+                            StringBuffer posterTitle = new StringBuffer();
+                            for(int k = 0; k <= j; k++) {
+                                posterTitle.append(rssTitleSplit[k] + " ");
+                            }
+                            String posterUrl = daumMovieTvService.getPoster(StringUtils.trim(posterTitle.toString()));
+                            if(!StringUtils.isEmpty(posterUrl)) {
+                                rssFeed.setRssPoster(posterUrl);
+                                break;
+                            }
+                        }
+                        // rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
                         rssFeedList.add(rssFeed);
 
                         logger.info("Add Feed: " + rssFeed.getTitle());

@@ -194,7 +194,7 @@ export default {
     deleteFeed: function () {
       if (confirm('삭제하시겠습니까?')) {
         axios.post('/api/rss/feed/delete/rss-site/list', this.selected).then(res => {
-          let msg = '삭제하였습니다..'
+          let msg = '삭제하였습니다.'
           if (res.status !== 200) {
             msg = '삭제하지 못했습니다.'
           }
