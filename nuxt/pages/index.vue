@@ -48,6 +48,7 @@
 
 <script>
   import axios from '~/plugins/axios'
+  import stompClient from '~/plugins/stomp'
   import NuxtFeed from '~/components/Feed'
   import NuxtDownloadDialog from '~/components/DownloadDialog'
 
@@ -77,33 +78,7 @@
     },
     watch: {
       toggle: function (val) {
-        this.page = 0
-        this.funcName = 'list'
-        if (this.$store.state.toolbar.searchText) {
-          this.funcName = 'search'
-        }
-        axios.get('/api/rss/feed/' + this.funcName, {
-          params: {
-            title: this.$store.state.toolbar.searchText,
-            page: this.page,
-            size: this.size,
-            sort: 'createDt,desc'
-          }
-        }).then(res => {
-          this.items = res.data.content
-          let stomps = []
-          for (var i = 0; i < res.data.content.length; i++) {
-            const obj = res.data.content[i]
-            stomps.push({
-              percentDone: obj.downloading === true ? 0 : -1,
-              active: obj.downloading === true,
-              stop: false,
-              delete: false,
-              id: obj.downloading === true ? obj.downloadId : 0
-            })
-          }
-          this.stomps = stomps
-        })
+        this.executeToggle()
       },
       downloadToggle: function (val) {
         this.stomps[this.download.vueIndex].active = this.download.active
@@ -120,9 +95,26 @@
       axios.get('/api/setting/DARK_THEME').then(res => {
         this.$store.commit('setDark', res.data === 'TRUE')
       })
+      if (stompClient.connected() === true) {
+        this.subscription = this.subscribe()
+      } else {
+        this.intervalObj = setInterval(() => {
+          if (stompClient.connected() === false) {
+            if (typeof this.subscription.unsubscribe === 'function') {
+              this.subscription.unsubscribe()
+            }
+          }
+          if (stompClient.connected() === true) {
+            this.subscription = this.subscribe()
+            clearInterval(this.intervalObj)
+          }
+        }, 1000)
+      }
     },
     data () {
       return {
+        intervalObj: '',
+        subscription: '',
         loading: false,
         funcName: 'list',
         page: 0,
@@ -180,6 +172,42 @@
             this.page = res.data.totalPages
             this.$store.commit('snackbar/show', 'End of Page')
           }
+        })
+      },
+      subscribe: function () {
+        return stompClient.subscribe('/topic/feed/update', frame => {
+          if (frame.body === 'true') {
+            this.executeToggle()
+          }
+        })
+      },
+      executeToggle: function () {
+        this.page = 0
+        this.funcName = 'list'
+        if (this.$store.state.toolbar.searchText) {
+          this.funcName = 'search'
+        }
+        axios.get('/api/rss/feed/' + this.funcName, {
+          params: {
+            title: this.$store.state.toolbar.searchText,
+            page: this.page,
+            size: this.size,
+            sort: 'createDt,desc'
+          }
+        }).then(res => {
+          this.items = res.data.content
+          let stomps = []
+          for (var i = 0; i < res.data.content.length; i++) {
+            const obj = res.data.content[i]
+            stomps.push({
+              percentDone: obj.downloading === true ? 0 : -1,
+              active: obj.downloading === true,
+              stop: false,
+              delete: false,
+              id: obj.downloading === true ? obj.downloadId : 0
+            })
+          }
+          this.stomps = stomps
         })
       }
     }

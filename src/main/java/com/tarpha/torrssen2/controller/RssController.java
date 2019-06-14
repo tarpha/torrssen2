@@ -74,7 +74,6 @@ public class RssController {
     @CrossOrigin("*")
     @GetMapping(value = "/feed/list")
     public Page<RssFeed> feedList(Pageable pageable) {
-        // Page<RssFeed> feedList = rssFeedRepository.findAll(pageable);
         Page<RssFeed> feedList = rssFeedRepository.findByRssSiteIn(rssSite(), pageable);
         for(RssFeed feed: feedList) {
             setDownloadInfo(feed);
@@ -85,7 +84,6 @@ public class RssController {
     @CrossOrigin("*")
     @GetMapping(value = "/feed/search")
     public Page<RssFeed> searchList(@RequestParam("title") String title, Pageable pageable) {
-        // Page<RssFeed> feedList = rssFeedRepository.findByTitleContaining(title, pageable);
         Page<RssFeed> feedList = rssFeedRepository.findByTitleContainingAndRssSiteIn(title, rssSite(), pageable);
         for(RssFeed feed: feedList) {
             setDownloadInfo(feed);

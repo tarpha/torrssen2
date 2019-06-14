@@ -36,20 +36,20 @@ public class WebSocketController {
         Long id = Long.valueOf(sid);
 
         logger.debug("id:" + sid);
-        
+
         String app = settingService.getDownloadApp();
-        if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
+        if (StringUtils.equals(app, "DOWNLOAD_STATION")) {
             ret = downloadStationService.getInfo(downloadStationService.getDbId(id));
-        } else if(StringUtils.equals(app, "TRANSMISSION")) {
+        } else if (StringUtils.equals(app, "TRANSMISSION")) {
             List<Long> ids = new ArrayList<>();
             ids.add(id);
-            List<DownloadList> list  = transmissionService.torrentGet(ids);
-            
-            if(list.size() > 0) {
+            List<DownloadList> list = transmissionService.torrentGet(ids);
+
+            if (list.size() > 0) {
                 ret = list.get(0);
             }
         }
-        
+
         return ret;
     }
 
@@ -57,14 +57,14 @@ public class WebSocketController {
     public List<DownloadList> downloadRateList() {
         List<DownloadList> ret = null;
         logger.debug("downloadList");
-        
+
         String app = settingService.getDownloadApp();
-        if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
+        if (StringUtils.equals(app, "DOWNLOAD_STATION")) {
             ret = downloadStationService.list();
-        } else if(StringUtils.equals(app, "TRANSMISSION")) {
+        } else if (StringUtils.equals(app, "TRANSMISSION")) {
             ret = transmissionService.torrentGet(null);
         }
-        
+
         return ret;
     }
 
@@ -73,17 +73,17 @@ public class WebSocketController {
         boolean ret = false;
 
         String app = settingService.getDownloadApp();
-        if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
+        if (StringUtils.equals(app, "DOWNLOAD_STATION")) {
             List<String> ids = new ArrayList<>();
             ids.add(downloadStationService.getDbId(download.getId()));
             ret = downloadStationService.delete(ids);
-        } else if(StringUtils.equals(app, "TRANSMISSION")) {
+        } else if (StringUtils.equals(app, "TRANSMISSION")) {
             List<Long> ids = new ArrayList<>();
             ids.add(download.getId());
             ret = transmissionService.torrentRemove(ids);
         }
 
-        if(ret) {
+        if (ret) {
             return download;
         } else {
             return null;

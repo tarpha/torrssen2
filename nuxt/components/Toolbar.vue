@@ -43,6 +43,17 @@
               ></v-checkbox>
             </v-list-tile-content>
           </v-list-tile>
+          <v-list-tile>
+            <v-list-tile-action>
+          <v-btn
+                color="primary"
+                flat="flat"
+                @click="reload"
+              >
+                RSS 갱신
+              </v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
         </v-list>
       </v-menu>
       <v-menu offset-y>
@@ -205,6 +216,15 @@ export default {
     },
     clear: function () {
       this.$store.commit('toolbar/toggle')
+    },
+    reload: function () {
+      axios.post('/api/rss/reload', {}).then(res => {
+        let msg = '갱신 요청하였습니다.'
+        if (res.status !== 200) {
+          msg = '갱신 요청에 실패하였습니다.'
+        }
+        this.$store.commit('snackbar/show', msg)
+      })
     }
   }
 }

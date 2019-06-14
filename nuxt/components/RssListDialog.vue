@@ -107,9 +107,9 @@
 					닫기
 				</v-btn> -->
 				<v-btn
-				color="primary"
-				flat="flat"
-				@click="reload"
+					color="primary"
+					flat="flat"
+					@click="reload"
 				>
 					RSS 갱신
 				</v-btn>
@@ -203,6 +203,7 @@ export default {
                 msg = '삭제하지 못했습니다.'
               }
               this.$store.commit('snackbar/show', msg)
+              this.$store.commit('toolbar/toggle')
             })
           } else {
             this.$store.commit('snackbar/show', msg)
@@ -217,6 +218,7 @@ export default {
           msg = '저장하지 못했습니다.'
         }
         this.$store.commit('snackbar/show', msg)
+        axios.post('/api/rss/reload', {})
         this.close()
       })
     },

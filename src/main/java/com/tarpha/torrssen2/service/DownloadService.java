@@ -10,11 +10,15 @@ import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.WatchListRepository;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DownloadService {
+
+    protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private DownloadListRepository downloadListRepository;
@@ -96,6 +100,37 @@ public class DownloadService {
             watchList.setReleaseGroup(download.getRssReleaseGroup());
 
             watchListRepository.save(watchList);
+        }
+
+        return ret;
+    }
+
+    public int remove(DownloadList download) {
+        int ret = -1;
+        boolean res = false;
+
+        String app = settingService.getDownloadApp();
+        if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
+            List<String> ids = new ArrayList<>();
+            ids.add(downloadStationService.getDbId(download.getId()));
+            res = downloadStationService.delete(ids);
+        } else if(StringUtils.equals(app, "TRANSMISSION")) {
+            List<Long> ids = new ArrayList<>();
+            ids.add(download.getId());
+            res = transmissionService.torrentRemove(ids);
+        }
+
+        if(res) {
+            Optional<DownloadList> down = downloadListRepository.findById(download.getId());
+            if(down.isPresent()) {
+                try {
+                    ret = down.get().getVueItemIndex();
+                } catch (NullPointerException e) {
+                    logger.error(e.getMessage());
+                }
+            } else {
+                ret = -2;
+            }
         }
 
         return ret;

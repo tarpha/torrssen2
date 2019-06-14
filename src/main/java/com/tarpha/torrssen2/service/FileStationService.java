@@ -19,7 +19,6 @@ public class FileStationService extends SynologyApiUtils {
 
     public boolean createFolder(String path, String name) {
         logger.info("File Station createFolder");
-        logger.debug(path + ":" + name);
         boolean ret = false;
 
         try {

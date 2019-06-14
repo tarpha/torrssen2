@@ -61,7 +61,9 @@ export default {
     }
     this.intervalObj = setInterval(() => {
       if (stompClient.connected() === false) {
-        this.subscription.unsubscribe()
+        if (typeof this.subscription.unsubscribe === 'function') {
+          this.subscription.unsubscribe()
+        }
       }
       if (stompClient.connected() === true) {
         if (this.count < 3) {

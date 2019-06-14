@@ -199,6 +199,7 @@ export default {
             msg = '삭제하지 못했습니다.'
           }
           this.$store.commit('snackbar/show', msg)
+          this.$store.commit('toolbar/toggle')
         })
       }
     }

@@ -1,17 +1,12 @@
 package com.tarpha.torrssen2.controller;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.service.DownloadService;
-import com.tarpha.torrssen2.service.DownloadStationService;
 import com.tarpha.torrssen2.service.SettingService;
-import com.tarpha.torrssen2.service.TransmissionService;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +32,6 @@ public class DownloadController {
     private DownloadListRepository downloadListRepository;
 
     @Autowired
-    private DownloadStationService downloadStationService;
-
-    @Autowired
-    private TransmissionService transmissionService;
-
-    @Autowired
     private SettingService settingService;
 
     @Autowired
@@ -64,70 +53,12 @@ public class DownloadController {
     @PostMapping(value = "/create")
     public long create(@RequestBody DownloadList download) {
         return downloadService.create(download);
-        // long ret = 0L;
-
-        // String app = settingService.getDownloadApp();
-        // if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
-        //     if(downloadStationService.create(download.getUri(), download.getDownloadPath())) {
-        //         for(DownloadList down: downloadStationService.list()) {
-        //             if(StringUtils.equals(download.getUri(), down.getUri())) {
-        //                 ret = down.getId();
-        //                 download.setDbid(down.getDbid());
-        //             }
-        //         }
-        //     }
-        // } else if(StringUtils.equals(app, "TRANSMISSION")) {
-        //     ret = (long)transmissionService.torrentAdd(download.getUri(), download.getDownloadPath());
-        // }
-
-        // if(ret > 0L) {
-        //     download.setId(ret);
-        //     downloadListRepository.save(download);
-        // }
-
-        // if(download.getAuto()) {
-        //     WatchList watchList = new WatchList();
-        //     watchList.setTitle(download.getRssTitle());
-        //     watchList.setDownloadPath(download.getDownloadPath());
-        //     watchList.setReleaseGroup(download.getRssReleaseGroup());
-
-        //     watchListRepository.save(watchList);
-        // }
-
-        // return ret;
     }
 
     @CrossOrigin("*")
     @PostMapping(value = "/remove")
     public int remove(@RequestBody DownloadList download) {
-        int ret = -1;
-        boolean res = false;
-
-        String app = settingService.getDownloadApp();
-        if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
-            List<String> ids = new ArrayList<>();
-            ids.add(downloadStationService.getDbId(download.getId()));
-            res = downloadStationService.delete(ids);
-        } else if(StringUtils.equals(app, "TRANSMISSION")) {
-            List<Long> ids = new ArrayList<>();
-            ids.add(download.getId());
-            res = transmissionService.torrentRemove(ids);
-        }
-
-        if(res) {
-            Optional<DownloadList> down = downloadListRepository.findById(download.getId());
-            if(down.isPresent()) {
-                try {
-                    ret = down.get().getVueItemIndex();
-                } catch (NullPointerException e) {
-                    logger.error(e.getMessage());
-                }
-            } else {
-                ret = -2;
-            }
-        }
-
-        return ret;
+        return downloadService.remove(download);
     }
 
     @CrossOrigin("*")
