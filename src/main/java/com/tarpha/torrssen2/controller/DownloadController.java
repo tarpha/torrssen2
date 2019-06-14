@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tarpha.torrssen2.domain.DownloadList;
-import com.tarpha.torrssen2.domain.WatchList;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
-import com.tarpha.torrssen2.repository.WatchListRepository;
 import com.tarpha.torrssen2.service.DownloadService;
 import com.tarpha.torrssen2.service.DownloadStationService;
 import com.tarpha.torrssen2.service.SettingService;
@@ -39,9 +37,6 @@ public class DownloadController {
     private DownloadListRepository downloadListRepository;
 
     @Autowired
-    private WatchListRepository watchListRepository;
-
-    @Autowired
     private DownloadStationService downloadStationService;
 
     @Autowired
@@ -68,37 +63,38 @@ public class DownloadController {
     @CrossOrigin("*")
     @PostMapping(value = "/create")
     public long create(@RequestBody DownloadList download) {
-        long ret = 0L;
+        return downloadService.create(download);
+        // long ret = 0L;
 
-        String app = settingService.getDownloadApp();
-        if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
-            if(downloadStationService.create(download.getUri(), download.getDownloadPath())) {
-                for(DownloadList down: downloadStationService.list()) {
-                    if(StringUtils.equals(download.getUri(), down.getUri())) {
-                        ret = down.getId();
-                        download.setDbid(down.getDbid());
-                    }
-                }
-            }
-        } else if(StringUtils.equals(app, "TRANSMISSION")) {
-            ret = (long)transmissionService.torrentAdd(download.getUri(), download.getDownloadPath());
-        }
+        // String app = settingService.getDownloadApp();
+        // if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
+        //     if(downloadStationService.create(download.getUri(), download.getDownloadPath())) {
+        //         for(DownloadList down: downloadStationService.list()) {
+        //             if(StringUtils.equals(download.getUri(), down.getUri())) {
+        //                 ret = down.getId();
+        //                 download.setDbid(down.getDbid());
+        //             }
+        //         }
+        //     }
+        // } else if(StringUtils.equals(app, "TRANSMISSION")) {
+        //     ret = (long)transmissionService.torrentAdd(download.getUri(), download.getDownloadPath());
+        // }
 
-        if(ret > 0L) {
-            download.setId(ret);
-            downloadListRepository.save(download);
-        }
+        // if(ret > 0L) {
+        //     download.setId(ret);
+        //     downloadListRepository.save(download);
+        // }
 
-        if(download.getAuto()) {
-            WatchList watchList = new WatchList();
-            watchList.setTitle(download.getRssTitle());
-            watchList.setDownloadPath(download.getDownloadPath());
-            watchList.setReleaseGroup(download.getRssReleaseGroup());
+        // if(download.getAuto()) {
+        //     WatchList watchList = new WatchList();
+        //     watchList.setTitle(download.getRssTitle());
+        //     watchList.setDownloadPath(download.getDownloadPath());
+        //     watchList.setReleaseGroup(download.getRssReleaseGroup());
 
-            watchListRepository.save(watchList);
-        }
+        //     watchListRepository.save(watchList);
+        // }
 
-        return ret;
+        // return ret;
     }
 
     @CrossOrigin("*")

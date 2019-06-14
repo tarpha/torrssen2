@@ -58,6 +58,13 @@ public class RssFeed {
 
         if (matcher.matches()) {
             episode = matcher.group(1);
+        } else {
+            pattern = Pattern.compile(".*-\\s*(\\d{2,}).*", Pattern.CASE_INSENSITIVE);
+            matcher = pattern.matcher(title);
+
+            if (matcher.matches()) {
+                episode = matcher.group(1);
+            }
         }
 
         this.rssEpisode = episode;
@@ -96,7 +103,7 @@ public class RssFeed {
         pattern = Pattern.compile("\\d{1,}-\\d{1,}회 합본");
         rssTitle = RegExUtils.removeAll(rssTitle, pattern);
 
-        pattern = Pattern.compile("\\[.{1,}\\]");
+        pattern = Pattern.compile("\\[[^\\]]{1,}\\]");
         rssTitle = RegExUtils.removeAll(rssTitle, pattern);
 
         this.rssTitle = StringUtils.trim(rssTitle);
