@@ -124,7 +124,10 @@ public class DownloadService {
             Optional<DownloadList> down = downloadListRepository.findById(download.getId());
             if(down.isPresent()) {
                 try {
-                    ret = down.get().getVueItemIndex();
+                    DownloadList temp = down.get();
+                    temp.setDone(true);
+                    downloadListRepository.save(temp);
+                    ret = temp.getVueItemIndex();
                 } catch (NullPointerException e) {
                     logger.error(e.getMessage());
                 }
