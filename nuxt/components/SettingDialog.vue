@@ -64,8 +64,26 @@
 											:required="item.required"
 										></v-combobox>
 									</v-flex>
+                  <template v-if="item.name === '로그인'">
+                    <v-flex xs12 v-for="(item, index) in item.arr" :key="index">
+                      <v-text-field 
+                        v-model="user.username" 
+                        readonly
+                        label="아이디" 
+                        type="text"
+                        :required="true"
+                      ></v-text-field>
+                    </v-flex>
+                    <v-flex xs12 v-for="(item, index) in item.arr" :key="index">
+                      <v-text-field 
+                        v-model="user.password" 
+                        label="비밀번호" 
+                        type="password"
+                        :required="true"
+                      ></v-text-field>
+                    </v-flex>
+                  </template>
                   <template v-if="item.name === 'FEED 관리'">
-                  <!-- <v-flex xs12 sm11> -->
                     <v-select
                       v-model="selected" 
                       :items="siteList"
@@ -73,7 +91,6 @@
                       multiple
                       chips
                     ></v-select>
-                  <!-- </v-flex> -->
                   <v-flex xs12 sm1 style="margin-top: 0.4rem">
                     <v-tooltip bottom>
                       <template v-slot:activator="{ on }">
@@ -104,7 +121,8 @@ export default {
       selected: [],
       siteList: [],
       currentItem: 0,
-      windowWidth: 0
+      windowWidth: 0,
+      user: {}
     }
   },
   computed: {
@@ -149,6 +167,10 @@ export default {
         axios.get('/api/rss/rss-site/distinct').then(res => {
           this.siteList = res.data
         })
+        this.user = {}
+        axios.get('/api/user/admin').then(res => {
+          this.user = res.data
+        })
       }
     }
   },
@@ -180,15 +202,17 @@ export default {
         }
       }
       axios.post('/api/setting/save', items).then(res => {
-        let msg = '저장하였습니다.'
-        if (res.status !== 200) {
-          msg = '저장하지 못했습니다.'
-        }
-        this.$store.commit('snackbar/show', msg)
-        axios.get('/api/setting/DARK_THEME').then(res => {
-          this.$store.commit('setDark', res.data === 'TRUE')
+        axios.post('/api/user/admin', this.user).then(res => {
+          let msg = '저장하였습니다.'
+          if (res.status !== 200) {
+            msg = '저장하지 못했습니다.'
+          }
+          this.$store.commit('snackbar/show', msg)
+          axios.get('/api/setting/DARK_THEME').then(res => {
+            this.$store.commit('setDark', res.data === 'TRUE')
+          })
+          this.close()
         })
-        this.close()
       })
     },
     deleteFeed: function () {

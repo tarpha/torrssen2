@@ -7,7 +7,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.tarpha'
-version = '0.6.2'
+version = '0.6.5'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -37,20 +37,32 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+	// implementation 'org.springframework.boot:spring-boot-starteroauth2-client'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-undertow'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
 	implementation "io.springfox:springfox-swagger2:${swaggerVersion}"
 	implementation "io.springfox:springfox-swagger-ui:${swaggerVersion}"
+
 	implementation "com.rometools:rome:${romeVersion}"
+
 	implementation "org.apache.httpcomponents:httpclient:${httpclientVersion}"
+
 	implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
 	implementation "org.apache.commons:commons-collections4:${commonsCollectionVersion}"
+
 	implementation "org.json:json:${jsonVersion}"
+
 	implementation "commons-io:commons-io:${commonsIoVersion}"
 	implementation "commons-codec:commons-codec:${commonsCodecVersion}"
+
 	implementation "net.minidev:json-smart:${jsonSmartVersion}"
+
 	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 }

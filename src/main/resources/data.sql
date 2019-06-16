@@ -218,3 +218,22 @@ SELECT 'LIMIT_COUNT' key
      , CURRENT_TIMESTAMP create_dt
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'LIMIT_COUNT');
+
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'USE_LOGIN' key
+     , 'FALSE' value
+     , 'boolean' type
+     , true required
+     , '사용여부'
+     , '로그인'
+     , 50
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'USE_LOGIN');
+
+INSERT INTO USER(id, username, password) SELECT * FROM (
+SELECT 1
+     , 'torrssen'
+     , 'bool$2a$10$$2a$10$lKvLozxX5WUFdwZrc8zHTOreCYM06GLiFAMov3YNu7YaWE8JQOjWW'
+) x
+WHERE NOT EXISTS(SELECT * FROM USER WHERE username = 'torrssen');

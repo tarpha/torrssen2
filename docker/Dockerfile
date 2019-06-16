@@ -1,5 +1,5 @@
 FROM openjdk:8-alpine
-COPY torrssen2-0.6.2.jar torrssen2.jar
+COPY torrssen2-0.6.5.jar torrssen2.jar
 VOLUME [ "/root/data" ]
 EXPOSE 8080
 ENV BASE_URL http://localhost:8080
