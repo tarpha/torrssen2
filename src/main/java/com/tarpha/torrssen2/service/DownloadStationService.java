@@ -30,7 +30,7 @@ public class DownloadStationService extends SynologyApiUtils {
         DownloadList down = new DownloadList();
 
         if(json.has("id")) {
-            boolean done = StringUtils.equals(json.getString("status"), "finished");
+            boolean done = StringUtils.equalsAny(json.getString("status"), "finished", "seeding");
 
             Long id = Long.parseLong(StringUtils.remove(json.getString("id"), "dbid_"));
 

@@ -47,24 +47,42 @@ public class SchedulerService {
     }
 
     public void transmissionJob() {
+        boolean doneDelete = false;
+        boolean sendTelegram = false;
+
         // 완료 시 삭제 여부
         Optional<Setting> optionalSetting = settingRepository.findByKey("DONE_DELETE");
         if (optionalSetting.isPresent()) {
             if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
-                logger.info("=== Transmission Stop Seeding ===");
-                List<DownloadList> list = transmissionService.torrentGet(null);
-                List<Long> ids = new ArrayList<Long>();
-                for (DownloadList down: list) {
-                    // SEED: 6  # Seeding
-                    if(down.getStatus() == 6) {
-                        ids.add(down.getId());
-                    }
-                }
+                doneDelete = true;
+            }
+        }
 
-                if(ids.size() > 0) {
-                    transmissionService.torrentRemove(ids);
+        //Telegram 발송 여부
+        optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
+        if (optionalSetting.isPresent()) {
+            if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
+                sendTelegram = true;
+            }
+        }
+
+        logger.info("=== Transmission Stop Seeding ===");
+        List<DownloadList> list = transmissionService.torrentGet(null);
+        List<Long> ids = new ArrayList<Long>();
+        for (DownloadList down: list) {
+            // SEED: 6  # Seeding
+            if(down.getStatus() == 6) {
+                downloadListRepository.save(down);
+
+                ids.add(down.getId());
+                if(sendTelegram) {
+                    sendTelegram(down);
                 }
             }
+        }
+
+        if(ids.size() > 0 && doneDelete) {
+            transmissionService.torrentRemove(ids);
         }
     }
             
@@ -72,6 +90,25 @@ public class SchedulerService {
         // 다운로드 스테이션 완료 체크 
         logger.info("=== Download Station Check Done ===");
         List<DownloadList> list = downloadStationService.list();
+
+        boolean doneDelete = false;
+        boolean sendTelegram = false;
+
+        // 완료 시 삭제 여부
+        Optional<Setting> optionalSetting = settingRepository.findByKey("DONE_DELETE");
+        if (optionalSetting.isPresent()) {
+            if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
+                doneDelete = true;
+            }
+        }
+
+        //Telegram 발송 여부
+        optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
+        if (optionalSetting.isPresent()) {
+            if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
+                sendTelegram = true;
+            }
+        }
         
         for(DownloadList down: list) {
             for(DownloadList tdown: downloadListRepository.findAllById(0L)) {
@@ -85,35 +122,38 @@ public class SchedulerService {
             }
 
             if(down.getDone()) {
+                //Telegram Message를 발송한다.
+                if(sendTelegram) {
+                    sendTelegram(down);
+                }
+
                 Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
                 if(rdown.isPresent()) {
-                    if(rdown.get().getIsSentAlert() == false) {
-                        //Telegram Message를 발송한다.
-                        Optional<Setting> optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
-                        if (optionalSetting.isPresent()) {
-                            if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
-                                logger.info("Send Telegram: " + down.getFileName());
-                                if(telegramService.sendMessage("<b>" + down.getFileName() + "</b>의 다운로드가 완료되었습니다.")) {
-                                    DownloadList sdown = rdown.get();
-                                    sdown.setIsSentAlert(true);
-
-                                    downloadListRepository.save(sdown);
-                                }
-                            }
-                        }
-                    }
-
                     // 완료 시 삭제 여부
-                    Optional<Setting> optionalSetting = settingRepository.findByKey("DONE_DELETE");
-                    if (optionalSetting.isPresent()) {
-                        if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
-                            logger.info("Remove Torrent: " + down.getFileName());
-                            
-                            List<String> ids = new ArrayList<String>();
-                            ids.add(rdown.get().getDbid());
-                            downloadStationService.delete(ids);
-                        }
+                    if(doneDelete) {
+                        logger.info("Remove Torrent: " + down.getFileName());
+                        
+                        List<String> ids = new ArrayList<String>();
+                        ids.add(rdown.get().getDbid());
+                        downloadStationService.delete(ids);
                     }
+                }
+            }
+        }
+    }
+
+    private void sendTelegram(DownloadList down) {
+        Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
+        logger.debug(rdown.toString());
+        if(rdown.isPresent()) {
+            if(rdown.get().getIsSentAlert() == false) {
+                String target = StringUtils.isEmpty(down.getFileName()) ? rdown.get().getName() : down.getFileName();
+                logger.info("Send Telegram: " + target);
+                if(telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
+                    DownloadList sdown = rdown.get();
+                    sdown.setIsSentAlert(true);
+
+                    downloadListRepository.save(sdown);
                 }
             }
         }

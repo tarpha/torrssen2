@@ -133,6 +133,11 @@ export default {
       const now = new Date()
       const dt = Date.parse(time.substring(0, 23) + 'Z')
       const diff = now - dt
+
+      if (diff < 60000) {
+        return '지금'
+      }
+
       const seconds = parseInt(diff) / 1000
       const minutes = seconds / 60
       const hours = minutes / 60
