@@ -230,10 +230,3 @@ SELECT 'USE_LOGIN' key
      , CURRENT_TIMESTAMP create_dt
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'USE_LOGIN');
-
-INSERT INTO USER(id, username, password) SELECT * FROM (
-SELECT 1
-     , 'torrssen'
-     , '$2a$11$kEot4JlD/rNkkgBxWcCEzeOxOYtN7RGm87eCPkwS0wwJIsbVj.jhy'
-) x
-WHERE NOT EXISTS(SELECT * FROM USER WHERE username = 'torrssen');

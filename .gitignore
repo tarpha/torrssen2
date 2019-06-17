@@ -31,3 +31,5 @@ HELP.md
 
 ### VS Code ###
 .vscode/
+
+/docker/logs

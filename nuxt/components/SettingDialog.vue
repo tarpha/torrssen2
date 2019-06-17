@@ -122,7 +122,8 @@ export default {
       siteList: [],
       currentItem: 0,
       windowWidth: 0,
-      user: {}
+      user: {},
+      oriUser: {}
     }
   },
   computed: {
@@ -170,6 +171,7 @@ export default {
         this.user = {}
         axios.get('/api/user/admin').then(res => {
           this.user = res.data
+          this.oriUser = JSON.parse(JSON.stringify(res.data))
         })
       }
     }
@@ -202,17 +204,24 @@ export default {
         }
       }
       axios.post('/api/setting/save', items).then(res => {
-        axios.post('/api/user/admin', this.user).then(res => {
-          let msg = '저장하였습니다.'
-          if (res.status !== 200) {
-            msg = '저장하지 못했습니다.'
+        for (let key in this.oriUser) {
+          if (this.user[key] !== this.oriUser[key]) {
+            axios.post('/api/user/admin', this.user).then(res => {
+              if (res.status !== 200) {
+                msg = '저장하지 못했습니다.'
+              }
+            })
           }
-          this.$store.commit('snackbar/show', msg)
-          axios.get('/api/setting/DARK_THEME').then(res => {
-            this.$store.commit('setDark', res.data === 'TRUE')
-          })
-          this.close()
+        }
+        let msg = '저장하였습니다.'
+        if (res.status !== 200) {
+          msg = '저장하지 못했습니다.'
+        }
+        this.$store.commit('snackbar/show', msg)
+        axios.get('/api/setting/DARK_THEME').then(res => {
+          this.$store.commit('setDark', res.data === 'TRUE')
         })
+        this.close()
       })
     },
     deleteFeed: function () {
