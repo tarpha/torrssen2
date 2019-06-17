@@ -77,8 +77,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             user.setUsername("recovery");
             user.setPassword(encoder().encode(symmetricKey));
             userRepository.save(user);
-        } 
+        } else {
+            recovery.setPassword(encoder().encode(symmetricKey));
+            userRepository.save(recovery);
+        }
         
+
         User torrssen = userRepository.findByUsername("torrssen");
         if(torrssen == null) {
             User user = new User();
