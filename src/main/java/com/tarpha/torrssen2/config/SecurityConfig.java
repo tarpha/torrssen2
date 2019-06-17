@@ -81,7 +81,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             recovery.setPassword(encoder().encode(symmetricKey));
             userRepository.save(recovery);
         }
-        
 
         User torrssen = userRepository.findByUsername("torrssen");
         if(torrssen == null) {
@@ -111,7 +110,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         }
     }
 
-    public String symmetricKey() {
+    private String symmetricKey() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
             keyGenerator.init(128);
