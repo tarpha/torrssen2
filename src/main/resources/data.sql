@@ -231,4 +231,16 @@ SELECT 'USE_LOGIN' key
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'USE_LOGIN');
 
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'TRANSMISSION_CALLBACK' key
+     , 'FALSE' value
+     , 'boolean' type
+     , true required
+     , '콜백 사용'
+     , '트랜스미션'
+     , 24
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'TRANSMISSION_CALLBACK');
+
 DELETE FROM USER WHERE id = 1;
