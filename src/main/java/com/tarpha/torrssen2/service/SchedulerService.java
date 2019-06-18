@@ -49,6 +49,7 @@ public class SchedulerService {
     public void transmissionJob() {
         boolean doneDelete = false;
         boolean sendTelegram = false;
+        boolean transmissionCallback = false;
 
         // 완료 시 삭제 여부
         Optional<Setting> optionalSetting = settingRepository.findByKey("DONE_DELETE");
@@ -66,6 +67,14 @@ public class SchedulerService {
             }
         }
 
+        //TRANSMISSION_CALLBACK
+        optionalSetting = settingRepository.findByKey("TRANSMISSION_CALLBACK");
+        if (optionalSetting.isPresent()) {
+            if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
+                transmissionCallback = true;
+            }
+        }
+
         logger.info("=== Transmission Stop Seeding ===");
         List<DownloadList> list = transmissionService.torrentGet(null);
         List<Long> ids = new ArrayList<Long>();
@@ -75,7 +84,7 @@ public class SchedulerService {
                 downloadListRepository.save(down);
 
                 ids.add(down.getId());
-                if(sendTelegram) {
+                if(sendTelegram && !transmissionCallback) {
                     sendTelegram(down);
                 }
             }
