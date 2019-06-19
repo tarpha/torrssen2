@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.CrossOrigin;
+// import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,19 +67,19 @@ public class SettingController {
     @Autowired
     private CryptoService cryptoService;
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/list")
     public List<Setting> list(Sort sort) {
         return settingRepository.findAll(sort);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/download-path")
     public List<DownloadPath> downloadPath() {
         return downloadPathRepository.findAll();
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/download-path/compute")
     public List<DownloadPath> computedDownloadPath(@RequestParam("title") String title, @RequestParam("season") String season) {
         List<DownloadPath> pathList = downloadPathRepository.findAll();
@@ -97,7 +97,7 @@ public class SettingController {
         return pathList;
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/{key}")
     public String value(@PathVariable("key") String key) {
         Optional<Setting> setting = settingRepository.findByKey(key);
@@ -109,7 +109,7 @@ public class SettingController {
         return null;
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/save")
     public void postMethodName(@RequestBody List<Setting> settings) throws Exception {
         for(Setting setting: settings) {
@@ -121,13 +121,13 @@ public class SettingController {
         settingRepository.saveAll(settings);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/rss-list")
     public List<RssList> getRssList() {
         return rssListRepository.findAll();
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/rss-list")
     public void setRssList(@RequestBody List<RssList> list) {
         List<RssList> deleteList = new ArrayList<>();
@@ -153,13 +153,13 @@ public class SettingController {
         rssListRepository.saveAll(list);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/path")
     public List<DownloadPath> getPathList() {
         return downloadPathRepository.findAll();
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/path")
     public void setPathList(@RequestBody List<DownloadPath> list) {
         List<DownloadPath> deleteList = new ArrayList<>();
@@ -185,61 +185,61 @@ public class SettingController {
         downloadPathRepository.saveAll(list);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/watch-list")
     public List<WatchList> getWatchList(Sort sort) {
         return watchListRepository.findAll(sort);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/watch-list")
     public void setWatchList(@RequestBody WatchList watchList) {
         watchListRepository.save(watchList);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/watch-list/execute")
     public void executeWatchList() {
         rssLoadService.checkWatchListFromDb();
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/watch-list/delete")
     public void deleteWatchList(@RequestBody WatchList watchList) {
         watchListRepository.delete(watchList);
     }
     
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/seen-list")
     public List<SeenList> getSeenList(Sort sort) {
         return seenListRepository.findAll(sort);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/seen-list/delete")
     public void deleteSeenList(@RequestBody SeenList seenList) {
         seenListRepository.delete(seenList);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/seen-list/delete/all")
     public void deleteAllSeenList() {
         seenListRepository.deleteAll();
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/download-list")
     public List<DownloadList> getDownloadList(Sort sort) {
         return downloadListRepository.findAll(sort);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/download-list/delete")
     public void deleteDownloadList(@RequestBody DownloadList downloadList) {
         downloadListRepository.delete(downloadList);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/download-list/delete/all")
     public void deleteAllDownloadList() {
         downloadListRepository.deleteAll();
