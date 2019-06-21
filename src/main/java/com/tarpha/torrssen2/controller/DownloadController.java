@@ -10,7 +10,7 @@ import com.tarpha.torrssen2.service.SettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
+// import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,31 +37,31 @@ public class DownloadController {
     @Autowired
     private DownloadService downloadService;
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/app")
     public String getApp() {
         return settingService.getDownloadApp();
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/id/{id}")
     public DownloadList getDownload(@PathVariable("id") long id) {
         return downloadService.getInfo(id);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/create")
     public long create(@RequestBody DownloadList download) {
         return downloadService.create(download);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/remove")
     public int remove(@RequestBody DownloadList download) {
         return downloadService.remove(download);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/magnet")
     public DownloadList downloadStatus(@RequestParam("magnet") String magnet) {
         Optional<DownloadList> download = downloadListRepository.findFirstByUriAndDoneOrderByCreateDtDesc(magnet, false);

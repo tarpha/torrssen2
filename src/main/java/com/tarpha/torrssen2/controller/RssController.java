@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.CrossOrigin;
+// import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,7 +71,7 @@ public class RssController {
         return ret;
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/feed/list")
     public Page<RssFeed> feedList(Pageable pageable) {
         Page<RssFeed> feedList = rssFeedRepository.findByRssSiteIn(rssSite(), pageable);
@@ -81,7 +81,7 @@ public class RssController {
         return feedList;
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/feed/search")
     public Page<RssFeed> searchList(@RequestParam("title") String title, Pageable pageable) {
         Page<RssFeed> feedList = rssFeedRepository.findByTitleContainingAndRssSiteIn(title, rssSite(), pageable);
@@ -91,19 +91,19 @@ public class RssController {
         return feedList;
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/feed/delete")
     public void deleteFeed() {
         rssFeedRepository.deleteAll();
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/feed/delete/rss-site")
     public void deleteFeedByRssSite(@RequestBody RssList rssList) {
         rssFeedRepository.deleteByRssSite(rssList.getName());
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/feed/delete/rss-site/list")
     public void deleteFeedByRssSiteList(@RequestBody List<String> rssSiteList) {
         for(String rssSite: rssSiteList) {
@@ -111,20 +111,20 @@ public class RssController {
         }
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @PostMapping(value = "/reload")
     public String reLoad() {
         rssLoadService.asyncLoadRss();
         return "success";
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/feed/regex/test")
     public List<RssFeed> regexTest(@RequestParam("title") String title) {
         return rssFeedRepository.testRegexTitle(title);
     }
 
-    @CrossOrigin("*")
+    // @CrossOrigin("*")
     @GetMapping(value = "/rss-site/distinct")
     public List<String> distinctRssSite() {
         return rssFeedRepository.distinctRssSite();
