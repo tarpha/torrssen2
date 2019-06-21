@@ -81,7 +81,7 @@
 									<v-flex xs12 sm6>
 										<v-combobox
 											v-model="item.tvSeries" 
-											label="TV시리즈 여부(제목 파싱)" 
+											label="TV 시리즈 여부 (제목 파싱)" 
 											:items="[true, false]"
 											required
 										></v-combobox>
