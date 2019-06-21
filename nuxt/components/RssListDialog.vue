@@ -81,17 +81,11 @@
 									<v-flex xs12 sm6>
 										<v-combobox
 											v-model="item.tvSeries" 
-											label="TV시리즈 여부(제목 파싱)" 
+											label="TV 시리즈 여부 (제목 파싱)" 
 											:items="[true, false]"
 											required
 										></v-combobox>
 									</v-flex>
-									<!-- <v-flex xs12 sm6>
-										<v-text-field
-											v-model="item.linkKey" 
-											label="마그넷 링크가 포함된 필드 키 (베타)"
-										></v-text-field>
-									</v-flex> -->
 								</v-layout>
 							</v-container>
 						</v-card-text>
