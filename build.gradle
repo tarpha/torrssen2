@@ -25,6 +25,7 @@ ext {
 	commonsCodecVersion = '1.12'
 	jsonVersion = '20180813'
 	jsonSmartVersion = '2.3'
+	btVersion = '1.8'
 }
 
 configurations {
@@ -59,6 +60,10 @@ dependencies {
 	implementation "commons-codec:commons-codec:${commonsCodecVersion}"
 
 	implementation "net.minidev:json-smart:${jsonSmartVersion}"
+
+	implementation "com.github.atomashpolskiy:bt-core:${btVersion}"
+	implementation "com.github.atomashpolskiy:bt-http-tracker-client:${btVersion}"
+	implementation "com.github.atomashpolskiy:bt-dht:${btVersion}"
 
 	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
