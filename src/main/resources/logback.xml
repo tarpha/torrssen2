@@ -38,14 +38,14 @@
         <appender-ref ref="Console" />
     </root>
  
-    <!-- LOG "com.tarpha*" at ERROR level -->
-    <logger name="com.tarpha" level="error" additivity="false">
+    <!-- LOG "bt.net*" at FATAL level -->
+    <logger name="bt.net*" level="OFF" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </logger>
 
-    <!-- LOG "bt.net*" at FATAL level -->
-    <logger name="bt.net" level="fatal" additivity="false">
+    <!-- LOG "com.tarpha*" at ERROR level -->
+    <logger name="com.tarpha*" level="error" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </logger>

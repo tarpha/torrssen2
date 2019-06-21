@@ -11,7 +11,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.tarpha.torrssen2.domain.DownloadList;
+import com.tarpha.torrssen2.domain.Setting;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
+import com.tarpha.torrssen2.repository.SettingRepository;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,6 +37,12 @@ public class BtService {
 
     @Autowired
     DownloadListRepository downloadListRepository;
+
+    @Autowired
+    SettingRepository settingRepository;
+
+    @Autowired
+    TelegramService telegramService;
 
     private static Map<Long, BtVo> jobs = new HashMap<>();
     private static long id = 1;
@@ -74,12 +82,14 @@ public class BtService {
 
     private DownloadList setInfo(BtVo vo) {
         DownloadList download = new DownloadList();
-        download.setId(id);
-        download.setPercentDone(vo.getPercentDone());
-        download.setDone(vo.getFuture().isDone());
-        download.setUri(vo.getLink());
-        download.setName(vo.getFilename());
-        download.setDownloadPath(vo.getPath());
+        if(vo != null) {
+            download.setId(id);
+            download.setPercentDone(vo.getPercentDone());
+            download.setDone(vo.getFuture().isDone());
+            download.setUri(vo.getLink());
+            download.setName(vo.getFilename());
+            download.setDownloadPath(vo.getPath());
+        }
 
         return download;
     }
@@ -93,6 +103,11 @@ public class BtService {
 
         logger.debug(link);
         logger.debug(path);
+
+        Optional<DownloadList> optionalSeq = downloadListRepository.findTopByOrderByIdDesc();
+        if(optionalSeq.isPresent()) {
+            // id = optionalSeq.get().getId() +1;  
+        }
 
         long currentId = id++;
 
@@ -120,10 +135,25 @@ public class BtService {
                         download.setPercentDone(100);
                         download.setDone(true);
                         downloadListRepository.save(download);
+
+                        Optional<Setting> optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
+                        if (optionalSetting.isPresent()) {
+                            if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
+                                if(download.getIsSentAlert() == false) {
+                                    String target = StringUtils.isEmpty(download.getFileName()) ? download.getName() : download.getFileName();
+                                    logger.info("Send Telegram: " + target);
+                                    if(telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
+                                        download.setIsSentAlert(true);
+                    
+                                        downloadListRepository.save(download);
+                                    }
+                                }
+                            }
+                        }
                     }
                     client.stop();
                 }
-            }, 1000);;
+            }, 1000);
 
             BtVo bt = new BtVo();
             bt.setPercentDone(0);
@@ -135,6 +165,7 @@ public class BtService {
 
         } catch (Exception e) {
             logger.error(e.getMessage());
+            return -1L;
         }
 
         return currentId;
@@ -146,7 +177,12 @@ public class BtService {
     }
 
     public DownloadList getInfo(long id) {
-        return setInfo(jobs.get(id));
+        if(jobs.containsKey(id)) {
+            if(jobs.get(id).getPercentDone() != 100) {
+                return setInfo(jobs.get(id));
+            }
+        }
+        return null;
     }
 
     public List<DownloadList> list() {
