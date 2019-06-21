@@ -13,35 +13,28 @@
         </v-btn>
         <v-toolbar-title>RSS 사이트 관리</v-toolbar-title>
         <template v-slot:extension>
-					<v-spacer></v-spacer>
-          <!-- <v-btn
-						color="primary"
-						flat="flat"
-						@click="reload"
-					>
-						RSS 갱신
-					</v-btn> -->
-					<v-btn
-						color="primary"
-						flat="flat"
-						@click="deleteTab(currentItem)"
-					>
-						삭제
-					</v-btn>
-					<v-btn
-						color="primary"
-						flat="flat"
-						@click="add"
-					>
-						추가
-					</v-btn>
-					<v-btn
-						color="primary"
-						flat="flat"
-						@click="save"
-					>
-						저장
-					</v-btn>
+			<v-spacer></v-spacer>
+			<v-btn
+				color="primary"
+				flat="flat"
+				@click="deleteTab(currentItem)"
+			>
+				삭제
+			</v-btn>
+			<v-btn
+				color="primary"
+				flat="flat"
+				@click="add"
+			>
+				추가
+			</v-btn>
+			<v-btn
+				color="primary"
+				flat="flat"
+				@click="save"
+			>
+				저장
+			</v-btn>
         </template>
       </v-toolbar>
 			<!-- <v-card-title class="headline" v-html="'RSS 사이트 관리'"></v-card-title> -->
@@ -86,11 +79,19 @@
 										></v-combobox>
 									</v-flex>
 									<v-flex xs12 sm6>
+										<v-combobox
+											v-model="item.tvSeries" 
+											label="TV시리즈 여부(제목 파싱)" 
+											:items="[true, false]"
+											required
+										></v-combobox>
+									</v-flex>
+									<!-- <v-flex xs12 sm6>
 										<v-text-field
 											v-model="item.linkKey" 
 											label="마그넷 링크가 포함된 필드 키 (베타)"
 										></v-text-field>
-									</v-flex>
+									</v-flex> -->
 								</v-layout>
 							</v-container>
 						</v-card-text>
@@ -99,13 +100,6 @@
 			</v-tabs>
 			<v-card-actions>
 				<v-spacer></v-spacer>
-				<!-- <v-btn
-					color="primary"
-					flat="flat"
-					@click="close"
-				>
-					닫기
-				</v-btn> -->
 				<v-btn
 					color="primary"
 					flat="flat"
@@ -113,27 +107,6 @@
 				>
 					RSS 갱신
 				</v-btn>
-				<!-- <v-btn
-					color="primary"
-					flat="flat"
-					@click="deleteTab(currentItem)"
-				>
-					삭제
-				</v-btn>
-				<v-btn
-					color="primary"
-					flat="flat"
-					@click="add"
-				>
-					추가
-				</v-btn>
-				<v-btn
-					color="primary"
-					flat="flat"
-					@click="save"
-				>
-					저장
-				</v-btn> -->
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -181,6 +154,7 @@ export default {
         name: 'RSS-' + this.items.length,
         url: '',
         useDb: true,
+        tvSeries: true,
         linkKey: 'link',
         createDt: new Date()
       })

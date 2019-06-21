@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
@@ -21,6 +22,7 @@ import lombok.Data;
 public class RssFeed {
 
     @Id
+    @Column(length = 2048)
     private String link;
 
     private String title;
@@ -46,6 +48,8 @@ public class RssFeed {
     private Long downloadId;
 
     private Boolean downloading = false;
+
+    private Boolean tvSeries = true;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();
@@ -135,6 +139,10 @@ public class RssFeed {
             rssReleaseGroup = "Hel";
         } else if (StringUtils.containsIgnoreCase(title, "DWBH")) {
             rssReleaseGroup = "DWBH";
+        } else if (StringUtils.containsIgnoreCase(title, "BluRay")) {
+            rssReleaseGroup = "BluRay";
+        } else if (StringUtils.containsIgnoreCase(title, "WEBRip")) {
+            rssReleaseGroup = "WEBRip";
         }
 
         this.rssReleaseGroup = rssReleaseGroup;

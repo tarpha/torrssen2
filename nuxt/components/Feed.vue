@@ -13,7 +13,8 @@
 			</v-list-tile-avatar>
 
 			<v-list-tile-content>
-				<v-list-tile-title v-html="item.rssTitle"></v-list-tile-title>
+				<v-list-tile-title v-html="item.rssTitle">
+        </v-list-tile-title>
 				<v-list-tile-sub-title 
 					v-html="getSubTitle(item)"
 				></v-list-tile-sub-title>
@@ -124,10 +125,16 @@ export default {
       return !!pattern.test(str)
     },
     getSubTitle: function (item) {
-      return '<span class=\'text--primary\'>S' + item.rssSeason +
-      ' E' + item.rssEpisode + '</span> &mdash; ' +
-      ' ' + (item.rssDate !== null ? item.rssDate : '') +
-      ' ' + item.rssQuality + ' ' + item.rssReleaseGroup
+      if (item.tvSeries === false) {
+        let regex = /\d{3,4}p/i
+        let spos = item.rssTitle.search(regex)
+        return item.rssTitle.substring(spos)
+      } else {
+        return '<span class=\'text--primary\'>S' + item.rssSeason +
+          ' E' + item.rssEpisode + '</span> &mdash; ' +
+          ' ' + (item.rssDate !== null ? item.rssDate : '') +
+          ' ' + item.rssQuality + ' ' + item.rssReleaseGroup
+      }
     },
     getSubTime: function (time) {
       const now = new Date()

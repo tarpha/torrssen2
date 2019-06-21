@@ -92,6 +92,7 @@ public class RssLoadService {
                         rssFeed.setTitle(feed.getTitle());
                         // rssFeed.setDesc(feed.getDescription().getValue());
                         rssFeed.setRssSite(rss.getName());
+                        rssFeed.setTvSeries(rss.getTvSeries());
 
                         rssFeed.setRssTitleByTitle(feed.getTitle());
                         rssFeed.setRssEpisodeByTitle(feed.getTitle());

@@ -50,7 +50,7 @@ public class RssController {
     @Autowired
     private DownloadService downloadService;
 
-    private void setDownloadInfo(RssFeed feed) {
+    private void setInfo(RssFeed feed) {
         Optional<DownloadList> download = downloadListRepository.findFirstByUriAndDoneOrderByCreateDtDesc(feed.getLink(), false);
         if(download.isPresent()) {
             if(downloadService.getInfo(download.get().getId()) != null) {
@@ -76,7 +76,7 @@ public class RssController {
     public Page<RssFeed> feedList(Pageable pageable) {
         Page<RssFeed> feedList = rssFeedRepository.findByRssSiteIn(rssSite(), pageable);
         for(RssFeed feed: feedList) {
-            setDownloadInfo(feed);
+            setInfo(feed);
         }
         return feedList;
     }
@@ -86,7 +86,7 @@ public class RssController {
     public Page<RssFeed> searchList(@RequestParam("title") String title, Pageable pageable) {
         Page<RssFeed> feedList = rssFeedRepository.findByTitleContainingAndRssSiteIn(title, rssSite(), pageable);
         for(RssFeed feed: feedList) {
-            setDownloadInfo(feed);
+            setInfo(feed);
         }
         return feedList;
     }

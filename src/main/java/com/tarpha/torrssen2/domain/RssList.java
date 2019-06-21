@@ -22,6 +22,8 @@ public class RssList {
 
     private Boolean show = true;
 
+    private Boolean tvSeries = true;
+
     private String linkKey = "link";
     
     @Temporal(TemporalType.TIMESTAMP)

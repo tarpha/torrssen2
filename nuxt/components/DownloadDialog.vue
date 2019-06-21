@@ -159,6 +159,13 @@ export default {
         if (ret.data > 0) {
           this.successClass = 'o-circle c-container__circle o-circle__sign--success'
           this.$store.commit('download/setText', '&nbsp<span style=\'color: green\'>성공</span>')
+
+          this.$store.commit('download/toggle', {
+            active: true,
+            stop: false,
+            vueIndex: this.$store.state.download.index,
+            id: ret.data
+          })
         } else {
           if (ret.data === -2) {
             this.$store.commit('download/setText', '&nbsp<span style=\'color: red\'>중복</span>')
@@ -168,15 +175,6 @@ export default {
           this.successClass = 'o-circle c-container__circle o-circle__sign--failure'
         }
         this.$store.commit('download/setResult', true)
-        // this.$store.commit('download/setVueIndex', this.$store.state.download.data.vueItemIndex)
-        this.$store.commit('download/toggle', {
-          active: true,
-          stop: false,
-          vueIndex: this.$store.state.download.index,
-          id: ret.data
-        })
-
-        // stompClient.send('/app/rate', ret.data, {})
 
         setTimeout(() => {
           this.close()
