@@ -16,6 +16,7 @@ import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping(value = "/api/user/")
+@CrossOrigin(origins = "http://localhost:3000")
 @Api
 public class UserController {
     @Autowired
@@ -24,13 +25,11 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @CrossOrigin("*")
     @GetMapping(value = "/admin")
     public User getAdmin() {
         return userRepository.findByUsername("torrssen");
     }
 
-    @CrossOrigin("*")
     @PostMapping(value = "/admin")
     public void setAdmin(@RequestBody User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));

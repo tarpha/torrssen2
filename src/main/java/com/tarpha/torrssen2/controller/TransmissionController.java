@@ -28,6 +28,7 @@ import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping(value = "/api/transmission/")
+@CrossOrigin(origins = "http://localhost:3000")
 @Api
 public class TransmissionController {
 
@@ -45,7 +46,6 @@ public class TransmissionController {
     @Autowired
     private TelegramService telegramService;
 
-    @CrossOrigin("*")
     @PostMapping(value = "/download-done")
     public int downloadDone(@RequestBody DownloadList downloadList) throws Exception {
         int ret = 0;

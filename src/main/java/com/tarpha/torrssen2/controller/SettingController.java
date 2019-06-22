@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.data.domain.Sort;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping(value = "/api/setting/")
+@CrossOrigin(origins = "http://localhost:3000")
 @Api
 public class SettingController {
 
@@ -70,19 +72,16 @@ public class SettingController {
     @Autowired
     private CryptoService cryptoService;
 
-    // @CrossOrigin("*")
     @GetMapping(value = "/list")
     public List<Setting> list(Sort sort) {
         return settingRepository.findAll(sort);
     }
 
-    // @CrossOrigin("*")
     @GetMapping(value = "/download-path")
     public List<DownloadPath> downloadPath() {
         return downloadPathRepository.findAll();
     }
 
-    // @CrossOrigin("*")
     @GetMapping(value = "/download-path/compute")
     public List<DownloadPath> computedDownloadPath(@RequestParam("title") String title, @RequestParam("season") String season) {
         List<DownloadPath> pathList = downloadPathRepository.findAll();
@@ -100,7 +99,6 @@ public class SettingController {
         return pathList;
     }
 
-    // @CrossOrigin("*")
     @GetMapping(value = "/{key}")
     public String value(@PathVariable("key") String key) {
         Optional<Setting> setting = settingRepository.findByKey(key);
@@ -112,7 +110,6 @@ public class SettingController {
         return null;
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/save")
     public void postMethodName(@RequestBody List<Setting> settings) throws Exception {
         for(Setting setting: settings) {
@@ -124,13 +121,11 @@ public class SettingController {
         settingRepository.saveAll(settings);
     }
 
-    // @CrossOrigin("*")
     @GetMapping(value = "/rss-list")
     public List<RssList> getRssList() {
         return rssListRepository.findAll();
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/rss-list")
     public void setRssList(@RequestBody List<RssList> list) {
         List<RssList> deleteList = new ArrayList<>();
@@ -156,13 +151,11 @@ public class SettingController {
         rssListRepository.saveAll(list);
     }
 
-    // @CrossOrigin("*")
     @GetMapping(value = "/path")
     public List<DownloadPath> getPathList() {
         return downloadPathRepository.findAll();
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/path")
     public void setPathList(@RequestBody List<DownloadPath> list) {
         List<DownloadPath> deleteList = new ArrayList<>();
@@ -188,67 +181,56 @@ public class SettingController {
         downloadPathRepository.saveAll(list);
     }
 
-    // @CrossOrigin("*")
     @GetMapping(value = "/watch-list")
     public List<WatchList> getWatchList(Sort sort) {
         return watchListRepository.findAll(sort);
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/watch-list")
     public void setWatchList(@RequestBody WatchList watchList) {
         watchListRepository.save(watchList);
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/watch-list/execute")
     public void executeWatchList() {
         rssLoadService.checkWatchListFromDb();
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/watch-list/delete")
     public void deleteWatchList(@RequestBody WatchList watchList) {
         watchListRepository.delete(watchList);
     }
     
-    // @CrossOrigin("*")
     @GetMapping(value = "/seen-list")
     public List<SeenList> getSeenList(Sort sort) {
         return seenListRepository.findAll(sort);
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/seen-list/delete")
     public void deleteSeenList(@RequestBody SeenList seenList) {
         seenListRepository.delete(seenList);
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/seen-list/delete/all")
     public void deleteAllSeenList() {
         seenListRepository.deleteAll();
     }
 
-    // @CrossOrigin("*")
     @GetMapping(value = "/download-list")
     public List<DownloadList> getDownloadList(Sort sort) {
         return downloadListRepository.findAll(sort);
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/download-list/delete")
     public void deleteDownloadList(@RequestBody DownloadList downloadList) {
         downloadListRepository.delete(downloadList);
     }
 
-    // @CrossOrigin("*")
     @PostMapping(value = "/download-list/delete/all")
     public void deleteAllDownloadList() {
         downloadListRepository.deleteAll();
     }
 
-    // @CrossOrigin("*")
     @GetMapping(value = "/version")
     public String getVersion() {
         if(buildProperties != null) {

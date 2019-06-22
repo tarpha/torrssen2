@@ -23,6 +23,7 @@ import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping(value = "/api/download/")
+@CrossOrigin(origins = "http://localhost:3000")
 @Api
 public class DownloadController {
 
@@ -37,31 +38,26 @@ public class DownloadController {
     @Autowired
     private DownloadService downloadService;
 
-    @CrossOrigin("*")
     @GetMapping(value = "/app")
     public String getApp() {
         return settingService.getDownloadApp();
     }
 
-    @CrossOrigin("*")
     @GetMapping(value = "/id/{id}")
     public DownloadList getDownload(@PathVariable("id") long id) {
         return downloadService.getInfo(id);
     }
 
-    @CrossOrigin("*")
     @PostMapping(value = "/create")
     public long create(@RequestBody DownloadList download) {
         return downloadService.create(download);
     }
 
-    @CrossOrigin("*")
     @PostMapping(value = "/remove")
     public int remove(@RequestBody DownloadList download) {
         return downloadService.remove(download);
     }
 
-    @CrossOrigin("*")
     @GetMapping(value = "/magnet")
     public DownloadList downloadStatus(@RequestParam("magnet") String magnet) {
         Optional<DownloadList> download = downloadListRepository.findFirstByUriAndDoneOrderByCreateDtDesc(magnet, false);

@@ -30,6 +30,7 @@ import io.swagger.annotations.Api;
 
 @RestController
 @RequestMapping(value = "/api/rss/")
+@CrossOrigin(origins = "http://localhost:3000")
 @Api
 public class RssController {
 
@@ -71,7 +72,6 @@ public class RssController {
         return ret;
     }
 
-    @CrossOrigin("*")
     @GetMapping(value = "/feed/list")
     public Page<RssFeed> feedList(Pageable pageable) {
         Page<RssFeed> feedList = rssFeedRepository.findByRssSiteIn(rssSite(), pageable);
@@ -81,7 +81,6 @@ public class RssController {
         return feedList;
     }
 
-    @CrossOrigin("*")
     @GetMapping(value = "/feed/search")
     public Page<RssFeed> searchList(@RequestParam("title") String title, Pageable pageable) {
         Page<RssFeed> feedList = rssFeedRepository.findByTitleContainingAndRssSiteIn(title, rssSite(), pageable);
@@ -91,19 +90,16 @@ public class RssController {
         return feedList;
     }
 
-    @CrossOrigin("*")
     @PostMapping(value = "/feed/delete")
     public void deleteFeed() {
         rssFeedRepository.deleteAll();
     }
 
-    @CrossOrigin("*")
     @PostMapping(value = "/feed/delete/rss-site")
     public void deleteFeedByRssSite(@RequestBody RssList rssList) {
         rssFeedRepository.deleteByRssSite(rssList.getName());
     }
 
-    @CrossOrigin("*")
     @PostMapping(value = "/feed/delete/rss-site/list")
     public void deleteFeedByRssSiteList(@RequestBody List<String> rssSiteList) {
         for(String rssSite: rssSiteList) {
@@ -111,20 +107,17 @@ public class RssController {
         }
     }
 
-    @CrossOrigin("*")
     @PostMapping(value = "/reload")
     public String reLoad() {
         rssLoadService.asyncLoadRss();
         return "success";
     }
 
-    @CrossOrigin("*")
     @GetMapping(value = "/feed/regex/test")
     public List<RssFeed> regexTest(@RequestParam("title") String title) {
         return rssFeedRepository.testRegexTitle(title);
     }
 
-    @CrossOrigin("*")
     @GetMapping(value = "/rss-site/distinct")
     public List<String> distinctRssSite() {
         return rssFeedRepository.distinctRssSite();
