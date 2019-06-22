@@ -13,4 +13,5 @@ public interface DownloadListRepository extends JpaRepository<DownloadList, Long
 
     public Optional<DownloadList> findFirstByUriAndDoneOrderByCreateDtDesc(String uri, Boolean done);
     
+    public Optional<DownloadList> findTopByOrderByIdDesc();
 }
