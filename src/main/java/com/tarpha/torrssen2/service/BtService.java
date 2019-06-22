@@ -1,6 +1,7 @@
 package com.tarpha.torrssen2.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
 import com.tarpha.torrssen2.util.CommonUtils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,14 +116,14 @@ public class BtService {
             });
             if (StringUtils.startsWith(link, "magnet")) {
                 client = Bt.client().autoLoadModules().module(dhtModule).storage(storage).magnet(link)
-                    .afterTorrentFetched(torrent -> {
-                        logger.debug("getName: " + torrent.getName());
-                        if (jobs.containsKey(currentId)) {
-                            BtVo vo = jobs.get(currentId);
-                            vo.setFilename(torrent.getName());
-                            vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
-                        }
-                    }).build();
+                        .afterTorrentFetched(torrent -> {
+                            logger.debug("getName: " + torrent.getName());
+                            if (jobs.containsKey(currentId)) {
+                                BtVo vo = jobs.get(currentId);
+                                vo.setFilename(torrent.getName());
+                                vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
+                            }
+                        }).build();
             } else {
                 client = Bt.client().autoLoadModules().storage(storage).torrent(new URL(link))
                         .afterTorrentFetched(torrent -> {
@@ -172,12 +174,14 @@ public class BtService {
 
                         if (jobs.containsKey(currentId)) {
                             BtVo vo = jobs.get(currentId);
-                            if(CommonUtils.removeDirectory(download.getDownloadPath(), vo.getFilename(), vo.getInnerFile())) {
+                            if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(),
+                                    vo.getInnerFile())) {
                                 vo.setFilename(vo.getInnerFile());
                             }
                             if (!StringUtils.isBlank(download.getRename())) {
-                                logger.debug("getRename: " +  download.getRename());
-                                CommonUtils.renameFile(download.getDownloadPath(), vo.getFilename(), download.getRename());
+                                logger.debug("getRename: " + download.getRename());
+                                CommonUtils.renameFile(vo.getPath(), vo.getFilename(),
+                                        download.getRename());
                             }
                             jobs.remove(currentId);
                         }
@@ -192,7 +196,7 @@ public class BtService {
             bt.setPath(path);
             bt.setLink(link);
             bt.setFilename(filename);
-            jobs.put(currentId, bt); 
+            jobs.put(currentId, bt);
 
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -203,8 +207,15 @@ public class BtService {
     }
 
     public boolean remove(long id) {
-        if(jobs.containsKey(id)) {
-            jobs.get(id).getFuture().cancel(true);
+        if (jobs.containsKey(id)) {
+            BtVo vo = jobs.get(id);
+            vo.getFuture().cancel(true);
+            try {
+                FileUtils.forceDelete(new File(vo.getPath(), vo.getFilename()));
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+                return false;
+            }
             return true;
         } else {
             return false;
