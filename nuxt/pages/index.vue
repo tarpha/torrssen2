@@ -95,6 +95,10 @@
       axios.get('/api/setting/DARK_THEME').then(res => {
         this.$store.commit('setDark', res.data === 'TRUE')
       })
+      axios.get('/api/setting/version').then(res => {
+        console.log(res)
+        this.$store.commit('setVesrion', res.data)
+      })
       if (stompClient.connected() === true) {
         this.subscription = this.subscribe()
       } else {

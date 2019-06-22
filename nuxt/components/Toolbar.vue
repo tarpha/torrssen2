@@ -79,6 +79,14 @@
               <v-list-tile-title>{{ item.title }}</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
+          <v-list-tile>
+            <v-list-tile-content>
+              <v-list-tile-sub-title style="text-align: right">
+                {{ $store.state.version }}
+              </v-list-tile-sub-title>
+            </v-list-tile-content>
+          </v-list-tile>
+
         </v-list>
       </v-menu>
     </v-toolbar>    
