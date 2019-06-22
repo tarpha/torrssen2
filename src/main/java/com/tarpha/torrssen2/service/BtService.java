@@ -29,8 +29,6 @@ import bt.data.file.FileSystemStorage;
 import bt.dht.DHTConfig;
 import bt.dht.DHTModule;
 import bt.runtime.BtClient;
-import bt.runtime.BtRuntime;
-import bt.runtime.Config;
 import lombok.Data;
 
 @Service
@@ -49,7 +47,7 @@ public class BtService {
     private static Map<Long, BtVo> jobs = new HashMap<>();
     private static long id = 1;
 
-    private BtRuntime sharedRuntime;
+    private DHTModule dhtModule;
 
     @Data
     private class BtVo {
@@ -60,31 +58,15 @@ public class BtService {
         private CompletableFuture<?> future;
     }
 
-    // public BtService() {
-    //     // enable multithreaded verification of torrent data
-    //     Config config = new Config() {
-    //         @Override
-    //         public int getNumOfHashingThreads() {
-    //             logger.debug("availableProcessors: " + Runtime.getRuntime().availableProcessors());
-    //             int size = Runtime.getRuntime().availableProcessors();
-    //             if (size == 0 ) {
-    //                 size = 2;
-    //             }
-    //             return size * 2;
-    //         }
-    //     };
-
-    //     // enable bootstrapping from public routers
-    //     DHTModule dhtModule = new DHTModule(new DHTConfig() {
-    //         @Override
-    //         public boolean shouldUseRouterBootstrap() {
-    //             return true;
-    //         }
-    //     });
-
-    //     // sharedRuntime = BtRuntime.defaultRuntime();
-        
-    // }
+    public BtService() {
+        // enable bootstrapping from public routers
+        dhtModule = new DHTModule(new DHTConfig() {
+            @Override
+            public boolean shouldUseRouterBootstrap() {
+                return true;
+            }
+        });
+    }
 
     @PostConstruct
     private void setId() {
@@ -120,31 +102,12 @@ public class BtService {
 
         try {
             BtClient client;
-            Config config = new Config() {
-                @Override
-                public int getNumOfHashingThreads() {
-                    logger.debug("availableProcessors: " + Runtime.getRuntime().availableProcessors());
-                    int size = Runtime.getRuntime().availableProcessors();
-                    if (size == 0 ) {
-                        size = 2;
-                    }
-                    return size * 2;
-                }
-            };
-    
-            // enable bootstrapping from public routers
-            DHTModule dhtModule = new DHTModule(new DHTConfig() {
-                @Override
-                public boolean shouldUseRouterBootstrap() {
-                    return true;
-                }
-            });
-            sharedRuntime = BtRuntime.builder(config).module(dhtModule).build();
             if(StringUtils.startsWith(link, "magnet")) {
-                client = Bt.client(sharedRuntime).storage(storage).magnet(link).build();
+                client = Bt.client().autoLoadModules().module(dhtModule).storage(storage).magnet(link).build();
             } else {
-                client = Bt.client(sharedRuntime).storage(storage).torrent(new URL(link)).build();
+                client = Bt.client().autoLoadModules().storage(storage).torrent(new URL(link)).build();
             }
+
             CompletableFuture<?> future = client.startAsync(state -> {
                 if(jobs.containsKey(currentId)) {
                     BtVo vo = jobs.get(currentId);
