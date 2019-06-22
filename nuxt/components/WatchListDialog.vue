@@ -184,7 +184,7 @@
 							<v-text-field 
 								v-model="editedItem.rename"
 								label="변경할 파일명 (베타)"
-								hint="${TITLE}, ${SEASON}, ${EPISODE}, ${QUALITY}, ${RELEASE_GROUP} 변수 사용 가능"
+								hint="${TITLE}, ${SEASON}, ${EPISODE}, ${QUALITY}, ${RELEASE_GROUP}, ${DATE} 변수 사용 가능"
 							></v-text-field>
 						</v-flex>
 					</v-layout>

@@ -1,6 +1,5 @@
 package com.tarpha.torrssen2.controller;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -11,9 +10,8 @@ import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
 import com.tarpha.torrssen2.service.TelegramService;
 import com.tarpha.torrssen2.service.TransmissionService;
+import com.tarpha.torrssen2.util.CommonUtils;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,15 +57,11 @@ public class TransmissionController {
 
             // 파일명을 변경한다.
             if (!StringUtils.isBlank(info.getRename())) {
-                logger.info("Rename File To: " + info.getRename());
-                String srcFile = downloadList.getDownloadPath() + "/" + downloadList.getFileName();
-                String destFile = downloadList.getDownloadPath() + "/" + info.getRename() 
-                    + "." + FilenameUtils.getExtension(downloadList.getFileName());
-                try {
-                    FileUtils.moveFile(FileUtils.getFile(srcFile), FileUtils.getFile(destFile));
-                } catch (IOException e) {
+                if(!CommonUtils.renameFile(
+                    downloadList.getDownloadPath(), 
+                    downloadList.getFileName(), 
+                    info.getRename())) {
                     ret = -1;
-                    logger.error(e.getMessage());
                 }
             }
 

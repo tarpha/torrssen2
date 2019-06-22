@@ -60,7 +60,7 @@
 											v-else-if="item.type == 'app'"
 											v-model="item.value" 
 											:label="item.label" 
-											:items="['TRANSMISSION', 'DOWNLOAD_STATION']"
+											:items="['TRANSMISSION', 'DOWNLOAD_STATION', 'EMBEDDED']"
 											:required="item.required"
 										></v-combobox>
 									</v-flex>

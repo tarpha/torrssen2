@@ -38,6 +38,9 @@ public class DownloadService {
     @Autowired
     private TransmissionService transmissionService;
 
+    @Autowired
+    private BtService btService;
+
     public DownloadList getInfo(long id) {
         String app = settingService.getDownloadApp();
         if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
@@ -52,9 +55,27 @@ public class DownloadService {
             if(list.size() > 0) {
                 return list.get(0);
             }
+        } else if(StringUtils.equals(app, "EMBEDDED")) {
+            return btService.getInfo(id);
         }
 
         return null;
+    }
+
+    public List<DownloadList> list() {
+        List<DownloadList> ret = null;
+        logger.debug("downloadList");
+
+        String app = settingService.getDownloadApp();
+        if (StringUtils.equals(app, "DOWNLOAD_STATION")) {
+            ret = downloadStationService.list();
+        } else if (StringUtils.equals(app, "TRANSMISSION")) {
+            ret = transmissionService.torrentGet(null);
+        } else if(StringUtils.equals(app, "EMBEDDED")) {
+            ret = btService.list();
+        }
+
+        return ret;
     }
 
     public long create(DownloadList download) {
@@ -86,6 +107,8 @@ public class DownloadService {
             }
         } else if(StringUtils.equals(app, "TRANSMISSION")) {
             ret = (long)transmissionService.torrentAdd(download.getUri(), download.getDownloadPath());
+        } else if(StringUtils.equals(app, "EMBEDDED")) {
+            ret = btService.create(download.getUri(), download.getDownloadPath(), download.getName());
         }
 
         if(ret > 0L) {
@@ -118,6 +141,8 @@ public class DownloadService {
             List<Long> ids = new ArrayList<>();
             ids.add(download.getId());
             res = transmissionService.torrentRemove(ids);
+        } else if(StringUtils.equals(app, "EMBEDDED")) {
+            res = btService.remove(download.getId());
         }
 
         if(res) {

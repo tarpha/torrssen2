@@ -37,6 +37,11 @@
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </root>
+
+    <logger name="bt.net" level="off" additivity="false">
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="Console" />
+    </logger>
  
     <!-- LOG "com.baeldung*" at ERROR level -->
     <logger name="com.tarpha" level="error" additivity="false">

@@ -16,6 +16,7 @@ import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.domain.Setting;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
+import com.tarpha.torrssen2.util.CommonUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import bt.data.Storage;
 import bt.data.file.FileSystemStorage;
 import bt.dht.DHTConfig;
 import bt.dht.DHTModule;
+import bt.metainfo.TorrentFile;
 import bt.runtime.BtClient;
 import lombok.Data;
 
@@ -47,39 +49,28 @@ public class BtService {
     private static Map<Long, BtVo> jobs = new HashMap<>();
     private static long id = 1;
 
-    private DHTModule dhtModule;
-
     @Data
     private class BtVo {
         private int percentDone;
         private String path;
         private String link;
         private String filename;
+        private String innerFile;
         private CompletableFuture<?> future;
-    }
-
-    public BtService() {
-        // enable bootstrapping from public routers
-        dhtModule = new DHTModule(new DHTConfig() {
-            @Override
-            public boolean shouldUseRouterBootstrap() {
-                return true;
-            }
-        });
     }
 
     @PostConstruct
     private void setId() {
         Optional<DownloadList> optionalSeq = downloadListRepository.findTopByOrderByIdDesc();
-        if(optionalSeq.isPresent()) {
-            id = optionalSeq.get().getId() + 1L;  
+        if (optionalSeq.isPresent()) {
+            id = optionalSeq.get().getId() + 1L;
             logger.debug("id: " + id);
         }
     }
 
-    private DownloadList setInfo(BtVo vo) {
+    private DownloadList setInfo(BtVo vo, Long id) {
         DownloadList download = new DownloadList();
-        if(vo != null) {
+        if (vo != null) {
             download.setId(id);
             download.setPercentDone(vo.getPercentDone());
             download.setDone(vo.getFuture().isDone());
@@ -89,6 +80,19 @@ public class BtService {
         }
 
         return download;
+    }
+
+    private String getInnerFile(List<TorrentFile> list, String name) {
+        for (int i = 0; i < list.size(); i++) {
+            TorrentFile torrent = list.get(i);
+            String pathElement = StringUtils.join(torrent.getPathElements(), File.pathSeparator);
+            logger.debug("pathElement : " + pathElement);
+            if (StringUtils.contains(pathElement, name)) {
+                return pathElement;
+            }
+        }
+        return null;
+
     }
 
     public Long create(String link, String path, String filename) {
@@ -102,44 +106,80 @@ public class BtService {
 
         try {
             BtClient client;
-            if(StringUtils.startsWith(link, "magnet")) {
-                client = Bt.client().autoLoadModules().module(dhtModule).storage(storage).magnet(link).build();
+            DHTModule dhtModule = new DHTModule(new DHTConfig() {
+                @Override
+                public boolean shouldUseRouterBootstrap() {
+                    return true;
+                }
+            });
+            if (StringUtils.startsWith(link, "magnet")) {
+                client = Bt.client().autoLoadModules().module(dhtModule).storage(storage).magnet(link)
+                    .afterTorrentFetched(torrent -> {
+                        logger.debug("getName: " + torrent.getName());
+                        if (jobs.containsKey(currentId)) {
+                            BtVo vo = jobs.get(currentId);
+                            vo.setFilename(torrent.getName());
+                            vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
+                        }
+                    }).build();
             } else {
-                client = Bt.client().autoLoadModules().storage(storage).torrent(new URL(link)).build();
+                client = Bt.client().autoLoadModules().storage(storage).torrent(new URL(link))
+                        .afterTorrentFetched(torrent -> {
+                            logger.debug("getName: " + torrent.getName());
+                            if (jobs.containsKey(currentId)) {
+                                BtVo vo = jobs.get(currentId);
+                                vo.setFilename(torrent.getName());
+                                vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
+                            }
+                        }).build();
             }
 
             CompletableFuture<?> future = client.startAsync(state -> {
-                if(jobs.containsKey(currentId)) {
+                if (jobs.containsKey(currentId)) {
                     BtVo vo = jobs.get(currentId);
                     logger.debug("getDownloaded: " + state.getDownloaded());
                     logger.debug("getPiecesTotal: " + state.getPiecesTotal());
                     logger.debug("getPiecesComplete: " + state.getPiecesComplete());
-                    logger.debug("percentDone: " + ((float)state.getPiecesComplete() / (float)state.getPiecesTotal()) * 100);
-                    vo.setPercentDone((int)(((float)state.getPiecesComplete() / (float)state.getPiecesTotal()) * 100));
+                    logger.debug("percentDone: "
+                            + ((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100);
+                    vo.setPercentDone(
+                            (int) (((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100));
                     jobs.put(currentId, vo);
                 }
                 logger.debug(jobs.get(currentId).toString());
-                if(state.getPiecesRemaining() == 0) {
-                    Optional<DownloadList> optionalDownload = downloadListRepository.findFirstByUriAndDoneOrderByCreateDtDesc(link, false);
-                    if(optionalDownload.isPresent()) {
+                if (state.getPiecesRemaining() == 0) {
+                    Optional<DownloadList> optionalDownload = downloadListRepository.findById(currentId);
+                    if (optionalDownload.isPresent()) {
                         DownloadList download = optionalDownload.get();
                         download.setPercentDone(100);
                         download.setDone(true);
                         downloadListRepository.save(download);
-
                         Optional<Setting> optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
                         if (optionalSetting.isPresent()) {
                             if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
-                                if(download.getIsSentAlert() == false) {
-                                    String target = StringUtils.isEmpty(download.getFileName()) ? download.getName() : download.getFileName();
+                                if (download.getIsSentAlert() == false) {
+                                    String target = StringUtils.isEmpty(download.getFileName()) ? download.getName()
+                                            : download.getFileName();
                                     logger.info("Send Telegram: " + target);
-                                    if(telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
+                                    if (telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
                                         download.setIsSentAlert(true);
-                    
+
                                         downloadListRepository.save(download);
                                     }
                                 }
                             }
+                        }
+
+                        if (jobs.containsKey(currentId)) {
+                            BtVo vo = jobs.get(currentId);
+                            if(CommonUtils.removeDirectory(download.getDownloadPath(), vo.getFilename(), vo.getInnerFile())) {
+                                vo.setFilename(vo.getInnerFile());
+                            }
+                            if (!StringUtils.isBlank(download.getRename())) {
+                                logger.debug("getRename: " +  download.getRename());
+                                CommonUtils.renameFile(download.getDownloadPath(), vo.getFilename(), download.getRename());
+                            }
+                            jobs.remove(currentId);
                         }
                     }
                     client.stop();
@@ -163,13 +203,25 @@ public class BtService {
     }
 
     public boolean remove(long id) {
-        jobs.get(id).getFuture().cancel(true);
-        return true;
+        if(jobs.containsKey(id)) {
+            jobs.get(id).getFuture().cancel(true);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public DownloadList getInfo(long id) {
+
         if(jobs.containsKey(id)) {
-            return setInfo(jobs.get(id));
+            return setInfo(jobs.get(id), id);
+        } else {
+            Optional<DownloadList> optionalDownload = downloadListRepository.findById(id);
+            if (optionalDownload.isPresent()) {
+                if(optionalDownload.get().getDone()) {
+                    return optionalDownload.get();
+                }
+            }
         }
         return null;
     }
@@ -179,7 +231,7 @@ public class BtService {
 
         for( Long id : jobs.keySet() ) {
             if(!jobs.get(id).getFuture().isDone()) {
-                ret.add(setInfo(jobs.get(id)));
+                ret.add(setInfo(jobs.get(id), id));
             }
         }
 

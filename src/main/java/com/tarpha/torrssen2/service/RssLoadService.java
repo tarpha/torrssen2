@@ -65,6 +65,9 @@ public class RssLoadService {
     private DownloadStationService downloadStationService;
 
     @Autowired
+    private BtService btService;
+
+    @Autowired
     private DaumMovieTvService daumMovieTvService;
 
     @Autowired
@@ -214,7 +217,18 @@ public class RssLoadService {
                                 addToDownloadList(0L, rssFeed, watchList, path);
                             }
                         } 
-                    }
+                    } else if(StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
+                        Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
+                        logger.info("Embeded ID: " + torrentAddedId);
+
+                        if (torrentAddedId > 0) {
+                            // Add to Seen
+                            addToSeenList(rssFeed, path);
+
+                            // Add to Download List
+                            addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
+                        }
+                    } 
                 }
             }
         }
@@ -239,12 +253,14 @@ public class RssLoadService {
         download.setDownloadPath(path);
         if(!StringUtils.isBlank(watchList.getRename())) {
             download.setRename(
-                CommonUtils.getRename(watchList.getRename()
+                CommonUtils.getRename(
+                    watchList.getRename()
                     , rssFeed.getRssTitle()
                     , rssFeed.getRssSeason()
                     , rssFeed.getRssEpisode()
                     , rssFeed.getRssQuality()
-                    , rssFeed.getRssReleaseGroup()));
+                    , rssFeed.getRssReleaseGroup()
+                    , rssFeed.getRssDate()));
         }
 
         downloadListRepository.save(download);
