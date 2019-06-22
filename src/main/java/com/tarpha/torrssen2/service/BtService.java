@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import javax.annotation.PostConstruct;
+
 import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.domain.Setting;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
@@ -49,8 +51,6 @@ public class BtService {
 
     private BtRuntime sharedRuntime;
 
-    private BtClient client;
-
     @Data
     private class BtVo {
         private int percentDone;
@@ -60,24 +60,39 @@ public class BtService {
         private CompletableFuture<?> future;
     }
 
-    public BtService() {
-        // enable multithreaded verification of torrent data
-        Config config = new Config() {
-            @Override
-            public int getNumOfHashingThreads() {
-                return Runtime.getRuntime().availableProcessors() * 2;
-            }
-        };
+    // public BtService() {
+    //     // enable multithreaded verification of torrent data
+    //     Config config = new Config() {
+    //         @Override
+    //         public int getNumOfHashingThreads() {
+    //             logger.debug("availableProcessors: " + Runtime.getRuntime().availableProcessors());
+    //             int size = Runtime.getRuntime().availableProcessors();
+    //             if (size == 0 ) {
+    //                 size = 2;
+    //             }
+    //             return size * 2;
+    //         }
+    //     };
 
-        // enable bootstrapping from public routers
-        DHTModule dhtModule = new DHTModule(new DHTConfig() {
-            @Override
-            public boolean shouldUseRouterBootstrap() {
-                return true;
-            }
-        });
+    //     // enable bootstrapping from public routers
+    //     DHTModule dhtModule = new DHTModule(new DHTConfig() {
+    //         @Override
+    //         public boolean shouldUseRouterBootstrap() {
+    //             return true;
+    //         }
+    //     });
 
-        sharedRuntime = BtRuntime.builder(config).module(dhtModule).build();
+    //     // sharedRuntime = BtRuntime.defaultRuntime();
+        
+    // }
+
+    @PostConstruct
+    private void setId() {
+        Optional<DownloadList> optionalSeq = downloadListRepository.findTopByOrderByIdDesc();
+        if(optionalSeq.isPresent()) {
+            id = optionalSeq.get().getId() + 1L;  
+            logger.debug("id: " + id);
+        }
     }
 
     private DownloadList setInfo(BtVo vo) {
@@ -101,17 +116,30 @@ public class BtService {
         // create file system based backend for torrent data
         Storage storage = new FileSystemStorage(targetDirectory);
 
-        logger.debug(link);
-        logger.debug(path);
-
-        Optional<DownloadList> optionalSeq = downloadListRepository.findTopByOrderByIdDesc();
-        if(optionalSeq.isPresent()) {
-            // id = optionalSeq.get().getId() +1;  
-        }
-
         long currentId = id++;
 
         try {
+            BtClient client;
+            Config config = new Config() {
+                @Override
+                public int getNumOfHashingThreads() {
+                    logger.debug("availableProcessors: " + Runtime.getRuntime().availableProcessors());
+                    int size = Runtime.getRuntime().availableProcessors();
+                    if (size == 0 ) {
+                        size = 2;
+                    }
+                    return size * 2;
+                }
+            };
+    
+            // enable bootstrapping from public routers
+            DHTModule dhtModule = new DHTModule(new DHTConfig() {
+                @Override
+                public boolean shouldUseRouterBootstrap() {
+                    return true;
+                }
+            });
+            sharedRuntime = BtRuntime.builder(config).module(dhtModule).build();
             if(StringUtils.startsWith(link, "magnet")) {
                 client = Bt.client(sharedRuntime).storage(storage).magnet(link).build();
             } else {
@@ -178,9 +206,7 @@ public class BtService {
 
     public DownloadList getInfo(long id) {
         if(jobs.containsKey(id)) {
-            if(jobs.get(id).getPercentDone() != 100) {
-                return setInfo(jobs.get(id));
-            }
+            return setInfo(jobs.get(id));
         }
         return null;
     }

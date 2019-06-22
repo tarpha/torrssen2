@@ -39,13 +39,13 @@
     </root>
  
     <!-- LOG "bt.net*" at FATAL level -->
-    <logger name="bt.net*" level="OFF" additivity="false">
+    <logger name="bt.net" level="OFF" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </logger>
 
     <!-- LOG "com.tarpha*" at ERROR level -->
-    <logger name="com.tarpha*" level="error" additivity="false">
+    <logger name="com.tarpha" level="debug" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </logger>
