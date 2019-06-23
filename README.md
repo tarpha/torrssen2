@@ -3,7 +3,7 @@ Torrent RSS Site를 등록/관리하고, 다운로드를 요청/관리하고, �
 
 ## Docker
 <code>docker pull tarpha/torrssen2</code><br>
-<code>docker run -d --name torrssen2 -p 8080:8080 -v {Data}:/root/data tarpha/torrssen2</code>
+<code>docker run -d --name torrssen2 -p 8080:8080 -v {data path}:/root/data tarpha/torrssen2</code>
 
 ### 수정이력
 - 0.7.8: 마이너 버그 수정
