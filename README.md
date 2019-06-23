@@ -1,10 +1,6 @@
 # torrssen2
 Torrent RSS Site를 등록/관리하고, 다운로드를 요청/관리하고, 자동 다운로드를 수행하는 Webapp (Spring Boot + Nuxt.js)
 
-## Docker
-<code>docker pull tarpha/torrssen2</code><br>
-<code>docker run -d --name torrssen2 -p 8080:8080 -v {data path}:/root/data tarpha/torrssen2</code>
-
 ## 기능
 - 복수의 RSS을 주기적으로 읽어와서 게시판 리스트 생성 (주기 설정 가능)
 - 리스트의 항목의 다운로드 요청 및 진행율 표시, 취소가 가능 (트랜스미션/다운로드스테이션/내장 모듈 지원)
@@ -17,6 +13,10 @@ Torrent RSS Site를 등록/관리하고, 다운로드를 요청/관리하고, �
 - 다크테마
 - 모바일 환경 지원
 - 로그인 기능
+
+## Docker
+<code>docker pull tarpha/torrssen2</code><br>
+<code>docker run -d --name torrssen2 -p 8080:8080 -v {data path}:/root/data tarpha/torrssen2</code>
 
 ## 수정이력
 - 0.7.8: 마이너 버그 수정
