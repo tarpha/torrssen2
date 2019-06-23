@@ -43,6 +43,10 @@ public class CommonUtils {
             File trg = new File(path);
             // ret = src.renameTo(trg); 
             try {
+                File remove = new File(path, inner);
+                if(remove.isFile()) {
+                    FileUtils.forceDelete(remove);
+                }
                 FileUtils.moveFileToDirectory(src, trg, true);
                 FileUtils.forceDelete(new File(path, outer));
             } catch (IOException e) {
