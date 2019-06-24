@@ -96,6 +96,16 @@ export default {
             id: 0
           })
         }
+        if (body.status < 0) {
+          clearInterval(this.intervalObj)
+          this.$store.commit('snackbar/show', '실패: ' + this.title)
+          this.$store.commit('download/toggle', {
+            active: false,
+            stop: false,
+            vueIndex: this.index,
+            id: 0
+          })
+        }
       })
     }
   }

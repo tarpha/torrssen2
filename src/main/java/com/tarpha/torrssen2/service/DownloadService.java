@@ -56,6 +56,7 @@ public class DownloadService {
                 return list.get(0);
             }
         } else if(StringUtils.equals(app, "EMBEDDED")) {
+            btService.check();
             return btService.getInfo(id);
         }
 
@@ -72,6 +73,7 @@ public class DownloadService {
         } else if (StringUtils.equals(app, "TRANSMISSION")) {
             ret = transmissionService.torrentGet(null);
         } else if(StringUtils.equals(app, "EMBEDDED")) {
+            btService.check();
             ret = btService.list();
         }
 

@@ -33,6 +33,9 @@ public class SchedulerService {
     private DownloadStationService downloadStationService;
 
     @Autowired
+    private BtService btService;
+
+    @Autowired
     private TelegramService telegramService;
 
     public void runTask() {
@@ -42,6 +45,8 @@ public class SchedulerService {
                 transmissionJob();
             } else if(StringUtils.equals(optionalSetting.get().getValue(), "DOWNLOAD_STATION")) {
                 downloadStationJob();
+            } else if(StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
+                btService.check();
             }
         }
     }

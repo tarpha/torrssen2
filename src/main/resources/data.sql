@@ -243,6 +243,18 @@ SELECT 'TRANSMISSION_CALLBACK' key
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'TRANSMISSION_CALLBACK');
 
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'EMBEDDED_LIMIT' key
+     , '4' value
+     , 'number' type
+     , true required
+     , '동시 다운로드 수 (EMBEDDED만 적용)'
+     , '일반'
+     , 6
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'EMBEDDED_LIMIT');
+
 DELETE FROM USER WHERE id = 1 AND username = 'torrssen';
 
 ALTER TABLE IF EXISTS RSS_FEED ALTER COLUMN LINK VARCHAR(2048);
