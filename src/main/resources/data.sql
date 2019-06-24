@@ -82,7 +82,7 @@ SELECT 'TELEGRAM_CHAT_ID' key
      , CURRENT_TIMESTAMP create_dt
 UNION ALL
 SELECT 'DOWNLOAD_APP' key
-     , 'TRANSMISSION' value
+     , 'EMBEDDED' value
      , 'app' type
      , true required
      , '기본 다운로드 앱'
