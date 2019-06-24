@@ -19,6 +19,7 @@ Torrent RSS Site를 등록/관리하고, 다운로드를 요청/관리하고, �
 <code>docker run -d --name torrssen2 -p 8080:8080 -v {data path}:/root/data tarpha/torrssen2</code>
 
 ## 수정이력
+- 0.8.0: 동시 다운로드 수 설정 (EMBEDDED만)
 - 0.7.8: 마이너 버그 수정
 - 0.7.7: 컨테이너 재시작 시 자동 업데이트
 - 0.7.6: 메뉴에 버전 정보 표시, 내장 다운로더 추가(embedded), 파일명 변경 패턴에 일자 추가.
