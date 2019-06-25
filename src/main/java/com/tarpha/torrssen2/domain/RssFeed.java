@@ -104,7 +104,8 @@ public class RssFeed {
             rssTitle = rssTitle.substring(0, matcher.start(1)).replaceAll("\\.", "");
         }
 
-        pattern = Pattern.compile("\\d{1,}-\\d{1,}회 합본");
+        // pattern = Pattern.compile("\\d{1,}-\\d{1,}회 합본");
+        pattern = Pattern.compile("E{0,1}\\d{1,}.{0,1}E{0,1}\\d{1,}회.{0,1}합본");
         rssTitle = RegExUtils.removeAll(rssTitle, pattern);
 
         pattern = Pattern.compile("\\[[^\\]]{1,}\\]");

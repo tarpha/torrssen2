@@ -13,9 +13,15 @@
         <template v-slot:extension>
           <v-checkbox 
             v-model="checkWatch"
-            label="자동 다운로드" 
+            :label="checkWatch ? '' : '자동 다운로드'" 
             color="primary"
           ></v-checkbox>
+          <v-text-field 
+            v-if="checkWatch"
+            v-model="title"
+            label="자동 다운로드 포함 제목"
+            style="width: 90%"
+          ></v-text-field>
         </template>
       </v-toolbar>
 			<!-- <v-card-title class="headline" v-html="'다운로드 요청' + $store.state.download.text"></v-card-title> -->
@@ -101,6 +107,7 @@ export default {
       successClass: 'o-circle c-container__circle o-circle__sign--success',
       seasonPath: '',
       customPath: '',
+      title: '',
       paths: []
     }
   },
@@ -138,6 +145,7 @@ export default {
         this.customPath = ''
       } else {
         this.paths = JSON.parse(JSON.stringify(this.pathList))
+        this.title = this.$store.state.download.data.rssTitle
       }
     }
   },
@@ -150,7 +158,8 @@ export default {
       axios.post('/api/download/create', {
         'name': this.$store.state.download.data.title,
         'uri': this.$store.state.download.data.link,
-        'rssTitle': this.$store.state.download.data.rssTitle,
+        // 'rssTitle': this.$store.state.download.data.rssTitle,
+        'rssTitle': this.title,
         'rssReleaseGroup': this.$store.state.download.data.rssReleaseGroup,
         'vueItemIndex': this.$store.state.download.index,
         'downloadPath': path,

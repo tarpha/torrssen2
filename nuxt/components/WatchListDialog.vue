@@ -113,7 +113,12 @@
 				<v-container grid-list-md>
 					<v-layout wrap>
 						<v-flex xs12 >
-							<v-text-field v-model="editedItem.title" label="포함될 단어" :readonly="editedIndex >= 0"></v-text-field>
+							<v-text-field 
+								ref="title"
+								v-model="editedItem.title"
+								label="포함될 단어" 
+								:readonly="editedIndex >= 0"
+							></v-text-field>
 						</v-flex>
 						<v-flex xs12 sm6 md6>
 							<v-combobox
@@ -143,15 +148,15 @@
 							v-if="regexShow"
 							hide-headers
 							hide-actions
-    					:items="regexItems"
+    						:items="regexItems"
 							style="width: 100%"
-  					>
+  						>
 							<template v-slot:items="props">
 								<td>{{ props.item.title }}</td>
 							</template>
 						</v-data-table>
 						<v-flex xs12 sm6 md6>
-							<v-text-field 
+							<v-text-field
 								v-model="editedItem.quality" 
 								label="화질"
 								hint="+로 상위 화질 검색 ex) 720p+"
@@ -308,18 +313,20 @@ export default {
     },
     save: function () {
       // this.editedItem.downloadPath = this.editedItem.downloadPath.name
-      axios.post('/api/setting/watch-list', this.editedItem).then(res => {
-        let msg = '저장하였습니다.'
-        if (res.status !== 200) {
-          msg = '저장하지 못했습니다.'
-        }
-        this.$store.commit('snackbar/show', msg)
-        // this.items.push(this.editedItem)
-        axios.get('/api/setting/watch-list').then(res => {
-          this.items = res.data
-        })
-        this.dialog = false
-      })
+      this.$refs.title.focus()
+      setTimeout(() =>
+        axios.post('/api/setting/watch-list', this.editedItem).then(res => {
+          let msg = '저장하였습니다.'
+          if (res.status !== 200) {
+            msg = '저장하지 못했습니다.'
+          }
+          this.$store.commit('snackbar/show', msg)
+          // this.items.push(this.editedItem)
+          axios.get('/api/setting/watch-list').then(res => {
+            this.items = res.data
+          })
+          this.dialog = false
+        }), 100)
     },
     editClose: function () {
       this.dialog = false

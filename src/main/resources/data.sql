@@ -45,6 +45,24 @@ SELECT 'DONE_DELETE' key
      , 2
      , CURRENT_TIMESTAMP create_dt
 UNION ALL
+SELECT 'DOWNLOAD_APP' key
+     , 'EMBEDDED' value
+     , 'app' type
+     , true required
+     , '기본 다운로드 앱'
+     , '일반'
+     , 3
+     , CURRENT_TIMESTAMP create_dt
+UNION ALL
+SELECT 'SEASON_PREFIX' key
+     , 'SEASON ' value
+     , 'text' type
+     , true required
+     , '시즌 폴더 접두사'
+     , '일반'
+     , 4
+     , CURRENT_TIMESTAMP create_dt
+UNION ALL
 SELECT 'DARK_THEME' key
      , 'FALSE' value
      , 'boolean' type
@@ -79,15 +97,6 @@ SELECT 'TELEGRAM_CHAT_ID' key
      , '아이디 (쉼표로 복수 가능)'
      , '텔레그램'
      , 12
-     , CURRENT_TIMESTAMP create_dt
-UNION ALL
-SELECT 'DOWNLOAD_APP' key
-     , 'EMBEDDED' value
-     , 'app' type
-     , true required
-     , '기본 다운로드 앱'
-     , '일반'
-     , 3
      , CURRENT_TIMESTAMP create_dt
 UNION ALL
 SELECT 'TRANSMISSION_HOST' key
@@ -160,15 +169,6 @@ SELECT 'DS_PASSWORD' key
      , '비밀번호'
      , '다운로드 스테이션'
      , 33
-     , CURRENT_TIMESTAMP create_dt
-UNION ALL
-SELECT 'SEASON_PREFIX' key
-     , 'SEASON ' value
-     , 'text' type
-     , true required
-     , '시즌 폴더 접두사'
-     , '일반'
-     , 4
      , CURRENT_TIMESTAMP create_dt
 ) x
 WHERE  NOT EXISTS(SELECT * FROM SETTING);
@@ -260,3 +260,8 @@ DELETE FROM USER WHERE id = 1 AND username = 'torrssen';
 ALTER TABLE IF EXISTS RSS_FEED ALTER COLUMN LINK VARCHAR(2048);
 
 UPDATE RSS_LIST SET tv_series = true WHERE tv_series IS NULL;
+
+UPDATE SETTING SET order_id = 3 WHERE key = 'EMBEDDED_LIMIT';
+UPDATE SETTING SET order_id = 4 WHERE key = 'DOWNLOAD_APP';
+UPDATE SETTING SET order_id = 5 WHERE key = 'SEASON_PREFIX';
+UPDATE SETTING SET order_id = 6 WHERE key = 'DARK_THEME';
