@@ -264,7 +264,10 @@ public class BtService {
             BtVo vo = jobs.get(id);
             vo.getFuture().cancel(true);
             try {
-                FileUtils.forceDelete(new File(vo.getPath(), vo.getFilename()));
+                File file = new File(vo.getPath(), vo.getFilename());
+                if(file.isFile() || file.isDirectory()) {
+                    FileUtils.forceDelete(file);
+                }
             } catch (IOException e) {
                 logger.error(e.getMessage());
                 return false;
