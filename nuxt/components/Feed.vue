@@ -133,7 +133,8 @@ export default {
         return '<span class=\'text--primary\'>S' + item.rssSeason +
           ' E' + item.rssEpisode + '</span> &mdash; ' +
           ' ' + (item.rssDate !== null ? item.rssDate : '') +
-          ' ' + item.rssQuality + ' ' + item.rssReleaseGroup
+          ' ' + item.rssQuality + ' ' + item.rssReleaseGroup +
+          (item.title.includes('자체자막') ? ' ' + '자체자막' : (item.title.includes('자막') ? ' ' + '자막' : ''))
       }
     },
     getSubTime: function (time) {
