@@ -1,5 +1,7 @@
 package com.tarpha.torrssen2.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,12 +43,39 @@ public class SchedulerService {
     public void runTask() {
         Optional<Setting> optionalSetting = settingRepository.findByKey("DOWNLOAD_APP");
         if (optionalSetting.isPresent()) {
-            if(StringUtils.equals(optionalSetting.get().getValue(), "TRANSMISSION")) {
+            if (StringUtils.equals(optionalSetting.get().getValue(), "TRANSMISSION")) {
                 transmissionJob();
-            } else if(StringUtils.equals(optionalSetting.get().getValue(), "DOWNLOAD_STATION")) {
+            } else if (StringUtils.equals(optionalSetting.get().getValue(), "DOWNLOAD_STATION")) {
                 downloadStationJob();
-            } else if(StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
+            } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
                 btService.check();
+            }
+        }
+    }
+
+    public void killTask() {
+        logger.debug("killTask");
+        Optional<Setting> optionalSetting = settingRepository.findByKey("USE_CRON");
+        if (optionalSetting.isPresent()) {
+            if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
+                try {
+                    while (btService.list().size() > 0) {
+                        Thread.sleep(60000);
+                    }
+                    File script = new File(File.separator, "kill.sh");
+                    boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
+                    if (script.isFile()) {
+                        if (!isWindows) {
+                            logger.debug("run kill.sh");
+                            Runtime.getRuntime().exec(String.format("sh -c %s", File.separator + "kill.sh"));  
+                        }
+                    } else {
+                        logger.debug("run ps -ef kill");
+                        Runtime.getRuntime().exec("ps - ef | grep torrssen2.jar | awk '{print $1}' | xargs kill");
+                    }
+                } catch (InterruptedException | IOException e) {
+                    logger.error(e.getMessage());
+                }
             }
         }
     }

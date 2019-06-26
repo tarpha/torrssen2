@@ -41,8 +41,9 @@
 						<v-card-text>
 							<v-container grid-list-md style="padding-top: 0; padding-bottom: 0">
 								<v-layout wrap>
-									<v-flex xs12 
-                    :sm6="item.type == 'number' || item.type == 'boolean' ? true : false" 
+									<v-flex :xs12="item.type == 'text' || item.type == 'password' || item.type == 'app'"
+                    :xs6="item.type == 'number' || item.type == 'boolean'" 
+                    v-show="item.type !== 'init'"
                     v-for="(item, index) in item.arr" :key="index">
 										<v-text-field 
 											v-if="item.type == 'text' || item.type == 'number' || item.type == 'password'"

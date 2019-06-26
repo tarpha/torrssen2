@@ -1,6 +1,7 @@
 FROM openjdk:8-alpine
-#COPY torrssen2-0.7.6.jar torrssen2.jar
+#COPY torrssen2-0.8.3.jar torrssen2.jar
 COPY run.sh /run.sh
+COPY kill.sh /kill.sh
 RUN apk --no-cache add git
 RUN git clone https://github.com/tarpha/torrssen2.git
 VOLUME [ "/root/data" ]

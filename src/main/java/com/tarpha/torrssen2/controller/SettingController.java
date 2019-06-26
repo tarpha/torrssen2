@@ -18,6 +18,7 @@ import com.tarpha.torrssen2.repository.SettingRepository;
 import com.tarpha.torrssen2.repository.WatchListRepository;
 import com.tarpha.torrssen2.service.CryptoService;
 import com.tarpha.torrssen2.service.RssLoadService;
+import com.tarpha.torrssen2.service.SchedulerService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -71,6 +72,9 @@ public class SettingController {
 
     @Autowired
     private CryptoService cryptoService;
+
+    @Autowired
+    private SchedulerService schedulerService;
 
     @GetMapping(value = "/list")
     public List<Setting> list(Sort sort) {
@@ -238,6 +242,10 @@ public class SettingController {
         } else {
             return "dev mode";
         }
-        
+    }
+
+    @PostMapping(value = "/restart")
+    public void restart() {
+        schedulerService.killTask();
     }
 }

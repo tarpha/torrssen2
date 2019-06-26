@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.CronTrigger;
 
 @Configuration
 public class SchedulerConfig implements SchedulingConfigurer {
@@ -61,6 +62,15 @@ public class SchedulerConfig implements SchedulingConfigurer {
                 nextExecutionTime.add(Calendar.MINUTE, Integer.parseInt(optionalSetting.get().getValue()));
             }
             return nextExecutionTime.getTime();
+        });
+
+        scheduledTaskRegistrar.addTriggerTask(() -> schedulerService.killTask(), t -> {
+            String cronExp = "0/5 * * * * ?";
+            Optional<Setting> optionalSetting = settingRepository.findByKey("CRON_EXR");
+            if (optionalSetting.isPresent()) {
+                cronExp = optionalSetting.get().getValue();
+            }
+            return new CronTrigger(cronExp).nextExecutionTime(t);
         });
     }
 
