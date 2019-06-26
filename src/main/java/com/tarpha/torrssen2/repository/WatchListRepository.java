@@ -17,7 +17,8 @@ public interface WatchListRepository extends JpaRepository<WatchList, Long> {
             + "       REPLACE(UPPER(CONCAT('%', w.title, '%', IFNULL(w.release_group, ''), '%')), ' ', '')) OR "
             + "      (w.use_regex = true  AND REGEXP_LIKE(?1, w.title, 'i'))) "
             + "AND  ((IFNULL(w.quality, '100P+') LIKE '%+' AND "
-            + "       REPLACE(UPPER(IFNULL(?2, '')), 'P', '') >=  REPLACE(UPPER(IFNULL(w.quality, '100P+')), 'P+', '' )) OR "
+            + "       CAST(REPLACE(UPPER(IFNULL(?2, '')), 'P', '') AS INTEGER) " 
+            + "       >= CAST(REPLACE(UPPER(IFNULL(w.quality, '100P+')), 'P+', '' ) AS INTEGER)) OR "
             + "      (UPPER(w.quality) LIKE '%P' AND "
             + "       UPPER(IFNULL(?2, '')) =  UPPER(w.quality))) ", nativeQuery = true)
     public Optional<WatchList> findByTitleRegex(String title, String quality);
