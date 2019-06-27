@@ -1,8 +1,10 @@
 package com.tarpha.torrssen2.service;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,9 +25,16 @@ import com.tarpha.torrssen2.util.CommonUtils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import bt.Bt;
@@ -67,6 +76,7 @@ public class BtService {
         private String innerFile;
         private List<String> innerList;
         private Boolean error = false;
+        private Boolean done = false;
         private CompletableFuture<?> future;
     }
 
@@ -92,11 +102,14 @@ public class BtService {
         if (vo != null) {
             download.setId(id);
             download.setPercentDone(vo.getPercentDone());
-            download.setDone(vo.getFuture().isDone());
             download.setUri(vo.getLink());
             download.setName(vo.getFilename());
             download.setDownloadPath(vo.getPath());
             download.setStatus(vo.getError() ? -1 : 3);
+
+            if(vo.getFuture() != null) {
+                download.setDone(vo.getFuture().isDone());
+            }
         }
 
         return download;
@@ -147,6 +160,19 @@ public class BtService {
         logger.debug("jobs size: " + jobs.size());
         logger.debug("concurrentSize: " + concurrentSize);
 
+        for(Long key: jobs.keySet()) {
+            if(jobs.get(key).getDone()) {
+                jobs.remove(key);
+                Optional<DownloadList> optionalDownload = downloadListRepository.findById(key);
+                if (optionalDownload.isPresent()) {
+                    DownloadList download = optionalDownload.get();
+                    download.setPercentDone(100);
+                    download.setDone(true);
+                    downloadListRepository.save(download);
+                }
+            }
+        }
+
         if (jobs.size() < concurrentSize) {
             if (queue.size() > 0) {
                 BtVo vo = queue.poll();
@@ -164,6 +190,50 @@ public class BtService {
         vo.setInnerList(getInnerFileList(torrent.getFiles()));
     }
 
+    @Async
+    private void httpDownload(Long currentId, String link, String path) {
+        BtVo bt = new BtVo();
+        bt.setId(currentId);
+                
+        try {
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            URIBuilder builder = new URIBuilder(link);
+            HttpGet httpGet = new HttpGet(builder.build());
+            CloseableHttpResponse response = httpClient.execute(httpGet);
+
+            Header[] header = response.getHeaders("Content-Disposition");
+            // logger.debug(header.length + "");
+            // logger.debug(header[0].getValue());
+
+            if(StringUtils.containsIgnoreCase(header[0].getValue(), "filename=")) {
+                String[] attachment = StringUtils.split(header[0].getValue(), "=");
+                // logger.debug(attachment[1]);
+
+                BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent());
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(path, attachment[1])));
+
+                int inByte;
+                while((inByte = bis.read()) != -1) bos.write(inByte);
+                bis.close();
+                bos.close();
+
+                bt.setPercentDone(100);
+                bt.setPath(path);
+                bt.setLink(link);
+                bt.setDone(true);
+                bt.setFilename(attachment[1]);
+            }
+
+            response.close();
+            httpClient.close();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            bt.setError(true);
+        }
+
+        jobs.put(currentId, bt);
+    }
+
     public void execute(Long currentId, String link, String path, String filename) {
         // get download directory
         Path targetDirectory = new File(path).toPath();
@@ -174,7 +244,7 @@ public class BtService {
         // long currentId = id++;
 
         try {
-            BtClient client;
+            // BtClient client = null;
             DHTModule dhtModule = new DHTModule(new DHTConfig() {
                 @Override
                 public boolean shouldUseRouterBootstrap() {
@@ -182,7 +252,7 @@ public class BtService {
                 }
             });
             if (StringUtils.startsWith(link, "magnet")) {
-                client = Bt.client().autoLoadModules().module(dhtModule).storage(storage).magnet(link)
+                BtClient client = Bt.client().autoLoadModules().module(dhtModule).storage(storage).magnet(link)
                         .afterTorrentFetched(torrent -> {
                             logger.debug("getName: " + torrent.getName());
                             logger.debug("getFiles: " + torrent.getFiles().toString());
@@ -190,77 +260,78 @@ public class BtService {
                                 setInfo(currentId, torrent);
                             }
                         }).build();
-            } else {
-                client = Bt.client().autoLoadModules().storage(storage).torrent(new URL(link))
-                        .afterTorrentFetched(torrent -> {
-                            logger.debug("getName: " + torrent.getName());
-                            if (jobs.containsKey(currentId)) {
-                                setInfo(currentId, torrent);
-                            }
-                        }).build();
-            }
 
-            CompletableFuture<?> future = client.startAsync(state -> {
-                if (jobs.containsKey(currentId)) {
-                    BtVo vo = jobs.get(currentId);
-                    logger.debug("getDownloaded: " + state.getDownloaded());
-                    logger.debug("getPiecesTotal: " + state.getPiecesTotal());
-                    logger.debug("getPiecesComplete: " + state.getPiecesComplete());
-                    logger.debug("percentDone: "
-                            + ((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100);
-                    vo.setPercentDone(
-                            (int) (((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100));
-                    jobs.put(currentId, vo);
-                }
-                logger.debug(jobs.get(currentId).toString());
-                if (state.getPiecesRemaining() == 0) {
-                    Optional<DownloadList> optionalDownload = downloadListRepository.findById(currentId);
-                    if (optionalDownload.isPresent()) {
-                        DownloadList download = optionalDownload.get();
-                        download.setPercentDone(100);
-                        download.setDone(true);
-                        downloadListRepository.save(download);
-                        Optional<Setting> optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
-                        if (optionalSetting.isPresent()) {
-                            if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
-                                if (download.getIsSentAlert() == false) {
-                                    String target = StringUtils.isEmpty(download.getFileName()) ? download.getName()
-                                            : download.getFileName();
-                                    logger.info("Send Telegram: " + target);
-                                    if (telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
-                                        download.setIsSentAlert(true);
+                CompletableFuture<?> future = client.startAsync(state -> {
+                    if (jobs.containsKey(currentId)) {
+                        BtVo vo = jobs.get(currentId);
+                        logger.debug("getDownloaded: " + state.getDownloaded());
+                        logger.debug("getPiecesTotal: " + state.getPiecesTotal());
+                        logger.debug("getPiecesComplete: " + state.getPiecesComplete());
+                        logger.debug("percentDone: "
+                                + ((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100);
+                        vo.setPercentDone(
+                                (int) (((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100));
+                        jobs.put(currentId, vo);
+                    }
+                    logger.debug(jobs.get(currentId).toString());
+                    if (state.getPiecesRemaining() == 0) {
+                        Optional<DownloadList> optionalDownload = downloadListRepository.findById(currentId);
+                        if (optionalDownload.isPresent()) {
+                            DownloadList download = optionalDownload.get();
+                            download.setPercentDone(100);
+                            download.setDone(true);
+                            downloadListRepository.save(download);
+                            Optional<Setting> optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
+                            if (optionalSetting.isPresent()) {
+                                if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
+                                    if (download.getIsSentAlert() == false) {
+                                        String target = StringUtils.isEmpty(download.getFileName()) ? download.getName()
+                                                : download.getFileName();
+                                        logger.info("Send Telegram: " + target);
+                                        if (telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
+                                            download.setIsSentAlert(true);
 
-                                        downloadListRepository.save(download);
+                                            downloadListRepository.save(download);
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (jobs.containsKey(currentId)) {
-                            BtVo vo = jobs.get(currentId);
-                            logger.debug("removeDirectory");
-                            if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(), vo.getInnerList(), settingRepository)) {
-                                vo.setFilename(vo.getInnerFile());
+                            if (jobs.containsKey(currentId)) {
+                                BtVo vo = jobs.get(currentId);
+                                logger.debug("removeDirectory");
+                                if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(), vo.getInnerList(), settingRepository)) {
+                                    vo.setFilename(vo.getInnerFile());
+                                }
+                                if (!StringUtils.isBlank(download.getRename())) {
+                                    logger.debug("getRename: " + download.getRename());
+                                    CommonUtils.renameFile(vo.getPath(), vo.getFilename(), download.getRename());
+                                }
+                                jobs.remove(currentId);
                             }
-                            if (!StringUtils.isBlank(download.getRename())) {
-                                logger.debug("getRename: " + download.getRename());
-                                CommonUtils.renameFile(vo.getPath(), vo.getFilename(), download.getRename());
-                            }
-                            jobs.remove(currentId);
                         }
+                        client.stop();
                     }
-                    client.stop();
-                }
-            }, 1000);
+                }, 1000);
 
-            BtVo bt = new BtVo();
-            bt.setId(currentId);
-            bt.setPercentDone(0);
-            bt.setFuture(future);
-            bt.setPath(path);
-            bt.setLink(link);
-            bt.setFilename(filename);
-            jobs.put(currentId, bt);
+                BtVo bt = new BtVo();
+                bt.setId(currentId);
+                bt.setPercentDone(0);
+                bt.setFuture(future);
+                bt.setPath(path);
+                bt.setLink(link);
+                bt.setFilename(filename);
+                jobs.put(currentId, bt);
+            } else {
+                httpDownload(currentId, link, path);
+                // client = Bt.client().storage(storage).torrent(new URL(link))
+                //         .afterTorrentFetched(torrent -> {
+                //             logger.debug("getName: " + torrent.getName());
+                //             if (jobs.containsKey(currentId)) {
+                //                 setInfo(currentId, torrent);
+                //             }
+                //         }).build();
+            }
 
         } catch (Exception e) {
             logger.error(e.getMessage());
