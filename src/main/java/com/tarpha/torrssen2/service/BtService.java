@@ -33,6 +33,7 @@ import bt.data.Storage;
 import bt.data.file.FileSystemStorage;
 import bt.dht.DHTConfig;
 import bt.dht.DHTModule;
+import bt.metainfo.Torrent;
 import bt.metainfo.TorrentFile;
 import bt.runtime.BtClient;
 import lombok.Data;
@@ -64,6 +65,7 @@ public class BtService {
         private String link;
         private String filename;
         private String innerFile;
+        private List<String> innerList;
         private Boolean error = false;
         private CompletableFuture<?> future;
     }
@@ -80,7 +82,7 @@ public class BtService {
 
     private void setConcurrentSize() {
         Optional<Setting> optionalSetting = settingRepository.findByKey("EMBEDDED_LIMIT");
-        if(optionalSetting.isPresent()) {
+        if (optionalSetting.isPresent()) {
             concurrentSize = Integer.parseInt(optionalSetting.get().getValue());
         }
     }
@@ -110,7 +112,17 @@ public class BtService {
             }
         }
         return null;
+    }
 
+    private List<String> getInnerFileList(List<TorrentFile> list) {
+        List<String> ret = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            TorrentFile torrent = list.get(i);
+            String pathElement = StringUtils.join(torrent.getPathElements(), File.separator);
+            logger.debug("pathElement : " + pathElement);
+            ret.add(pathElement);
+        }
+        return null;
     }
 
     public long create(String link, String path, String filename) {
@@ -134,15 +146,21 @@ public class BtService {
 
         logger.debug("jobs size: " + jobs.size());
         logger.debug("concurrentSize: " + concurrentSize);
-        
-        if(jobs.size() < concurrentSize) {
-            if(queue.size() > 0) {
+
+        if (jobs.size() < concurrentSize) {
+            if (queue.size() > 0) {
                 BtVo vo = queue.poll();
-                if(vo != null) {
+                if (vo != null) {
                     execute(vo.getId(), vo.getLink(), vo.getPath(), vo.getFilename());
                 }
-            } 
+            }
         }
+    }
+
+    private void setInfo(BtVo vo, Torrent torrent) {
+        vo.setFilename(torrent.getName());
+        vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
+        vo.setInnerList(getInnerFileList(torrent.getFiles()));
     }
 
     public void execute(Long currentId, String link, String path, String filename) {
@@ -167,9 +185,10 @@ public class BtService {
                         .afterTorrentFetched(torrent -> {
                             logger.debug("getName: " + torrent.getName());
                             if (jobs.containsKey(currentId)) {
-                                BtVo vo = jobs.get(currentId);
-                                vo.setFilename(torrent.getName());
-                                vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
+                                setInfo(jobs.get(currentId), torrent);
+                                // BtVo vo = jobs.get(currentId);
+                                // vo.setFilename(torrent.getName());
+                                // vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
                             }
                         }).build();
             } else {
@@ -177,9 +196,10 @@ public class BtService {
                         .afterTorrentFetched(torrent -> {
                             logger.debug("getName: " + torrent.getName());
                             if (jobs.containsKey(currentId)) {
-                                BtVo vo = jobs.get(currentId);
-                                vo.setFilename(torrent.getName());
-                                vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
+                                setInfo(jobs.get(currentId), torrent);
+                                // BtVo vo = jobs.get(currentId);
+                                // vo.setFilename(torrent.getName());
+                                // vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
                             }
                         }).build();
             }
@@ -222,14 +242,12 @@ public class BtService {
 
                         if (jobs.containsKey(currentId)) {
                             BtVo vo = jobs.get(currentId);
-                            if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(),
-                                    vo.getInnerFile())) {
+                            if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(), vo.getInnerFile())) {
                                 vo.setFilename(vo.getInnerFile());
                             }
                             if (!StringUtils.isBlank(download.getRename())) {
                                 logger.debug("getRename: " + download.getRename());
-                                CommonUtils.renameFile(vo.getPath(), vo.getFilename(),
-                                        download.getRename());
+                                CommonUtils.renameFile(vo.getPath(), vo.getFilename(), download.getRename());
                             }
                             jobs.remove(currentId);
                         }
@@ -265,7 +283,7 @@ public class BtService {
             vo.getFuture().cancel(true);
             try {
                 File file = new File(vo.getPath(), vo.getFilename());
-                if(file.isFile() || file.isDirectory()) {
+                if (file.isFile() || file.isDirectory()) {
                     FileUtils.forceDelete(file);
                 }
             } catch (IOException e) {
@@ -281,12 +299,12 @@ public class BtService {
 
     public DownloadList getInfo(long id) {
 
-        if(jobs.containsKey(id)) {
+        if (jobs.containsKey(id)) {
             return setInfo(jobs.get(id), id);
         } else {
             Optional<DownloadList> optionalDownload = downloadListRepository.findById(id);
             if (optionalDownload.isPresent()) {
-                if(optionalDownload.get().getDone()) {
+                if (optionalDownload.get().getDone()) {
                     return optionalDownload.get();
                 }
             }
@@ -297,8 +315,8 @@ public class BtService {
     public List<DownloadList> list() {
         List<DownloadList> ret = new ArrayList<>();
 
-        for( Long id : jobs.keySet() ) {
-            if(!jobs.get(id).getFuture().isDone()) {
+        for (Long id : jobs.keySet()) {
+            if (!jobs.get(id).getFuture().isDone()) {
                 ret.add(setInfo(jobs.get(id), id));
             }
         }
