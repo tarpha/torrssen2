@@ -270,7 +270,7 @@ WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'USE_CRON');
 INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
 SELECT 'CRON_EXR' key
      , '0 0 4 * * ?' value
-     , 'text' type
+     , 'boolean' type
      , true required
      , '자동 재시작 스케줄 (CRON)'
      , '일반'
@@ -279,13 +279,50 @@ SELECT 'CRON_EXR' key
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'CRON_EXR');
 
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'DEL_DIR' key
+     , 'TRUE' value
+     , 'boolean' type
+     , true required
+     , '폴더 파일 추출'
+     , '다운로드'
+     , 9
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'DEL_DIR');
+
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'EXCEPT_EXT' key
+     , '' value
+     , 'text' type
+     , true required
+     , '추출 제외 확장자 (쉼표로 복수 가능)'
+     , '다운로드'
+     , 9
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'EXCEPT_EXT');
+
 DELETE FROM USER WHERE id = 1 AND username = 'torrssen';
 
 ALTER TABLE IF EXISTS RSS_FEED ALTER COLUMN LINK VARCHAR(2048);
 
 UPDATE RSS_LIST SET tv_series = true WHERE tv_series IS NULL;
 
-UPDATE SETTING SET order_id = 3 WHERE key = 'EMBEDDED_LIMIT';
-UPDATE SETTING SET order_id = 4 WHERE key = 'DOWNLOAD_APP';
-UPDATE SETTING SET order_id = 5 WHERE key = 'SEASON_PREFIX';
-UPDATE SETTING SET order_id = 6 WHERE key = 'DARK_THEME';
+UPDATE SETTING SET order_id = 1 WHERE key = 'DARK_THEME';
+UPDATE SETTING SET order_id = 2 WHERE key = 'DOWNLOAD_APP';
+UPDATE SETTING SET order_id = 3 WHERE key = 'SEASON_PREFIX';
+UPDATE SETTING SET order_id = 4 WHERE key = 'USE_CRON';
+UPDATE SETTING SET order_id = 5 WHERE key = 'CRON_EXR';
+
+UPDATE SETTING SET order_id = 6, group_label = '다운로드' WHERE key = 'DOWNLOAD_CHECK_INTERVAL';
+UPDATE SETTING SET order_id = 7, group_label = '다운로드' WHERE key = 'EMBEDDED_LIMIT';
+UPDATE SETTING SET order_id = 8, group_label = '다운로드' WHERE key = 'DONE_DELETE';
+
+UPDATE SETTING SET order_id = 20 WHERE key = 'TRANSMISSION_HOST';
+UPDATE SETTING SET order_id = 21 WHERE key = 'TRANSMISSION_PORT';
+UPDATE SETTING SET order_id = 22 WHERE key = 'TRANSMISSION_CALLBACK';
+UPDATE SETTING SET order_id = 23 WHERE key = 'TRANSMISSION_USERNAME';
+UPDATE SETTING SET order_id = 24 WHERE key = 'TRANSMISSION_PASSWORD';
+
+UPDATE SETTING SET group_label = '시놀로지' WHERE group_label = '다운로드 스테이션';

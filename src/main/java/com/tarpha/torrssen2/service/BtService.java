@@ -122,7 +122,7 @@ public class BtService {
             logger.debug("pathElement : " + pathElement);
             ret.add(pathElement);
         }
-        return null;
+        return ret;
     }
 
     public long create(String link, String path, String filename) {
@@ -157,7 +157,8 @@ public class BtService {
         }
     }
 
-    private void setInfo(BtVo vo, Torrent torrent) {
+    private void setInfo(Long currentId, Torrent torrent) {
+        BtVo vo = jobs.get(currentId);
         vo.setFilename(torrent.getName());
         vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
         vo.setInnerList(getInnerFileList(torrent.getFiles()));
@@ -184,11 +185,9 @@ public class BtService {
                 client = Bt.client().autoLoadModules().module(dhtModule).storage(storage).magnet(link)
                         .afterTorrentFetched(torrent -> {
                             logger.debug("getName: " + torrent.getName());
+                            logger.debug("getFiles: " + torrent.getFiles().toString());
                             if (jobs.containsKey(currentId)) {
-                                setInfo(jobs.get(currentId), torrent);
-                                // BtVo vo = jobs.get(currentId);
-                                // vo.setFilename(torrent.getName());
-                                // vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
+                                setInfo(currentId, torrent);
                             }
                         }).build();
             } else {
@@ -196,10 +195,7 @@ public class BtService {
                         .afterTorrentFetched(torrent -> {
                             logger.debug("getName: " + torrent.getName());
                             if (jobs.containsKey(currentId)) {
-                                setInfo(jobs.get(currentId), torrent);
-                                // BtVo vo = jobs.get(currentId);
-                                // vo.setFilename(torrent.getName());
-                                // vo.setInnerFile(getInnerFile(torrent.getFiles(), torrent.getName()));
+                                setInfo(currentId, torrent);
                             }
                         }).build();
             }
@@ -242,7 +238,8 @@ public class BtService {
 
                         if (jobs.containsKey(currentId)) {
                             BtVo vo = jobs.get(currentId);
-                            if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(), vo.getInnerFile())) {
+                            logger.debug("removeDirectory");
+                            if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(), vo.getInnerList(), settingRepository)) {
                                 vo.setFilename(vo.getInnerFile());
                             }
                             if (!StringUtils.isBlank(download.getRename())) {
@@ -273,8 +270,6 @@ public class BtService {
                 vo.setError(true);
             }
         }
-
-        // return currentId;
     }
 
     public boolean remove(long id) {

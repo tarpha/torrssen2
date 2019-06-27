@@ -3,6 +3,10 @@ package com.tarpha.torrssen2.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+
+import com.tarpha.torrssen2.domain.Setting;
+import com.tarpha.torrssen2.repository.SettingRepository;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -29,57 +33,82 @@ public class CommonUtils {
         return srcFile.renameTo(destFile);
     }
 
-    public static boolean removeDirectory(String path, String outer, String inner) {
-        boolean ret = true;
+    public static boolean removeDirectory(String path, String outer, String inner, SettingRepository settingRepository) {
+        Optional<Setting> delDirSetting = settingRepository.findByKey("DEL_DIR");
+        
+        if (delDirSetting.isPresent()) {
+            if(Boolean.parseBoolean(delDirSetting.get().getValue())) {
+                boolean ret = true;
 
-        File file = new File(path, outer);
-        if (file.isDirectory()) {
-            File src = new File(path + File.separator + outer, inner);
-            File trg = new File(path);
-            // ret = src.renameTo(trg);
-            try {
-                File remove = new File(path, inner);
-                if (remove.isFile()) {
-                    FileUtils.forceDelete(remove);
-                }
-                FileUtils.moveFileToDirectory(src, trg, true);
-                FileUtils.forceDelete(new File(path, outer));
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-                ret = false;
-            }
-        } else {
-            ret = false;
-        }
-
-        return ret;
-    }
-
-    public static boolean removeDirectory(String path, String outer, List<String> innerList) {
-        boolean ret = true;
-
-        File file = new File(path, outer);
-        if (file.isDirectory()) {
-            try {
-                for (String inner : innerList) {
+                File file = new File(path, outer);
+                if (file.isDirectory()) {
                     File src = new File(path + File.separator + outer, inner);
                     File trg = new File(path);
-                    File remove = new File(path, inner);
-                    if (remove.isFile()) {
-                        FileUtils.forceDelete(remove);
+                    try {
+                        File remove = new File(path, inner);
+                        if (remove.isFile()) {
+                            FileUtils.forceDelete(remove);
+                        }
+                        FileUtils.moveFileToDirectory(src, trg, true);
+                        FileUtils.forceDelete(new File(path, outer));
+                    } catch (IOException e) {
+                        logger.error(e.getMessage());
+                        ret = false;
                     }
-                    FileUtils.moveFileToDirectory(src, trg, true);
+                } else {
+                    ret = false;
                 }
-                FileUtils.forceDelete(new File(path, outer));
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-                ret = false;
-            }
-        } else {
-            ret = false;
-        }
 
-        return ret;
+                return ret;
+            }
+        }
+        
+        return false;
+    }
+
+    public static boolean removeDirectory(String path, String outer, List<String> innerList, SettingRepository settingRepository) {
+        String[] exts = {};
+        Optional<Setting> exceptExtSetting = settingRepository.findByKey("EXCEPT_EXT");
+        if(exceptExtSetting.isPresent()) {
+            exts = StringUtils.split(StringUtils.lowerCase(exceptExtSetting.get().getValue()), ",");
+        }
+        
+        Optional<Setting> delDirSetting = settingRepository.findByKey("DEL_DIR");
+
+        logger.debug("delete List");
+        
+        if (delDirSetting.isPresent()) {
+            logger.debug(delDirSetting.get().getValue());
+            if(Boolean.parseBoolean(delDirSetting.get().getValue())) {
+                boolean ret = true;
+
+                File file = new File(path, outer);
+                if (file.isDirectory()) {
+                    try {
+                        for (String inner : innerList) {
+                            if(!StringUtils.containsAny(StringUtils.lowerCase(FilenameUtils.getExtension(inner)), exts)) {
+                                File src = new File(path + File.separator + outer, inner);
+                                File trg = new File(path);
+                                File remove = new File(path, inner);
+                                if (remove.isFile()) {
+                                    FileUtils.forceDelete(remove);
+                                }
+                                FileUtils.moveFileToDirectory(src, trg, true);
+                            }
+                        }
+                        FileUtils.forceDelete(new File(path, outer));
+                    } catch (IOException e) {
+                        logger.error(e.getMessage());
+                        ret = false;
+                    }
+                } else {
+                    ret = false;
+                }
+
+                return ret;
+            }
+        }
+        return false;
     }
 
 }
