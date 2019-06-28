@@ -303,17 +303,17 @@ SELECT 'EXCEPT_EXT' key
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'EXCEPT_EXT');
 
-INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
-SELECT 'CORS_URL' key
-     , '' value
-     , 'text' type
-     , true required
-     , 'CORS 허용 URL'
-     , '일반'
-     , 6
-     , CURRENT_TIMESTAMP create_dt
-) x
-WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'CORS_URL');
+-- INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+-- SELECT 'CORS_URL' key
+--      , '' value
+--      , 'text' type
+--      , true required
+--      , 'CORS 허용 URL'
+--      , '일반'
+--      , 6
+--      , CURRENT_TIMESTAMP create_dt
+-- ) x
+-- WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'CORS_URL');
 
 DELETE FROM USER WHERE id = 1 AND username = 'torrssen';
 
