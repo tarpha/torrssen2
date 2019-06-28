@@ -138,6 +138,7 @@ export default {
       }
     },
     getSubTime: function (time) {
+      console.log(time)
       const now = new Date()
       const dt = Date.parse(time.substring(0, 23) + 'Z')
       const diff = now - dt

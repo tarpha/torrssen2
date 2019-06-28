@@ -1,4 +1,5 @@
-FROM openjdk:8-alpine
+#FROM openjdk:8-alpine
+FROM adoptopenjdk/openjdk8-openj9:alpine-slim
 #COPY torrssen2-0.8.3.jar torrssen2.jar
 COPY run.sh /run.sh
 COPY kill.sh /kill.sh

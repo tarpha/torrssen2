@@ -209,6 +209,12 @@ public class BtService {
                 String[] attachment = StringUtils.split(header[0].getValue(), "=");
                 // logger.debug(attachment[1]);
 
+                File directory = new File(path);
+
+                if(!directory.isDirectory()) {
+                    FileUtils.forceMkdir(directory);
+                }
+
                 BufferedInputStream bis = new BufferedInputStream(response.getEntity().getContent());
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(path, attachment[1])));
 

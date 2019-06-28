@@ -19,6 +19,7 @@ Torrent RSS Site를 등록/관리하고, 다운로드를 요청/관리하고, �
 <code>docker run -d --name torrssen2 -p 8080:8080 -v {data path}:/root/data tarpha/torrssen2</code>
 
 ## 수정이력
+- 0.9.0: cors 옵션 추가. 마이너 버그 수정. 메모리 관리 향상(openj9)
 - 0.8.8: 지믹 다운로드 오류 수정
 - 0.8.7: 폴더 삭제 로직 향상
 - 0.8.6: 마이너 버그 수정. 피드에 자막 정보 추가

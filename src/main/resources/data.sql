@@ -270,7 +270,7 @@ WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'USE_CRON');
 INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
 SELECT 'CRON_EXR' key
      , '0 0 4 * * ?' value
-     , 'boolean' type
+     , 'text' type
      , true required
      , '자동 재시작 스케줄 (CRON)'
      , '일반'
@@ -303,6 +303,18 @@ SELECT 'EXCEPT_EXT' key
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'EXCEPT_EXT');
 
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'CORS_URL' key
+     , '' value
+     , 'text' type
+     , true required
+     , 'CORS 허용 URL'
+     , '일반'
+     , 6
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'CORS_URL');
+
 DELETE FROM USER WHERE id = 1 AND username = 'torrssen';
 
 ALTER TABLE IF EXISTS RSS_FEED ALTER COLUMN LINK VARCHAR(2048);
@@ -313,7 +325,7 @@ UPDATE SETTING SET order_id = 1 WHERE key = 'DARK_THEME';
 UPDATE SETTING SET order_id = 2 WHERE key = 'DOWNLOAD_APP';
 UPDATE SETTING SET order_id = 3 WHERE key = 'SEASON_PREFIX';
 UPDATE SETTING SET order_id = 4 WHERE key = 'USE_CRON';
-UPDATE SETTING SET order_id = 5 WHERE key = 'CRON_EXR';
+UPDATE SETTING SET order_id = 5, type='text' WHERE key = 'CRON_EXR';
 
 UPDATE SETTING SET order_id = 6, group_label = '다운로드' WHERE key = 'DOWNLOAD_CHECK_INTERVAL';
 UPDATE SETTING SET order_id = 7, group_label = '다운로드' WHERE key = 'EMBEDDED_LIMIT';
