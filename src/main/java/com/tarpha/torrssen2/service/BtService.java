@@ -324,10 +324,10 @@ public class BtService {
                                 jobs.remove(currentId);
                             }
                         }
-                        state = null;
+                        // state = null;
                         client.stop();
                     }
-                    state = null;
+                    // state = null;
                 }, 1000);
 
                 BtVo bt = new BtVo();
