@@ -59,9 +59,9 @@ public class BtService {
     @Autowired
     TelegramService telegramService;
 
-    private static Map<Long, BtVo> jobs = new HashMap<>();
-    private static Queue<BtVo> queue = new LinkedList<>();
-    private static long id = 1;
+    private Map<Long, BtVo> jobs = new HashMap<>();
+    private Queue<BtVo> queue = new LinkedList<>();
+    private long id = 1;
 
     private int concurrentSize = Runtime.getRuntime().availableProcessors() * 2;
 
