@@ -268,68 +268,67 @@ public class BtService {
                             }
                         }).build();
 
-                client.startAsync();
                 // CompletableFuture<?> future = 
-                // client.startAsync(state -> {
-                //     if (jobs.containsKey(currentId)) {
-                //         BtVo vo = jobs.get(currentId);
-                //         if(vo.getCancel()) {
-                //             logger.debug("=== cancel ====");
-                //             jobs.remove(currentId);
-                //             client.stop();
-                //         }
+                client.startAsync(state -> {
+                    if (jobs.containsKey(currentId)) {
+                        BtVo vo = jobs.get(currentId);
+                        if(vo.getCancel()) {
+                            logger.debug("=== cancel ====");
+                            jobs.remove(currentId);
+                            client.stop();
+                        }
 
-                //         logger.debug("getDownloaded: " + state.getDownloaded());
-                //         logger.debug("getPiecesTotal: " + state.getPiecesTotal());
-                //         logger.debug("getPiecesComplete: " + state.getPiecesComplete());
-                //         logger.debug("percentDone: "
-                //                 + ((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100);
-                //         vo.setPercentDone(
-                //                 (int) (((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100));
-                //         jobs.put(currentId, vo);
-                //     }
-                //     logger.debug(jobs.get(currentId).toString());
-                //     if (state.getPiecesRemaining() == 0) {
-                //         Optional<DownloadList> optionalDownload = downloadListRepository.findById(currentId);
-                //         if (optionalDownload.isPresent()) {
-                //             DownloadList download = optionalDownload.get();
-                //             download.setPercentDone(100);
-                //             download.setDone(true);
-                //             downloadListRepository.save(download);
-                //             Optional<Setting> optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
-                //             if (optionalSetting.isPresent()) {
-                //                 if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
-                //                     if (download.getIsSentAlert() == false) {
-                //                         String target = StringUtils.isEmpty(download.getFileName()) ? download.getName()
-                //                                 : download.getFileName();
-                //                         logger.info("Send Telegram: " + target);
-                //                         if (telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
-                //                             download.setIsSentAlert(true);
+                        logger.debug("getDownloaded: " + state.getDownloaded());
+                        logger.debug("getPiecesTotal: " + state.getPiecesTotal());
+                        logger.debug("getPiecesComplete: " + state.getPiecesComplete());
+                        logger.debug("percentDone: "
+                                + ((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100);
+                        vo.setPercentDone(
+                                (int) (((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100));
+                        jobs.put(currentId, vo);
+                    }
+                    logger.debug(jobs.get(currentId).toString());
+                    if (state.getPiecesRemaining() == 0) {
+                        Optional<DownloadList> optionalDownload = downloadListRepository.findById(currentId);
+                        if (optionalDownload.isPresent()) {
+                            DownloadList download = optionalDownload.get();
+                            download.setPercentDone(100);
+                            download.setDone(true);
+                            downloadListRepository.save(download);
+                            Optional<Setting> optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
+                            if (optionalSetting.isPresent()) {
+                                if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
+                                    if (download.getIsSentAlert() == false) {
+                                        String target = StringUtils.isEmpty(download.getFileName()) ? download.getName()
+                                                : download.getFileName();
+                                        logger.info("Send Telegram: " + target);
+                                        if (telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
+                                            download.setIsSentAlert(true);
 
-                //                             downloadListRepository.save(download);
-                //                         }
-                //                     }
-                //                 }
-                //             }
+                                            downloadListRepository.save(download);
+                                        }
+                                    }
+                                }
+                            }
 
-                //             if (jobs.containsKey(currentId)) {
-                //                 BtVo vo = jobs.get(currentId);
-                //                 logger.debug("removeDirectory");
-                //                 if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(), vo.getInnerList(), settingRepository)) {
-                //                     vo.setFilename(vo.getInnerFile());
-                //                 }
-                //                 if (!StringUtils.isBlank(download.getRename())) {
-                //                     logger.debug("getRename: " + download.getRename());
-                //                     CommonUtils.renameFile(vo.getPath(), vo.getFilename(), download.getRename());
-                //                 }
-                //                 jobs.remove(currentId);
-                //             }
-                //         }
-                //         state = null;
-                //         client.stop();
-                //     }
-                //     state = null;
-                // }, 1000);
+                            if (jobs.containsKey(currentId)) {
+                                BtVo vo = jobs.get(currentId);
+                                logger.debug("removeDirectory");
+                                if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(), vo.getInnerList(), settingRepository)) {
+                                    vo.setFilename(vo.getInnerFile());
+                                }
+                                if (!StringUtils.isBlank(download.getRename())) {
+                                    logger.debug("getRename: " + download.getRename());
+                                    CommonUtils.renameFile(vo.getPath(), vo.getFilename(), download.getRename());
+                                }
+                                jobs.remove(currentId);
+                            }
+                        }
+                        state = null;
+                        client.stop();
+                    }
+                    state = null;
+                }, 1000);
 
                 BtVo bt = new BtVo();
                 bt.setId(currentId);
