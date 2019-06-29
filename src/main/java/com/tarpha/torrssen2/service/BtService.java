@@ -259,6 +259,7 @@ public class BtService {
             });
             if (StringUtils.startsWith(link, "magnet")) {
                 BtClient client = Bt.client().autoLoadModules().module(dhtModule).storage(storage).magnet(link)
+                        .stopWhenDownloaded()
                         .afterTorrentFetched(torrent -> {
                             logger.debug("getName: " + torrent.getName());
                             logger.debug("getFiles: " + torrent.getFiles().toString());
