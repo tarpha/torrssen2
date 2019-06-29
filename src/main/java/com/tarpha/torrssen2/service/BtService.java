@@ -328,7 +328,7 @@ public class BtService {
                         client.stop();
                     }
                     state = null;
-                }, 10000);
+                }, 1000);
 
                 BtVo bt = new BtVo();
                 bt.setId(currentId);
