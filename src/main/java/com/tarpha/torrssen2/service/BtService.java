@@ -271,11 +271,6 @@ public class BtService {
                 client.startAsync(state -> {
                     if (jobs.containsKey(currentId)) {
                         BtVo vo = jobs.get(currentId);
-                        if(vo.getCancel()) {
-                            logger.debug("=== cancel ====");
-                            jobs.remove(currentId);
-                            client.stop();
-                        }
 
                         logger.debug("getDownloaded: " + state.getDownloaded());
                         logger.debug("getPiecesTotal: " + state.getPiecesTotal());
@@ -285,6 +280,12 @@ public class BtService {
                         vo.setPercentDone(
                                 (int) (((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100));
                         jobs.put(currentId, vo);
+
+                        if(vo.getCancel()) {
+                            logger.debug("=== cancel ====");
+                            jobs.remove(currentId);
+                            client.stop();
+                        }
                     }
                     logger.debug(jobs.get(currentId).toString());
                     if (state.getPiecesRemaining() == 0) {
