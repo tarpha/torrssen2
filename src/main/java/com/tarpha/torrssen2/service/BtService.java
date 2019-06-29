@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.PostConstruct;
 
@@ -77,7 +76,8 @@ public class BtService {
         private List<String> innerList;
         private Boolean error = false;
         private Boolean done = false;
-        private CompletableFuture<?> future;
+        private Boolean cancel = false;
+        // private CompletableFuture<?> future;
     }
 
     @PostConstruct
@@ -107,9 +107,9 @@ public class BtService {
             download.setDownloadPath(vo.getPath());
             download.setStatus(vo.getError() ? -1 : 3);
 
-            if(vo.getFuture() != null) {
-                download.setDone(vo.getFuture().isDone());
-            }
+            // if(vo.getFuture() != null) {
+            //     download.setDone(vo.getFuture().isDone());
+            // }
         }
 
         return download;
@@ -267,9 +267,16 @@ public class BtService {
                             }
                         }).build();
 
-                CompletableFuture<?> future = client.startAsync(state -> {
+                // CompletableFuture<?> future = 
+                client.startAsync(state -> {
                     if (jobs.containsKey(currentId)) {
                         BtVo vo = jobs.get(currentId);
+                        if(vo.getCancel()) {
+                            logger.debug("=== cancel ====");
+                            jobs.remove(currentId);
+                            client.stop();
+                        }
+
                         logger.debug("getDownloaded: " + state.getDownloaded());
                         logger.debug("getPiecesTotal: " + state.getPiecesTotal());
                         logger.debug("getPiecesComplete: " + state.getPiecesComplete());
@@ -323,7 +330,7 @@ public class BtService {
                 BtVo bt = new BtVo();
                 bt.setId(currentId);
                 bt.setPercentDone(0);
-                bt.setFuture(future);
+                // bt.setFuture(future);
                 bt.setPath(path);
                 bt.setLink(link);
                 bt.setFilename(filename);
@@ -352,7 +359,8 @@ public class BtService {
     public boolean remove(long id) {
         if (jobs.containsKey(id)) {
             BtVo vo = jobs.get(id);
-            vo.getFuture().cancel(true);
+            vo.setCancel(true);
+            // vo.getFuture().cancel(true);
             try {
                 File file = new File(vo.getPath(), vo.getFilename());
                 if (file.isFile() || file.isDirectory()) {
@@ -362,7 +370,7 @@ public class BtService {
                 logger.error(e.getMessage());
                 return false;
             }
-            jobs.remove(id);
+            // jobs.remove(id);
             return true;
         } else {
             return false;
@@ -388,7 +396,7 @@ public class BtService {
         List<DownloadList> ret = new ArrayList<>();
 
         for (Long id : jobs.keySet()) {
-            if (!jobs.get(id).getFuture().isDone()) {
+            if (!jobs.get(id).getDone()) {
                 ret.add(setInfo(jobs.get(id), id));
             }
         }
