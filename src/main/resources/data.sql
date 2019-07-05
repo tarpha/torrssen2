@@ -243,17 +243,17 @@ SELECT 'TRANSMISSION_CALLBACK' key
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'TRANSMISSION_CALLBACK');
 
-INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
-SELECT 'EMBEDDED_LIMIT' key
-     , '4' value
-     , 'number' type
-     , true required
-     , '동시 다운로드 수 (EMBEDDED만 적용)'
-     , '일반'
-     , 6
-     , CURRENT_TIMESTAMP create_dt
-) x
-WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'EMBEDDED_LIMIT');
+-- INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+-- SELECT 'EMBEDDED_LIMIT' key
+--      , '4' value
+--      , 'number' type
+--      , true required
+--      , '동시 다운로드 수 (EMBEDDED만 적용)'
+--      , '일반'
+--      , 6
+--      , CURRENT_TIMESTAMP create_dt
+-- ) x
+-- WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'EMBEDDED_LIMIT');
 
 INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
 SELECT 'USE_CRON' key
@@ -328,8 +328,8 @@ UPDATE SETTING SET order_id = 4 WHERE key = 'USE_CRON';
 UPDATE SETTING SET order_id = 5, type='text' WHERE key = 'CRON_EXR';
 
 UPDATE SETTING SET order_id = 6, group_label = '다운로드' WHERE key = 'DOWNLOAD_CHECK_INTERVAL';
-UPDATE SETTING SET order_id = 7, group_label = '다운로드' WHERE key = 'EMBEDDED_LIMIT';
-UPDATE SETTING SET order_id = 8, group_label = '다운로드' WHERE key = 'DONE_DELETE';
+-- UPDATE SETTING SET order_id = 7, group_label = '다운로드' WHERE key = 'EMBEDDED_LIMIT';
+UPDATE SETTING SET order_id = 7, group_label = '다운로드' WHERE key = 'DONE_DELETE';
 
 UPDATE SETTING SET order_id = 20 WHERE key = 'TRANSMISSION_HOST';
 UPDATE SETTING SET order_id = 21 WHERE key = 'TRANSMISSION_PORT';
@@ -339,3 +339,4 @@ UPDATE SETTING SET order_id = 24 WHERE key = 'TRANSMISSION_PASSWORD';
 
 UPDATE SETTING SET group_label = '시놀로지' WHERE group_label = '다운로드 스테이션';
 DELETE FROM SETTING WHERE key = 'CORS_URL';
+DELETE FROM SETTING WHERE key = 'EMBEDDED_LIMIT';

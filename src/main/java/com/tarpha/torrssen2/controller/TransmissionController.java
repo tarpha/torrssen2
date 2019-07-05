@@ -101,6 +101,22 @@ public class TransmissionController {
             }
         }
 
+        logger.debug("removeDirectory");
+        List<String> inners = CommonUtils.removeDirectory(downloadList.getDownloadPath(), downloadList.getName(), settingRepository);
+        
+        if (!StringUtils.isBlank(downloadList.getRename())) {
+            logger.debug("getRename: " + downloadList.getRename());
+            if(inners == null) {
+                CommonUtils.renameFile(downloadList.getDownloadPath(), downloadList.getName(), downloadList.getRename());
+            } else {
+                for(String name: inners) {
+                    if(StringUtils.contains(downloadList.getName(), name)) {
+                        CommonUtils.renameFile(downloadList.getDownloadPath(), name, downloadList.getRename());
+                    }
+                }
+            }
+        }
+
         return ret;
     }
     

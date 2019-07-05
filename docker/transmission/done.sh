@@ -2,20 +2,20 @@
 FILE_NAME=${TR_TORRENT_NAME}
 
 # DELETE DIRECTORY FILE TO ONLY FILE
-if [ -d "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}" ]
-then
-  if [ -f "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mp4 ]
-  then
-  	FILE_NAME=$(ls "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mp4 | awk '{print $1}' | head -1 | xargs -n 1 basename)
-    mv "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mp4 "${TR_TORRENT_DIR}"
-    rm -rf "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"
-  elif [ -f "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mkv ]
-  then
-  	FILE_NAME=$(ls "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mp4 | awk '{print $1}' | head -1 | xargs -n 1 basename)
-    mv "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mkv "${TR_TORRENT_DIR}"
-    rm -rf "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"
-  fi
-fi
+# if [ -d "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}" ]
+# then
+#   if [ -f "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mp4 ]
+#   then
+#   	FILE_NAME=$(ls "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mp4 | awk '{print $1}' | head -1 | xargs -n 1 basename)
+#     mv "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mp4 "${TR_TORRENT_DIR}"
+#     rm -rf "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"
+#   elif [ -f "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mkv ]
+#   then
+#   	FILE_NAME=$(ls "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mp4 | awk '{print $1}' | head -1 | xargs -n 1 basename)
+#     mv "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"/*.mkv "${TR_TORRENT_DIR}"
+#     rm -rf "${TR_TORRENT_DIR}/${TR_TORRENT_NAME}"
+#   fi
+# fi
 
 #CALL SERVICE
 generate_post_data()

@@ -4,6 +4,8 @@ ARG         DOCKER_UID
 
 # Create a user to run the application
 RUN         adduser -D -u ${DOCKER_UID} transmission
+COPY        ./settings.json /home/transmission/.config/settings.json
+RUN         chown -R transmission:transmission /home/transmission
 WORKDIR     /home/transmission
 
 # Data and config volumes

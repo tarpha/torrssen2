@@ -2,6 +2,8 @@ package com.tarpha.torrssen2.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +12,9 @@ import com.tarpha.torrssen2.repository.SettingRepository;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.NotFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +114,52 @@ public class CommonUtils {
             }
         }
         return false;
+    }
+
+    public static List<String> removeDirectory(String path, String outer, SettingRepository settingRepository) {
+        String[] exts = {};
+        Optional<Setting> exceptExtSetting = settingRepository.findByKey("EXCEPT_EXT");
+        if(exceptExtSetting.isPresent()) {
+            exts = StringUtils.split(StringUtils.lowerCase(exceptExtSetting.get().getValue()), ",");
+        }
+
+        Optional<Setting> delDirSetting = settingRepository.findByKey("DEL_DIR");
+        
+        if (delDirSetting.isPresent()) {
+            if(Boolean.parseBoolean(delDirSetting.get().getValue())) {
+                File file = new File(path, outer);
+                if (file.isDirectory()) {
+                    Collection<File> subFiles;
+                    if(exts != null) {
+                        NotFileFilter fileFilter = new NotFileFilter(new SuffixFileFilter(exts)); 
+                        subFiles = FileUtils.listFiles(new File(path, outer), fileFilter, TrueFileFilter.INSTANCE);
+                    } else {
+                        subFiles = FileUtils.listFiles(new File(path, outer), TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+                    }
+                    
+                    List<String> ret = new ArrayList<>();
+
+                    try {
+                        for(File subFile: subFiles) {
+                            logger.debug(subFile.getPath() + ":" + subFile.getName());
+                            File remove = new File(path, subFile.getName());
+                            if (remove.isFile()) {
+                                FileUtils.forceDelete(remove);
+                            }
+                            FileUtils.moveFileToDirectory(subFile, new File(path), true);
+                            ret.add(subFile.getName());
+                        }
+                        FileUtils.forceDelete(new File(path, outer));
+                    } catch (IOException e) {
+                        logger.error(e.getMessage());
+                    }
+
+                    return ret;
+                } 
+            }
+        }
+
+        return null;
     }
 
 }

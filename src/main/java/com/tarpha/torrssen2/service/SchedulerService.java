@@ -10,6 +10,7 @@ import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.domain.Setting;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
+import com.tarpha.torrssen2.util.CommonUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -120,6 +121,22 @@ public class SchedulerService {
                 ids.add(down.getId());
                 if(sendTelegram && !transmissionCallback) {
                     sendTelegram(down);
+                }
+
+                logger.debug("removeDirectory");
+                List<String> inners = CommonUtils.removeDirectory(down.getDownloadPath(), down.getName(), settingRepository);
+             
+                if (!StringUtils.isBlank(down.getRename())) {
+                    logger.debug("getRename: " + down.getRename());
+                    if(inners == null) {
+                        CommonUtils.renameFile(down.getDownloadPath(), down.getName(), down.getRename());
+                    } else {
+                        for(String name: inners) {
+                            if(StringUtils.contains(down.getName(), name)) {
+                                CommonUtils.renameFile(down.getDownloadPath(), name, down.getRename());
+                            }
+                        }
+                    }
                 }
             }
         }
