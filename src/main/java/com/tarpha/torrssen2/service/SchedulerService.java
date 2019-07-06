@@ -198,6 +198,26 @@ public class SchedulerService {
                         downloadStationService.delete(ids);
                     }
                 }
+
+                logger.debug("removeDirectory");
+                String path = down.getDownloadPath();
+                if(StringUtils.startsWith(path, File.separator)) {
+                    path = File.separator + path;
+                }
+                List<String> inners = CommonUtils.removeDirectory(path, down.getName(), settingRepository);
+             
+                if (!StringUtils.isBlank(down.getRename())) {
+                    logger.debug("getRename: " + down.getRename());
+                    if(inners == null) {
+                        CommonUtils.renameFile(path, down.getName(), down.getRename());
+                    } else {
+                        for(String name: inners) {
+                            if(StringUtils.contains(down.getName(), name)) {
+                                CommonUtils.renameFile(path, name, down.getRename());
+                            }
+                        }
+                    }
+                }
             }
         }
     }
