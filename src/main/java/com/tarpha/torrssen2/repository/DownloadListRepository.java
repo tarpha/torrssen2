@@ -11,6 +11,8 @@ public interface DownloadListRepository extends JpaRepository<DownloadList, Long
 
     public List<DownloadList> findAllById(Long id);
 
+    public Optional<DownloadList> findByDbid(String dbid);
+
     public Optional<DownloadList> findFirstByUriAndDoneOrderByCreateDtDesc(String uri, Boolean done);
     
     public Optional<DownloadList> findTopByOrderByIdDesc();

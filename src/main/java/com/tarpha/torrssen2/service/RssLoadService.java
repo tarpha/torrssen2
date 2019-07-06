@@ -151,6 +151,9 @@ public class RssLoadService {
     }
 
     private void checkWatchList(RssFeed rssFeed) {
+        if(StringUtils.isEmpty(rssFeed.getRssQuality())) {
+            rssFeed.setRssQuality("720p");
+        }
         Optional<WatchList> optionalWatchList = watchListRepository.findByTitleRegex(rssFeed.getTitle(),
                 rssFeed.getRssQuality());
 
@@ -213,7 +216,8 @@ public class RssLoadService {
                             for(DownloadList down: downloadStationService.list()) {
                                 if(StringUtils.equals(rssFeed.getLink(), down.getUri())) {
                                     isExist = true;
-                                    downloadListRepository.save(down);
+                                    // downloadListRepository.save(down);
+                                    addToDownloadList(down.getId(), rssFeed, watchList, path);
                                 }
                             }
 

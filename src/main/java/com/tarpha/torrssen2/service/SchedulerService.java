@@ -12,7 +12,10 @@ import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
 import com.tarpha.torrssen2.util.CommonUtils;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class SchedulerService {
 
     @Autowired
     private DownloadStationService downloadStationService;
+
+    @Autowired
+    private FileStationService fileStationService;
 
     @Autowired
     private BtService btService;
@@ -126,14 +132,18 @@ public class SchedulerService {
                 logger.debug("removeDirectory");
                 List<String> inners = CommonUtils.removeDirectory(down.getDownloadPath(), down.getName(), settingRepository);
              
-                if (!StringUtils.isBlank(down.getRename())) {
-                    logger.debug("getRename: " + down.getRename());
-                    if(inners == null) {
-                        CommonUtils.renameFile(down.getDownloadPath(), down.getName(), down.getRename());
-                    } else {
-                        for(String name: inners) {
-                            if(StringUtils.contains(down.getName(), name)) {
-                                CommonUtils.renameFile(down.getDownloadPath(), name, down.getRename());
+                Optional<DownloadList> optionalDown = downloadListRepository.findById(down.getId());
+                if(optionalDown.isPresent()) {
+                    String rename = optionalDown.get().getRename();
+                    if (!StringUtils.isBlank(rename)) {
+                        logger.debug("getRename: " + rename);
+                        if(inners == null) {
+                            CommonUtils.renameFile(down.getDownloadPath(), down.getName(), rename);
+                        } else {
+                            for(String name: inners) {
+                                if(StringUtils.contains(down.getName(), name)) {
+                                    CommonUtils.renameFile(down.getDownloadPath(), name, rename);
+                                }
                             }
                         }
                     }
@@ -173,11 +183,16 @@ public class SchedulerService {
         for(DownloadList down: list) {
             for(DownloadList tdown: downloadListRepository.findAllById(0L)) {
                 if(StringUtils.equals(down.getUri(), tdown.getUri())) {
+                    down.setRename(tdown.getRename());
                     downloadListRepository.save(down);
                 }
             }
 
             if(down.getId() > 0) {
+                Optional<DownloadList> optinalDown = downloadListRepository.findById(down.getId());
+                if(optinalDown.isPresent()) {
+                    down.setRename(optinalDown.get().getRename());
+                }
                 downloadListRepository.save(down);
             }
 
@@ -204,16 +219,45 @@ public class SchedulerService {
                 if(!StringUtils.startsWith(path, File.separator)) {
                     path = File.separator + path;
                 }
-                List<String> inners = CommonUtils.removeDirectory(path, down.getName(), settingRepository);
-             
+                JSONArray jsonArray = fileStationService.list(path, down.getName());
+                List<String> srcs = new ArrayList<>();
+                if(jsonArray != null) {
+                    String[] exts = {};
+                    Optional<Setting> exceptExtSetting = settingRepository.findByKey("EXCEPT_EXT");
+                    if(exceptExtSetting.isPresent()) {
+                        exts = StringUtils.split(StringUtils.lowerCase(exceptExtSetting.get().getValue()), ",");
+                    }
+
+                    for(int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject object = jsonArray.getJSONObject(i);
+
+                        if(object.has("path")) {
+                            String temp = object.getString("path");
+                            if(!StringUtils.containsAny(temp, exts)) {
+                                srcs.add(temp);
+                            }
+                        }
+                    }
+
+                    if(srcs.size() > 0) {
+                        fileStationService.move(StringUtils.join(srcs, ","), path);
+                        fileStationService.delete(path + File.separator + down.getName());
+                    }
+                }
+
                 if (!StringUtils.isBlank(down.getRename())) {
                     logger.debug("getRename: " + down.getRename());
-                    if(inners == null) {
-                        CommonUtils.renameFile(path, down.getName(), down.getRename());
+                    if(jsonArray == null) {
+                        fileStationService.rename(path + File.separator + down.getName(), path + File.separator + down.getRename());
                     } else {
-                        for(String name: inners) {
-                            if(StringUtils.contains(down.getName(), name)) {
-                                CommonUtils.renameFile(path, name, down.getRename());
+                        for(int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject object = jsonArray.getJSONObject(i);
+                            if(object.has("name")){
+                                String name = object.getString("name");
+                                if(StringUtils.contains(name, down.getName())) {
+                                    fileStationService.rename(path + File.separator + name, 
+                                        down.getRename() + "." + FilenameUtils.getExtension(name));
+                                }
                             }
                         }
                     }
