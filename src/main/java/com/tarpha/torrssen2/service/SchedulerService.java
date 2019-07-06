@@ -201,7 +201,7 @@ public class SchedulerService {
 
                 logger.debug("removeDirectory");
                 String path = down.getDownloadPath();
-                if(StringUtils.startsWith(path, File.separator)) {
+                if(!StringUtils.startsWith(path, File.separator)) {
                     path = File.separator + path;
                 }
                 List<String> inners = CommonUtils.removeDirectory(path, down.getName(), settingRepository);
