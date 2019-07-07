@@ -179,9 +179,9 @@ export default {
           this.successClass = 'o-circle c-container__circle o-circle__sign--failure'
           if (ret.data === -2) {
             this.$store.commit('download/setText', '&nbsp<span style=\'color: red\'>중복</span>')
-          } else if (ret.data === 0) {
-            this.successClass = 'o-circle c-container__circle o-circle__sign--success'
-            this.$store.commit('download/setText', '&nbsp<span style=\'color: green\'>성공(일반파일)</span>')
+          // } else if (ret.data === 0) {
+          //   this.successClass = 'o-circle c-container__circle o-circle__sign--success'
+          //   this.$store.commit('download/setText', '&nbsp<span style=\'color: green\'>성공(일반파일)</span>')
           } else {
             this.$store.commit('download/setText', '&nbsp<span style=\'color: red\'>실패</span>')
           }

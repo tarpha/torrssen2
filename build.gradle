@@ -25,6 +25,7 @@ ext {
 	commonsCodecVersion = '1.12'
 	jsonVersion = '20180813'
 	jsonSmartVersion = '2.3'
+	asyncHttpClientVersion = '2.10.1'
 	btVersion = '1.8'
 }
 
@@ -67,6 +68,8 @@ dependencies {
 	implementation "commons-codec:commons-codec:${commonsCodecVersion}"
 
 	implementation "net.minidev:json-smart:${jsonSmartVersion}"
+
+	implementation "org.asynchttpclient:async-http-client:${asyncHttpClientVersion}"
 
 	implementation "com.github.atomashpolskiy:bt-core:${btVersion}"
 	implementation "com.github.atomashpolskiy:bt-http-tracker-client:${btVersion}"

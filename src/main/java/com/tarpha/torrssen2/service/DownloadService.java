@@ -58,6 +58,8 @@ public class DownloadService {
             List<DownloadList> list = transmissionService.torrentGet(ids);
             if(list.size() > 0) {
                 return list.get(0);
+            } else {
+                return httpDownloadService.getInfo(id);
             }
         } else if(StringUtils.equals(app, "EMBEDDED")) {
             btService.check();
@@ -116,6 +118,15 @@ public class DownloadService {
                 || StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(download.getUri()), "torrent")) {
                 ret = (long)transmissionService.torrentAdd(download.getUri(), download.getDownloadPath());
             } else {
+                Optional<DownloadList> optionalSeq = downloadListRepository.findTopByOrderByIdDesc();
+                if (optionalSeq.isPresent()) {
+                    Long id = optionalSeq.get().getId() + 100L;                    
+                    logger.debug("id: " + id);
+                    ret = id;
+                } else {
+                    ret = 100L;
+                }
+                download.setId(ret);
                 httpDownloadService.createTransmission(download);
             }
             
