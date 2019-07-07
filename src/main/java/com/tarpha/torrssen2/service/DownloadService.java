@@ -9,6 +9,7 @@ import com.tarpha.torrssen2.domain.WatchList;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.WatchListRepository;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,9 @@ public class DownloadService {
 
     @Autowired
     private TransmissionService transmissionService;
+
+    @Autowired
+    private HttpDownloadService httpDownloadService;
 
     @Autowired
     private BtService btService;
@@ -108,7 +112,13 @@ public class DownloadService {
                 }
             }
         } else if(StringUtils.equals(app, "TRANSMISSION")) {
-            ret = (long)transmissionService.torrentAdd(download.getUri(), download.getDownloadPath());
+            if (StringUtils.startsWith(download.getUri(), "magnet")
+                || StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(download.getUri()), "torrent")) {
+                ret = (long)transmissionService.torrentAdd(download.getUri(), download.getDownloadPath());
+            } else {
+                httpDownloadService.createTransmission(download);
+            }
+            
         } else if(StringUtils.equals(app, "EMBEDDED")) {
             ret = btService.create(download.getUri(), download.getDownloadPath(), download.getName());
         }

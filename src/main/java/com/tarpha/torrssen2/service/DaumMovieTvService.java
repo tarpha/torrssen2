@@ -12,6 +12,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -50,11 +51,14 @@ public class DaumMovieTvService {
             logger.debug(json.toString());
 
             if(json.has("items")) {
-                if(json.getJSONArray("items").length() > 0) {
-                    String[] arr = StringUtils.split(json.getJSONArray("items").getString(0), "|");
+                JSONArray jarr = json.getJSONArray("items");
+                for(int i = 0; i < jarr.length(); i++) {
+                    String[] arr = StringUtils.split(jarr.getString(i), "|");
 
                     if(arr.length > 2) {
-                        return arr[2];
+                        if(StringUtils.containsIgnoreCase(arr[0], query)) {
+                            return arr[2];
+                        }
                     }
                 }   
             }

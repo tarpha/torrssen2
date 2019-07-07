@@ -101,15 +101,18 @@
       })
       if (stompClient.connected() === true) {
         this.subscription = this.subscribe()
+        this.subscribeDownload = this.subscribeDownload()
       } else {
         this.intervalObj = setInterval(() => {
           if (stompClient.connected() === false) {
             if (typeof this.subscription.unsubscribe === 'function') {
               this.subscription.unsubscribe()
+              this.subscribeDownload.unsubscribe()
             }
           }
           if (stompClient.connected() === true) {
             this.subscription = this.subscribe()
+            this.subscribeDownload = this.subscribeDownload()
             clearInterval(this.intervalObj)
           }
         }, 1000)
@@ -119,6 +122,7 @@
       return {
         intervalObj: '',
         subscription: '',
+        subscribeDownload: '',
         loading: false,
         funcName: 'list',
         page: 0,
@@ -184,6 +188,17 @@
             this.executeToggle()
             this.$store.commit('snackbar/show', '목록이 갱신되었습니다.')
           }
+        })
+      },
+      subscribeDownload: function () {
+        return stompClient.subscribe('/topic/feed/download', frame => {
+          let json = JSON.parse(frame.body)
+          this.$store.commit('download/toggle', {
+            active: true,
+            stop: false,
+            vueIndex: json.vueIndex,
+            id: json.id
+          })
         })
       },
       executeToggle: function () {
