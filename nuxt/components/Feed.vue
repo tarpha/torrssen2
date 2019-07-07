@@ -13,12 +13,15 @@
 			</v-list-tile-avatar>
 
 			<v-list-tile-content>
-				<v-list-tile-title v-html="item.rssTitle">
+				<v-list-tile-title icon>
+          <v-icon v-if="item.link && !item.link.startsWith('magnet')">attachment</v-icon>
+          {{ item.rssTitle }}
         </v-list-tile-title>
 				<v-list-tile-sub-title 
 					v-html="getSubTitle(item)"
 				></v-list-tile-sub-title>
-				<v-list-tile-sub-title v-html="item.rssSite">
+				<v-list-tile-sub-title>
+          {{ item.rssSite }}
 				</v-list-tile-sub-title>
 			</v-list-tile-content>
 
