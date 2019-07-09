@@ -7,9 +7,11 @@ import java.util.Optional;
 import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.domain.RssFeed;
 import com.tarpha.torrssen2.domain.RssList;
+import com.tarpha.torrssen2.domain.WatchList;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.RssFeedRepository;
 import com.tarpha.torrssen2.repository.RssListRepository;
+import com.tarpha.torrssen2.repository.WatchListRepository;
 import com.tarpha.torrssen2.service.DownloadService;
 import com.tarpha.torrssen2.service.RssLoadService;
 
@@ -47,6 +49,9 @@ public class RssController {
     private DownloadListRepository downloadListRepository;
 
     @Autowired
+    private WatchListRepository watchListRepository;
+
+    @Autowired
     private RssLoadService rssLoadService;
 
     @Autowired
@@ -59,6 +64,16 @@ public class RssController {
                 feed.setDownloadId(download.get().getId());
                 feed.setDownloading(true);
             }
+        }
+
+        Optional<DownloadList> downloaded = downloadListRepository.findFirstByUriAndDoneOrderByCreateDtDesc(feed.getLink(), true);
+        if(downloaded.isPresent()) {
+            feed.setDownloaded(downloaded.get().getDone());
+        }
+
+        Optional<WatchList> optionalWatchList = watchListRepository.findByTitleRegex(feed.getTitle(), feed.getRssQuality());
+        if(optionalWatchList.isPresent()) {
+            feed.setWatch(true);
         }
     }
 

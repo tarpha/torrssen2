@@ -173,7 +173,7 @@ public class DownloadService {
             if(down.isPresent()) {
                 try {
                     DownloadList temp = down.get();
-                    temp.setDone(true);
+                    temp.setCancel(true);
                     downloadListRepository.save(temp);
                     ret = temp.getVueItemIndex();
                 } catch (NullPointerException e) {

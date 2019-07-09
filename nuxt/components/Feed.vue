@@ -14,12 +14,15 @@
 
 			<v-list-tile-content>
 				<v-list-tile-title icon>
+          <v-icon v-if="item.watch" color="yellow darken-3">star</v-icon>
+          <v-icon v-if="item.downloaded" color="red darken-3">done</v-icon>
           <v-icon v-if="item.link && !item.link.startsWith('magnet')">attachment</v-icon>
           {{ item.rssTitle }}
         </v-list-tile-title>
-				<v-list-tile-sub-title 
+				<v-list-tile-sub-title
 					v-html="getSubTitle(item)"
-				></v-list-tile-sub-title>
+				>
+        </v-list-tile-sub-title>
 				<v-list-tile-sub-title>
           {{ item.rssSite }}
 				</v-list-tile-sub-title>
@@ -76,17 +79,16 @@ export default {
     index: {
       type: Number,
       required: false
+    },
+    dark: {
+      type: Boolean,
+      required: true
     }
   },
   data () {
     return {
       intervalObj: '',
       stop: false
-    }
-  },
-  computed: {
-    dark: function () {
-      return this.$store.state.dark
     }
   },
   watch: {
@@ -141,7 +143,6 @@ export default {
       }
     },
     getSubTime: function (time) {
-      console.log(time)
       const now = new Date()
       const dt = Date.parse(time.substring(0, 23) + 'Z')
       const diff = now - dt

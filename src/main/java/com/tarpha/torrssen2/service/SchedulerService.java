@@ -214,49 +214,56 @@ public class SchedulerService {
                     }
                 }
 
-                logger.debug("removeDirectory");
-                String path = down.getDownloadPath();
-                if(!StringUtils.startsWith(path, File.separator)) {
-                    path = File.separator + path;
-                }
-                JSONArray jsonArray = fileStationService.list(path, down.getName());
-                List<String> srcs = new ArrayList<>();
-                if(jsonArray != null) {
-                    String[] exts = {};
-                    Optional<Setting> exceptExtSetting = settingRepository.findByKey("EXCEPT_EXT");
-                    if(exceptExtSetting.isPresent()) {
-                        exts = StringUtils.split(StringUtils.lowerCase(exceptExtSetting.get().getValue()), ",");
-                    }
+                Optional<Setting> delDirSetting = settingRepository.findByKey("DEL_DIR");
+        
+                if (delDirSetting.isPresent()) {
+                    if(Boolean.parseBoolean(delDirSetting.get().getValue()) && !StringUtils.isEmpty(down.getName())) {
 
-                    for(int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject object = jsonArray.getJSONObject(i);
+                        logger.debug("removeDirectory");
+                        String path = down.getDownloadPath();
+                        if(!StringUtils.startsWith(path, File.separator)) {
+                            path = File.separator + path;
+                        }
+                        JSONArray jsonArray = fileStationService.list(path, down.getName());
+                        List<String> srcs = new ArrayList<>();
+                        if(jsonArray != null) {
+                            String[] exts = {};
+                            Optional<Setting> exceptExtSetting = settingRepository.findByKey("EXCEPT_EXT");
+                            if(exceptExtSetting.isPresent()) {
+                                exts = StringUtils.split(StringUtils.lowerCase(exceptExtSetting.get().getValue()), ",");
+                            }
 
-                        if(object.has("path")) {
-                            String temp = object.getString("path");
-                            if(!StringUtils.containsAny(temp, exts)) {
-                                srcs.add(temp);
+                            for(int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject object = jsonArray.getJSONObject(i);
+
+                                if(object.has("path")) {
+                                    String temp = object.getString("path");
+                                    if(!StringUtils.containsAny(temp, exts)) {
+                                        srcs.add(temp);
+                                    }
+                                }
+                            }
+
+                            if(srcs.size() > 0) {
+                                fileStationService.move(StringUtils.join(srcs, ","), path);
+                                fileStationService.delete(path + File.separator + down.getName());
                             }
                         }
-                    }
 
-                    if(srcs.size() > 0) {
-                        fileStationService.move(StringUtils.join(srcs, ","), path);
-                        fileStationService.delete(path + File.separator + down.getName());
-                    }
-                }
-
-                if (!StringUtils.isBlank(down.getRename())) {
-                    logger.debug("getRename: " + down.getRename());
-                    if(jsonArray == null) {
-                        fileStationService.rename(path + File.separator + down.getName(), path + File.separator + down.getRename());
-                    } else {
-                        for(int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject object = jsonArray.getJSONObject(i);
-                            if(object.has("name")){
-                                String name = object.getString("name");
-                                if(StringUtils.contains(name, down.getName())) {
-                                    fileStationService.rename(path + File.separator + name, 
-                                        down.getRename() + "." + FilenameUtils.getExtension(name));
+                        if (!StringUtils.isBlank(down.getRename())) {
+                            logger.debug("getRename: " + down.getRename());
+                            if(jsonArray == null) {
+                                fileStationService.rename(path + File.separator + down.getName(), path + File.separator + down.getRename());
+                            } else {
+                                for(int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject object = jsonArray.getJSONObject(i);
+                                    if(object.has("name")){
+                                        String name = object.getString("name");
+                                        if(StringUtils.contains(name, down.getName())) {
+                                            fileStationService.rename(path + File.separator + name, 
+                                                down.getRename() + "." + FilenameUtils.getExtension(name));
+                                        }
+                                    }
                                 }
                             }
                         }

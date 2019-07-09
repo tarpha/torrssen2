@@ -12,14 +12,14 @@
         v-model="searchText"
         hide-details
         prepend-inner-icon="search"
-        :background-color="dark !== true ? '#f5f5f5' : '#333333'"
+        :background-color="dark ? '#333333' : '#f5f5f5'"
         solo
         clearable
         flat
         @keyup.enter="submit"
         @click:clear="clear"
       ></v-text-field>
-     <v-menu offset-y :close-on-content-click="false">
+     <v-menu offset-y :close-on-content-click="false" max-height="83%">
         <template v-slot:activator="{ on }">
           <v-btn
             icon
@@ -116,6 +116,12 @@ export default {
     NuxtDownloadListDialog,
     NuxtDownloadStatusDialog
   },
+  props: {
+    dark: {
+      type: Boolean,
+      required: true
+    }
+  },
   data () {
     return {
       rss: [],
@@ -130,11 +136,6 @@ export default {
           icon: 'rss_feed',
           method: () => this.$store.commit('setting/setShowRssList', true)
         },
-        // {
-        //   title: 'RSS Feed 관리',
-        //   icon: 'list',
-        //   method: () => this.$store.commit('setting/setShowRssFeed', true)
-        // },
         {
           title: '자동 다운로드 관리',
           icon: 'playlist_add',
@@ -181,9 +182,6 @@ export default {
       set (array) {
         this.$store.commit('setting/setRssList', array)
       }
-    },
-    dark: function () {
-      return this.$store.state.dark
     }
   },
   watch: {

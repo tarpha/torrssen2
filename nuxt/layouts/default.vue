@@ -1,28 +1,9 @@
 <template>
-  <v-app :dark="dark">
-    <v-content>
-      <nuxt-toolbar />
-      <nuxt />
-    </v-content>
-  </v-app>
+  <nuxt />
 </template>
 
 <script>
-  import NuxtToolbar from '~/components/Toolbar'
-
   export default {
-    components: {
-      NuxtToolbar
-    },
-    data () {
-      return {
-      }
-    },
-    computed: {
-      dark: function () {
-        return this.$store.state.dark
-      }
-    }
   }
 </script>
 

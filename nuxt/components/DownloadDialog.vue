@@ -24,8 +24,7 @@
           ></v-text-field>
         </template>
       </v-toolbar>
-			<!-- <v-card-title class="headline" v-html="'다운로드 요청' + $store.state.download.text"></v-card-title> -->
-
+			
 			<div v-if="$store.state.download.result">
         <div :class="successClass">
           <div class="o-circle__sign"></div>  
@@ -34,21 +33,18 @@
       <div v-else>
 			<v-card flat>
        	<v-list two-line>
-          <!-- <v-subheader style="text-weight: bold">
-            <v-checkbox v-model="checkWatch" label="자동 다운로드" color="primary"></v-checkbox>
-          </v-subheader> -->
 					<v-list-tile v-for="(item, index) in paths" :key="index"
-						@click="if(item.useSeason === false && item.useTitle === false) download(item.path)"
+						@click="if(!edit) download(item.path)"
 					>
 						<v-list-tile-action >
 							<v-icon 
                 :color="dark !== true ? 'blue-grey darken-2' : 'grey lighten-4'"
-                @click="if(item.useSeason === true || item.useTitle === true) download(item.path)"
+                @click="if(edit) download(item.path)"
               >
                 get_app
               </v-icon>
 						</v-list-tile-action>
-						<v-list-tile-content v-if="!item.useSeason && !item.useTitle">
+						<v-list-tile-content v-if="!edit">
 							<v-list-tile-title>{{ item.name }}</v-list-tile-title>
 							<v-list-tile-sub-title>{{ item.path }}</v-list-tile-sub-title>
 						</v-list-tile-content>
@@ -78,21 +74,20 @@
               ></v-text-field>
 						</v-list-tile-content>
 					</v-list-tile>
-				</v-list>
+          <v-list-tile>
+						<v-list-tile-action>
+							<v-checkbox 
+                v-model="edit"
+                color="primary"
+              ></v-checkbox>
+						</v-list-tile-action>
+						<v-list-tile-content>
+              <v-list-tile-title>경로 편집</v-list-tile-title>
+						</v-list-tile-content>
+					</v-list-tile>
+        </v-list>
 			</v-card>
       </div>
-			<!-- <v-card-actions>
-				<v-spacer></v-spacer>
-
-				<v-btn
-          v-if="$store.state.download.result === false"
-					color="primary"
-					flat="flat"
-					@click="close"
-				>
-					닫기
-				</v-btn>
-			</v-card-actions> -->
 
 		</v-card>
 	</v-dialog>
@@ -108,7 +103,8 @@ export default {
       seasonPath: '',
       customPath: '',
       title: '',
-      paths: []
+      paths: [],
+      edit: false
     }
   },
   computed: {
@@ -144,6 +140,7 @@ export default {
         this.seasonPath = ''
         this.customPath = ''
       } else {
+        this.edit = false
         this.paths = JSON.parse(JSON.stringify(this.pathList))
         this.title = this.$store.state.download.data.rssTitle
       }
@@ -158,7 +155,6 @@ export default {
       axios.post('/api/download/create', {
         'name': this.$store.state.download.data.title,
         'uri': this.$store.state.download.data.link,
-        // 'rssTitle': this.$store.state.download.data.rssTitle,
         'rssTitle': this.title,
         'rssReleaseGroup': this.$store.state.download.data.rssReleaseGroup,
         'vueItemIndex': this.$store.state.download.index,
@@ -179,9 +175,6 @@ export default {
           this.successClass = 'o-circle c-container__circle o-circle__sign--failure'
           if (ret.data === -2) {
             this.$store.commit('download/setText', '&nbsp<span style=\'color: red\'>중복</span>')
-          // } else if (ret.data === 0) {
-          //   this.successClass = 'o-circle c-container__circle o-circle__sign--success'
-          //   this.$store.commit('download/setText', '&nbsp<span style=\'color: green\'>성공(일반파일)</span>')
           } else {
             this.$store.commit('download/setText', '&nbsp<span style=\'color: red\'>실패</span>')
           }

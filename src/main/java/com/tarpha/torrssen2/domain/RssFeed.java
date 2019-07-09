@@ -50,6 +50,10 @@ public class RssFeed {
     private Boolean downloading = false;
 
     private Boolean tvSeries = true;
+
+    private Boolean downloaded = false;
+
+    private Boolean watch = false;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();

@@ -72,7 +72,7 @@ public class HttpDownloadService {
                 if(StringUtils.containsIgnoreCase(str, "filename=")) {
                     logger.debug(str);
                     String[] attachment = StringUtils.split(str, "=");
-                    File directory = new File(download.getDownloadPath());
+                    File directory = new File(path);
     
                     if(!directory.isDirectory()) {
                         FileUtils.forceMkdir(directory);

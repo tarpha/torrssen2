@@ -42,6 +42,8 @@ public class DownloadList {
 
     private Boolean done = false;
 
+    private Boolean cancel = false;
+
     private Boolean isFake = false;
 
     private Boolean isSentAlert = false;

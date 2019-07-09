@@ -1,49 +1,53 @@
 <template>
-  <div>
-    <nuxt-download-dialog />
-    <v-snackbar
-      v-model="show"
-      :timeout=3500
-      top
-    >
-      {{ this.$store.state.snackbar.text }}
-      <v-btn
-        color="pink"
-        flat
-        @click="$store.commit('snackbar/setShow', false)"
+  <v-app :dark="dark">
+    <v-content>
+      <nuxt-toolbar :dark="dark"/>
+      <nuxt-download-dialog />
+      <v-snackbar
+        v-model="show"
+        :timeout=3500
+        top
       >
-        Close
-      </v-btn>
-    </v-snackbar>
-    <v-layout row>
-      <v-flex xs12 sm6 offset-sm3>
-        <v-card flat>
-          <v-list three-line>
-            <template v-for="(item, index) in items">
-              <nuxt-feed :item="item" :index="index" :stomp="stomps[index]" :key="index" />
-            </template>
-          </v-list>
-        </v-card>
-        <v-alert
-          v-if="items.length === 0"
-          :value="true"
-          type="info"
+        {{ this.$store.state.snackbar.text }}
+        <v-btn
+          color="pink"
+          flat
+          @click="$store.commit('snackbar/setShow', false)"
         >
-          검색 결과가 없습니다.
-        </v-alert>
-        <div xs12 sm4 text-xs-center style="text-align:center">
-          <v-btn 
-            flat
-            :loading="loading"
-            :disabled="loading"
-            @click="next()"
+          Close
+        </v-btn>
+      </v-snackbar>
+      <v-layout row>
+        <v-flex xs12 sm6 offset-sm3>
+          <v-card flat>
+            <v-list three-line>
+              <template v-for="(item, index) in items">
+                <nuxt-feed :item="item" :index="index" :stomp="stomps[index]" :key="index" :dark="dark"/>
+              </template>
+            </v-list>
+          </v-card>
+          <v-alert
+            v-if="items.length === 0"
+            :value="true"
+            type="info"
           >
-            더 보기
-          </v-btn>
-        </div>
-      </v-flex>
-    </v-layout>
-  </div>
+            검색 결과가 없습니다.
+          </v-alert>
+          <div xs12 sm4 text-xs-center style="text-align:center">
+            <v-btn 
+              flat
+              block
+              :loading="loading"
+              :disabled="loading"
+              @click="next()"
+            >
+              더 보기
+            </v-btn>
+          </div>
+        </v-flex>
+      </v-layout>
+    </v-content>
+  </v-app>
 </template>
 
 <script>
@@ -51,11 +55,13 @@
   import stompClient from '~/plugins/stomp'
   import NuxtFeed from '~/components/Feed'
   import NuxtDownloadDialog from '~/components/DownloadDialog'
+  import NuxtToolbar from '~/components/Toolbar'
 
   export default {
     components: {
       NuxtFeed,
-      NuxtDownloadDialog
+      NuxtDownloadDialog,
+      NuxtToolbar
     },
     computed: {
       show: {
@@ -74,6 +80,9 @@
       },
       download () {
         return this.$store.state.download.download
+      },
+      darkTheme () {
+        return this.$store.state.dark
       }
     },
     watch: {
@@ -84,6 +93,9 @@
         this.stomps[this.download.vueIndex].active = this.download.active
         this.stomps[this.download.vueIndex].stop = this.download.stop
         this.stomps[this.download.vueIndex].id = this.download.id
+      },
+      darkTheme: function (val) {
+        this.dark = val
       }
     },
     mounted () {
@@ -96,7 +108,6 @@
         this.$store.commit('setDark', res.data === 'TRUE')
       })
       axios.get('/api/setting/version').then(res => {
-        console.log(res)
         this.$store.commit('setVesrion', res.data)
       })
       if (stompClient.connected() === true) {
@@ -148,9 +159,11 @@
           id: obj.downloading === true ? obj.downloadId : 0
         })
       }
+      const theme = await axios.get('/api/setting/DARK_THEME')
       return {
         items: res.data.content,
-        stomps: stomps
+        stomps: stomps,
+        dark: theme.data === 'TRUE'
       }
     },
     methods: {

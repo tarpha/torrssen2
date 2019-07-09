@@ -46,7 +46,7 @@ SELECT 'DONE_DELETE' key
      , CURRENT_TIMESTAMP create_dt
 UNION ALL
 SELECT 'DOWNLOAD_APP' key
-     , 'EMBEDDED' value
+     , 'TRANSMISSION' value
      , 'app' type
      , true required
      , '기본 다운로드 앱'
