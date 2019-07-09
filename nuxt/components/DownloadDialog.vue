@@ -71,6 +71,7 @@
                 v-model="customPath" 
                 label="사용자 지정 경로"
                 style="width: 90%"
+                @keyup.enter="download(customPath)"
               ></v-text-field>
 						</v-list-tile-content>
 					</v-list-tile>
