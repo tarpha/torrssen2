@@ -47,6 +47,12 @@ public class DownloadList {
     private Boolean isFake = false;
 
     private Boolean isSentAlert = false;
+
+    private Boolean task = false;
+
+    private String taskId;
+
+    private String deletePath;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();

@@ -122,27 +122,30 @@ public class SchedulerService {
         for (DownloadList down: list) {
             // SEED: 6  # Seeding
             if(down.getStatus() == 6) {
-                downloadListRepository.save(down);
+                Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
+                if(rdown.isPresent()) {
+                    downloadListRepository.save(down);
 
-                ids.add(down.getId());
-                if(sendTelegram && !transmissionCallback) {
-                    sendTelegram(down);
-                }
+                    ids.add(down.getId());
+                    if(sendTelegram && !transmissionCallback) {
+                        sendTelegram(down);
+                    }
 
-                logger.debug("removeDirectory");
-                List<String> inners = CommonUtils.removeDirectory(down.getDownloadPath(), down.getName(), settingRepository);
-             
-                Optional<DownloadList> optionalDown = downloadListRepository.findById(down.getId());
-                if(optionalDown.isPresent()) {
-                    String rename = optionalDown.get().getRename();
-                    if (!StringUtils.isBlank(rename)) {
-                        logger.debug("getRename: " + rename);
-                        if(inners == null) {
-                            CommonUtils.renameFile(down.getDownloadPath(), down.getName(), rename);
-                        } else {
-                            for(String name: inners) {
-                                if(StringUtils.contains(down.getName(), name)) {
-                                    CommonUtils.renameFile(down.getDownloadPath(), name, rename);
+                    logger.debug("removeDirectory");
+                    List<String> inners = CommonUtils.removeDirectory(down.getDownloadPath(), down.getName(), settingRepository);
+                
+                    Optional<DownloadList> optionalDown = downloadListRepository.findById(down.getId());
+                    if(optionalDown.isPresent()) {
+                        String rename = optionalDown.get().getRename();
+                        if (!StringUtils.isBlank(rename)) {
+                            logger.debug("getRename: " + rename);
+                            if(inners == null) {
+                                CommonUtils.renameFile(down.getDownloadPath(), down.getName(), rename);
+                            } else {
+                                for(String name: inners) {
+                                    if(StringUtils.contains(down.getName(), name)) {
+                                        CommonUtils.renameFile(down.getDownloadPath(), name, rename);
+                                    }
                                 }
                             }
                         }
@@ -197,71 +200,75 @@ public class SchedulerService {
             }
 
             if(down.getDone()) {
-                //Telegram Message를 발송한다.
-                if(sendTelegram) {
-                    sendTelegram(down);
-                }
-
                 Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
                 if(rdown.isPresent()) {
+                    DownloadList tdown = rdown.get();
+                    //Telegram Message를 발송한다.
+                    if(sendTelegram) {
+                        sendTelegram(down);
+                    }
                     // 완료 시 삭제 여부
                     if(doneDelete) {
                         logger.info("Remove Torrent: " + down.getFileName());
                         
                         List<String> ids = new ArrayList<String>();
-                        ids.add(rdown.get().getDbid());
+                        ids.add(tdown.getDbid());
                         downloadStationService.delete(ids);
                     }
-                }
 
-                Optional<Setting> delDirSetting = settingRepository.findByKey("DEL_DIR");
+                    Optional<Setting> delDirSetting = settingRepository.findByKey("DEL_DIR");
         
-                if (delDirSetting.isPresent()) {
-                    if(Boolean.parseBoolean(delDirSetting.get().getValue()) && !StringUtils.isEmpty(down.getName())) {
+                    if (delDirSetting.isPresent()) {
+                        if(Boolean.parseBoolean(delDirSetting.get().getValue()) && !StringUtils.isEmpty(down.getName())) {
 
-                        logger.debug("removeDirectory");
-                        String path = down.getDownloadPath();
-                        if(!StringUtils.startsWith(path, File.separator)) {
-                            path = File.separator + path;
-                        }
-                        JSONArray jsonArray = fileStationService.list(path, down.getName());
-                        List<String> srcs = new ArrayList<>();
-                        if(jsonArray != null) {
-                            String[] exts = {};
-                            Optional<Setting> exceptExtSetting = settingRepository.findByKey("EXCEPT_EXT");
-                            if(exceptExtSetting.isPresent()) {
-                                exts = StringUtils.split(StringUtils.lowerCase(exceptExtSetting.get().getValue()), ",");
+                            logger.debug("removeDirectory");
+                            String path = down.getDownloadPath();
+                            if(!StringUtils.startsWith(path, File.separator)) {
+                                path = File.separator + path;
                             }
+                            JSONArray jsonArray = fileStationService.list(path, down.getName());
+                            List<String> srcs = new ArrayList<>();
+                            if(jsonArray != null) {
+                                String[] exts = {};
+                                Optional<Setting> exceptExtSetting = settingRepository.findByKey("EXCEPT_EXT");
+                                if(exceptExtSetting.isPresent()) {
+                                    exts = StringUtils.split(StringUtils.lowerCase(exceptExtSetting.get().getValue()), ",");
+                                }
 
-                            for(int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject object = jsonArray.getJSONObject(i);
+                                for(int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject object = jsonArray.getJSONObject(i);
 
-                                if(object.has("path")) {
-                                    String temp = object.getString("path");
-                                    if(!StringUtils.containsAny(temp, exts)) {
-                                        srcs.add(temp);
+                                    if(object.has("path")) {
+                                        String temp = object.getString("path");
+                                        if(!StringUtils.containsAny(temp, exts)) {
+                                            srcs.add(temp);
+                                        }
                                     }
+                                }
+
+                                if(srcs.size() > 0) {
+                                    String taskId = fileStationService.move(StringUtils.join(srcs, ","), path);
+                                    tdown.setTask(true);
+                                    tdown.setTaskId(taskId);
+                                    tdown.setDeletePath(path + File.separator + down.getName());
+                                    downloadListRepository.save(tdown);
+                                    // fileStationService.delete(path + File.separator + down.getName());
                                 }
                             }
 
-                            if(srcs.size() > 0) {
-                                fileStationService.move(StringUtils.join(srcs, ","), path);
-                                fileStationService.delete(path + File.separator + down.getName());
-                            }
-                        }
-
-                        if (!StringUtils.isBlank(down.getRename())) {
-                            logger.debug("getRename: " + down.getRename());
-                            if(jsonArray == null) {
-                                fileStationService.rename(path + File.separator + down.getName(), path + File.separator + down.getRename());
-                            } else {
-                                for(int i = 0; i < jsonArray.length(); i++) {
-                                    JSONObject object = jsonArray.getJSONObject(i);
-                                    if(object.has("name")){
-                                        String name = object.getString("name");
-                                        if(StringUtils.contains(name, down.getName())) {
-                                            fileStationService.rename(path + File.separator + name, 
-                                                down.getRename() + "." + FilenameUtils.getExtension(name));
+                            if (!StringUtils.isBlank(down.getRename())) {
+                                logger.debug("getRename: " + down.getRename());
+                                if(jsonArray == null) {
+                                    fileStationService.rename(path + File.separator + down.getName(), path + File.separator + down.getRename());
+                                } else {
+                                    for(int i = 0; i < jsonArray.length(); i++) {
+                                        JSONObject object = jsonArray.getJSONObject(i);
+                                        if(object.has("name")){
+                                            String name = object.getString("name");
+                                            if(StringUtils.contains(name, down.getName())) {
+                                                fileStationService.rename(path + File.separator + name, 
+                                                    down.getRename() + "." + FilenameUtils.getExtension(name));
+                                            }
                                         }
                                     }
                                 }
@@ -269,6 +276,17 @@ public class SchedulerService {
                         }
                     }
                 }
+            }
+        }
+
+        List<DownloadList> tasks = downloadListRepository.findByTask(true);
+        for(DownloadList task: tasks) {
+            logger.debug("moveDone: " + task.getTaskId());
+            if(fileStationService.moveTask(task.getTaskId())) {
+                logger.debug("finished");
+                fileStationService.delete(task.getDeletePath());
+                task.setTask(false);
+                downloadListRepository.save(task);
             }
         }
     }

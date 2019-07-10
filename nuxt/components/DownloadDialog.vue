@@ -5,24 +5,11 @@
 		max-width="550"
 	>
 		<v-card style="overflow: hidden;">
-      <v-toolbar flat extended>
+      <v-toolbar flat>
         <v-btn icon @click="close">
           <v-icon>close</v-icon>
         </v-btn>
         <v-toolbar-title v-html="'다운로드 요청' + $store.state.download.text"></v-toolbar-title>
-        <template v-slot:extension>
-          <v-checkbox 
-            v-model="checkWatch"
-            :label="checkWatch ? '' : '자동 다운로드'" 
-            color="primary"
-          ></v-checkbox>
-          <v-text-field 
-            v-if="checkWatch"
-            v-model="title"
-            label="자동 다운로드 포함 제목"
-            style="width: 90%"
-          ></v-text-field>
-        </template>
       </v-toolbar>
 			
 			<div v-if="$store.state.download.result">
@@ -33,6 +20,25 @@
       <div v-else>
 			<v-card flat>
        	<v-list two-line>
+          <v-list-tile>
+            <v-list-tile-action >
+              <v-checkbox 
+                v-model="checkWatch"
+                color="primary"
+              ></v-checkbox>
+            </v-list-tile-action>
+            <v-list-tile-content v-if="!checkWatch">
+              <v-list-tile-title>자동 다운로드</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-content v-else>
+              <v-text-field 
+                v-if="checkWatch"
+                v-model="title"
+                label="자동 다운로드 포함 제목"
+                style="width: 90%"
+              ></v-text-field>
+            </v-list-tile-content>
+          </v-list-tile>
 					<v-list-tile v-for="(item, index) in paths" :key="index"
 						@click="if(!edit) download(item.path)"
 					>

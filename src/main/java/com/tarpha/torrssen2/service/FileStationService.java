@@ -94,9 +94,9 @@ public class FileStationService extends SynologyApiUtils {
         return null;
     }
 
-    public boolean move(String path, String dest) {
+    public String move(String path, String dest) {
         logger.info("File Station CopyMove");
-        boolean ret = false;
+        String taskId = null;
 
         try {
             baseUrl = "http://" +
@@ -119,7 +119,49 @@ public class FileStationService extends SynologyApiUtils {
                 logger.debug(resJson.toString());
                 if(resJson.has("success")) {
                     if(Boolean.parseBoolean(resJson.get("success").toString())) {
-                        ret = true;
+                        if(resJson.has("data")) {
+                            if(resJson.getJSONObject("data").has("taskid")) {
+                                taskId = resJson.getJSONObject("data").getString("taskid");
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (URISyntaxException | ParseException | JSONException e) {
+            logger.error(e.getMessage());
+        } 
+
+        return taskId;
+    }
+
+    public boolean moveTask(String taskId) {
+        boolean ret = false;
+
+        try {
+            baseUrl = "http://" +
+                settingService.getSettingValue("DS_HOST") +
+                ":" + 
+                settingService.getSettingValue("DS_PORT") +
+                "/webapi";
+
+            URIBuilder builder = new URIBuilder(baseUrl + "/entry.cgi");
+            builder.setParameter("api", "SYNO.FileStation.CopyMove").setParameter("version", "3")
+                    .setParameter("method", "status").setParameter("taskid", taskId);
+
+            JSONObject resJson = executeGet(builder);
+
+            logger.debug(builder.toString());
+
+            if(resJson != null) {
+                logger.debug(resJson.toString());
+                if(resJson.has("success")) {
+                    if(Boolean.parseBoolean(resJson.get("success").toString())) {
+                        if(resJson.has("data")) {
+                            if(resJson.getJSONObject("data").has("finished")) {
+                                ret = resJson.getJSONObject("data").getBoolean("finished");
+                            }
+                        }
                     }
                 }
             }
