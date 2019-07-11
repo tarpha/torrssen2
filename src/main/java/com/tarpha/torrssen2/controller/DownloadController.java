@@ -69,5 +69,11 @@ public class DownloadController {
         }
         return null;
     }
-    
+
+    @GetMapping(value = "/conn-test")
+    public boolean connTest(@RequestParam("app") String app, @RequestParam("host") String host,
+        @RequestParam("port") String port, @RequestParam("id") String id, @RequestParam("pwd") String pwd) {
+        return downloadService.connTest(app, host, port, id, pwd);
+    }
+
 }

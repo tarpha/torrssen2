@@ -66,6 +66,14 @@
 											:items="['TRANSMISSION', 'DOWNLOAD_STATION']"
 											:required="item.required"
 										></v-combobox>
+                    <v-btn
+                      v-else-if="item.type == 'button'"
+                      flat
+                      block
+                      @click="connTest(item.value, tabIndex)"
+                    >
+                      {{ item.label }}
+                    </v-btn>
 									</v-flex>
                   <template v-if="item.name === '로그인'">
                     <v-flex xs12 v-for="(item, index) in item.arr" :key="index">
@@ -104,7 +112,15 @@
                   </template>
 								</v-layout>
 							</v-container>
+              <v-alert
+                    :value="alertShow"
+                    :type="alertType"
+                    transition="scale-transition"
+                  >
+                    {{ alertMsg }}
+                  </v-alert>
 						</v-card-text>
+            
 					</v-tab-item>
 				</v-tabs-items>
 			</v-tabs>
@@ -125,7 +141,10 @@ export default {
       currentItem: 0,
       windowWidth: 0,
       user: {},
-      oriUser: {}
+      oriUser: {},
+      alertShow: false,
+      alertType: '',
+      alertMsg: ''
     }
   },
   computed: {
@@ -240,6 +259,63 @@ export default {
           }
           this.$store.commit('snackbar/show', msg)
           this.$store.commit('toolbar/toggle')
+        })
+      }
+    },
+    connTest: function (val, tabIndex) {
+      if (val === 'telegramTest') {
+        let token, chatId
+        console.log(this.tabs[tabIndex].arr)
+        for (let i = 0; i < this.tabs[tabIndex].arr.length; i++) {
+          let item = this.tabs[tabIndex].arr[i]
+          if (item.key === 'TELEGRAM_TOKEN') {
+            token = item.value
+          } else if (item.key === 'TELEGRAM_CHAT_ID') {
+            chatId = item.value
+          }
+        }
+        axios.get('/api/setting/telegram-test', {
+          params: {
+            token: token,
+            chatId: chatId
+          }
+        }).then(res => {
+          this.alertMsg = res.data ? '접속 성공' : '접속 실패'
+          this.alertType = res.data ? 'success' : 'error'
+          this.alertShow = true
+          setTimeout(() => {
+            this.alertShow = false
+          }, 3000)
+        })
+      } else {
+        let host, port, id, pwd
+        for (let i = 0; i < this.tabs[tabIndex].arr.length; i++) {
+          let item = this.tabs[tabIndex].arr[i]
+          if (item.key.includes('USERNAME')) {
+            id = item.value
+          } else if (item.key.includes('PASSWORD')) {
+            pwd = item.value
+          } else if (item.key.includes('HOST')) {
+            host = item.value
+          } else if (item.key.includes('PORT')) {
+            port = item.value
+          }
+        }
+        axios.get('/api/download/conn-test', {
+          params: {
+            app: val,
+            host: host,
+            port: port,
+            id: id,
+            pwd: pwd
+          }
+        }).then(res => {
+          this.alertMsg = res.data ? '접속 성공' : '접속 실패'
+          this.alertType = res.data ? 'success' : 'error'
+          this.alertShow = true
+          setTimeout(() => {
+            this.alertShow = false
+          }, 3000)
         })
       }
     }

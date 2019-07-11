@@ -62,7 +62,7 @@ public class SynologyApiUtils {
                 + settingService.getSettingValue("DS_PORT") + "/webapi";
     }
 
-    protected void initialize() {
+    protected boolean initialize() {
         logger.info("Initialize File Station Http Client");
         HttpResponse response = null;
 
@@ -108,6 +108,54 @@ public class SynologyApiUtils {
                 HttpClientUtils.closeQuietly(response);
             }
         }
+
+        if (StringUtils.isEmpty(this.sid)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean test(String host, String port, String id, String pwd) {
+        boolean ret = false;
+        HttpResponse response = null;
+        String url = "http://" + host + ":" + port + "/webapi";
+
+        try {
+            URIBuilder builder = new URIBuilder(url+ "/auth.cgi");
+            builder.setParameter("api", "SYNO.API.Auth").setParameter("version", "3")
+                    .setParameter("method", "login").setParameter("session", session).setParameter("format", "sid")
+                    .setParameter("account", id).setParameter("passwd", pwd);
+
+            logger.debug(builder.toString());
+
+            HttpGet httpGet = new HttpGet(builder.build());
+
+            try {
+                httpClient = HttpClientBuilder.create().build();
+                response = httpClient.execute(httpGet);
+
+                logger.debug("init-response-code: " + response.getStatusLine().getStatusCode());
+                JSONObject resJson = new JSONObject(EntityUtils.toString(response.getEntity()));
+
+                if (Boolean.parseBoolean(resJson.get("success").toString())) {
+                    if (resJson.getJSONObject("data").has("sid")) {
+                        if(!StringUtils.isEmpty(resJson.getJSONObject("data").getString("sid"))) {
+                            ret = true;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage());
+            }
+
+        } catch (URISyntaxException | ParseException | JSONException e) {
+            logger.error(e.getMessage());
+        } finally {
+            HttpClientUtils.closeQuietly(response);
+        }
+        
+        return ret;
     }
 
     protected JSONObject executeGet(URIBuilder builder) {

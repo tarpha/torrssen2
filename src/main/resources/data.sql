@@ -303,6 +303,42 @@ SELECT 'EXCEPT_EXT' key
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'EXCEPT_EXT');
 
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'TRANSMISSION_TEST' key
+     , 'transmissionTest' value
+     , 'button' type
+     , false required
+     , '접속 테스트'
+     , '트랜스미션'
+     , 25
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'TRANSMISSION_TEST');
+
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'DS_TEST' key
+     , 'dsTest' value
+     , 'button' type
+     , false required
+     , '접속 테스트'
+     , '시놀로지'
+     , 34
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'DS_TEST');
+
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'TELEGRAM_TEST' key
+     , 'telegramTest' value
+     , 'button' type
+     , false required
+     , '접속 테스트'
+     , '텔레그램'
+     , 13
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'TELEGRAM_TEST');
+
 -- INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
 -- SELECT 'CORS_URL' key
 --      , '' value

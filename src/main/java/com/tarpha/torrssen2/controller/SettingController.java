@@ -19,6 +19,7 @@ import com.tarpha.torrssen2.repository.WatchListRepository;
 import com.tarpha.torrssen2.service.CryptoService;
 import com.tarpha.torrssen2.service.RssLoadService;
 import com.tarpha.torrssen2.service.SchedulerService;
+import com.tarpha.torrssen2.service.TelegramService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -76,6 +77,9 @@ public class SettingController {
 
     @Autowired
     private SchedulerService schedulerService;
+
+    @Autowired
+    private TelegramService telegramService;
 
     @GetMapping(value = "/list")
     public List<Setting> list(Sort sort) {
@@ -248,5 +252,11 @@ public class SettingController {
     @PostMapping(value = "/restart")
     public void restart() {
         schedulerService.killTask();
+    }
+
+    @GetMapping(value = "/telegram-test")
+    public boolean telegramTest(@RequestParam("token") String token, @RequestParam("chatId") String chatId) {
+        String message = "torrssen2에서 발송한 테스트 메시지입니다.";
+        return telegramService.sendMessage(token, chatId, message);
     }
 }

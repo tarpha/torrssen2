@@ -73,7 +73,7 @@ public class TransmissionService {
 
     }
 
-    public void initialize() {
+    public boolean initialize() {
         username = settingService.getSettingValue("TRANSMISSION_USERNAME");
         try {
             password = cryptoService.decrypt(settingService.getSettingValue("TRANSMISSION_PASSWORD"));
@@ -112,6 +112,42 @@ public class TransmissionService {
 
         httpClient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).setDefaultHeaders(headers)
                 .build();
+        
+        if(StringUtils.isEmpty(xTransmissionSessionId)) {
+            return false;
+        } 
+
+        return true;
+    }
+
+    public boolean test(String host, String port, String id, String pwd) {
+        boolean ret = false;
+
+        String url = "http://" + host + ":" + port + "/transmission/rpc";
+
+        CredentialsProvider provider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(id, pwd);
+        provider.setCredentials(AuthScope.ANY, credentials);
+
+        CloseableHttpResponse response = null;
+
+        try {
+            httpClient = HttpClientBuilder.create().setDefaultCredentialsProvider(provider).build();
+
+            response = httpClient.execute(new HttpGet(url));
+            if(response.getFirstHeader("X-Transmission-Session-Id") != null) {
+                if(!StringUtils.isEmpty(response.getFirstHeader("X-Transmission-Session-Id").getValue())) {
+                    ret = true;
+                }
+            }
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        } finally {
+            HttpClientUtils.closeQuietly(response);
+            HttpClientUtils.closeQuietly(httpClient);
+        }
+        
+        return ret;
     }
 
     private TransmissionVO execute(JSONObject params) {

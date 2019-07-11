@@ -15,7 +15,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +50,7 @@ public class TelegramService {
     }
 
     public boolean sendMessage(String message) {
-        boolean ret = true;
+        boolean ret = false;
 
         if(httpClient == null) {
             initialize();
@@ -71,11 +70,47 @@ public class TelegramService {
                 response = httpClient.execute(httpPost);
 
                 logger.debug("telegram-send-message-response-code: " + response.getStatusLine().getStatusCode());
-                if (response.getStatusLine().getStatusCode() != 200) {
-                    logger.debug(EntityUtils.toString(response.getEntity()));
-                    ret = false;
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    ret = true;
                 } 
             }
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        } finally {
+            HttpClientUtils.closeQuietly(response);
+        }
+
+        return ret;
+    }
+
+    public boolean sendMessage(String inToken, String chatId, String message) {
+        boolean ret = false;
+
+        baseUrl = "https://api.telegram.org/bot" + inToken + "/sendMessage";
+        
+        List<Header> headers = new ArrayList<Header>();
+        headers.add(new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json"));
+        httpClient = HttpClientBuilder.create().setDefaultHeaders(headers).build();
+
+        HttpPost httpPost = new HttpPost(baseUrl);
+        CloseableHttpResponse response = null;
+
+        logger.debug("token:" + inToken);
+        logger.debug("chatId: " + chatId);
+
+        try {
+            JSONObject params = new JSONObject();
+            params.put("chat_id", chatId);
+            params.put("text", message);
+            params.put("parse_mode", "HTML");
+            httpPost.setEntity(new StringEntity(params.toString(), StandardCharsets.UTF_8));
+
+            response = httpClient.execute(httpPost);
+
+            logger.debug("telegram-send-message-response-code: " + response.getStatusLine().getStatusCode());
+            if (response.getStatusLine().getStatusCode() == 200) {
+                ret = true;
+            } 
         } catch (IOException e) {
             logger.error(e.getMessage());
         } finally {

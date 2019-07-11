@@ -186,4 +186,13 @@ public class DownloadService {
 
         return ret;
     }
+
+    public boolean connTest(String app, String host, String port, String id, String pwd) {
+        if(StringUtils.equals(app, "dsTest")) {
+            return downloadStationService.test(host, port, id, pwd);
+        } else if(StringUtils.equals(app, "transmissionTest")) {
+            return transmissionService.test(host, port, id, pwd);
+        }
+        return false;
+    }
 }
