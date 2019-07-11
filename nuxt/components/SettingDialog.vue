@@ -70,8 +70,7 @@
                   <template v-if="item.name === '로그인'">
                     <v-flex xs12 v-for="(item, index) in item.arr" :key="index">
                       <v-text-field 
-                        v-model="user.username" 
-                        readonly
+                        v-model="user.username"
                         label="아이디" 
                         type="text"
                         :required="true"
@@ -173,8 +172,13 @@ export default {
         })
         this.user = {}
         axios.get('/api/user/admin').then(res => {
-          this.user = res.data
-          this.oriUser = JSON.parse(JSON.stringify(res.data))
+          if (res.data) {
+            this.user = res.data
+            this.oriUser = JSON.parse(JSON.stringify(res.data))
+          } else {
+            this.user = { username: '', password: '' }
+            this.oriUser = { username: ' ', password: '' }
+          }
         })
       }
     }

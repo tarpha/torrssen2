@@ -82,13 +82,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             userRepository.save(recovery);
         }
 
-        User torrssen = userRepository.findByUsername("torrssen");
-        if(torrssen == null) {
-            User user = new User();
-            user.setUsername("torrssen");
-            user.setPassword("");
-            userRepository.save(user);
-        }
+        // User torrssen = userRepository.findByUsername("torrssen");
+        // if(torrssen == null) {
+        //     User user = new User();
+        //     user.setUsername("torrssen");
+        //     user.setPassword("");
+        //     userRepository.save(user);
+        // }
 
         Optional<Setting> optionalSetting = settingRepository.findByKey("USE_LOGIN");
         if(optionalSetting.isPresent()) {

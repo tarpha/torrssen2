@@ -17,35 +17,37 @@
           Close
         </v-btn>
       </v-snackbar>
-      <v-layout row>
-        <v-flex xs12 sm6 offset-sm3>
-          <v-card flat>
-            <v-list three-line>
-              <template v-for="(item, index) in items">
-                <nuxt-feed :item="item" :index="index" :stomp="stomps[index]" :key="index" :dark="dark"/>
-              </template>
-            </v-list>
-          </v-card>
-          <v-alert
-            v-if="items.length === 0"
-            :value="true"
-            type="info"
-          >
-            검색 결과가 없습니다.
-          </v-alert>
-          <div xs12 sm4 text-xs-center style="text-align:center">
-            <v-btn 
-              flat
-              block
-              :loading="loading"
-              :disabled="loading"
-              @click="next()"
+      <div v-infinite-scroll="next" infinite-scroll-disabled="busy">
+        <v-layout row>
+          <v-flex xs12 sm6 offset-sm3>
+            <v-card flat>
+              <v-list three-line>
+                <template v-for="(item, index) in items">
+                  <nuxt-feed :item="item" :index="index" :stomp="stomps[index]" :key="index" :dark="dark"/>
+                </template>
+              </v-list>
+            </v-card>
+            <v-alert
+              v-if="items.length === 0"
+              :value="true"
+              type="info"
             >
-              더 보기
-            </v-btn>
-          </div>
-        </v-flex>
-      </v-layout>
+              검색 결과가 없습니다.
+            </v-alert>
+            <div xs12 sm4 text-xs-center style="text-align:center">
+              <v-btn 
+                flat
+                block
+                :loading="loading"
+                :disabled="loading"
+                @click="next"
+              >
+                더 보기
+              </v-btn>
+            </div>
+          </v-flex>
+        </v-layout>
+      </div>
     </v-content>
   </v-app>
 </template>
@@ -112,18 +114,20 @@
       })
       if (stompClient.connected() === true) {
         this.subscription = this.subscribe()
-        this.subscribeDownload = this.subscribeDownload()
+        this.subscriptionDownload = this.subscribeDownload()
       } else {
         this.intervalObj = setInterval(() => {
           if (stompClient.connected() === false) {
             if (typeof this.subscription.unsubscribe === 'function') {
               this.subscription.unsubscribe()
-              this.subscribeDownload.unsubscribe()
+            }
+            if (typeof this.subscriptionDownload.unsubscribe === 'function') {
+              this.subscriptionDownload.unsubscribe()
             }
           }
           if (stompClient.connected() === true) {
             this.subscription = this.subscribe()
-            this.subscribeDownload = this.subscribeDownload()
+            this.subscriptionDownload = this.subscribeDownload()
             clearInterval(this.intervalObj)
           }
         }, 1000)
@@ -133,11 +137,12 @@
       return {
         intervalObj: '',
         subscription: '',
-        subscribeDownload: '',
+        subscriptionDownload: '',
         loading: false,
         funcName: 'list',
         page: 0,
-        size: 25
+        size: 25,
+        busy: false
       }
     },
     async asyncData ({ app }) {

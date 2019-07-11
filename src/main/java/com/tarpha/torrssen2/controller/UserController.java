@@ -28,7 +28,7 @@ public class UserController {
 
     @GetMapping(value = "/admin")
     public User getAdmin() {
-        return userRepository.findByUsername("torrssen");
+        return userRepository.findFirstByUsernameNot("recovery");
     }
 
     @PostMapping(value = "/admin")

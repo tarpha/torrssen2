@@ -18,7 +18,8 @@ module.exports = {
     baseUrl: process.env.BASE_URL || 'http://localhost:8080'
   },
   plugins: [
-    '~/plugins/vuetify.js'
+    '~/plugins/vuetify.js',
+    { src: '~plugins/vue-infinite-scroll.js', ssr: false }
   ],
   css: ['~/assets/style/app.styl'],
   /*
