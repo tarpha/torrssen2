@@ -74,7 +74,7 @@ public class SchedulerService {
                     if (script.isFile()) {
                         if (!isWindows) {
                             logger.debug("run kill.sh");
-                            Runtime.getRuntime().exec(String.format("sh -c %s", File.separator + "kill.sh"));  
+                            Runtime.getRuntime().exec(String.format("sh -c %s", File.separator + "kill.sh"));
                         }
                     } else {
                         logger.debug("run ps -ef kill");
@@ -100,7 +100,7 @@ public class SchedulerService {
             }
         }
 
-        //Telegram 발송 여부
+        // Telegram 발송 여부
         optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
         if (optionalSetting.isPresent()) {
             if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
@@ -108,7 +108,7 @@ public class SchedulerService {
             }
         }
 
-        //TRANSMISSION_CALLBACK
+        // TRANSMISSION_CALLBACK
         optionalSetting = settingRepository.findByKey("TRANSMISSION_CALLBACK");
         if (optionalSetting.isPresent()) {
             if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
@@ -119,31 +119,32 @@ public class SchedulerService {
         logger.info("=== Transmission Stop Seeding ===");
         List<DownloadList> list = transmissionService.torrentGet(null);
         List<Long> ids = new ArrayList<Long>();
-        for (DownloadList down: list) {
-            // SEED: 6  # Seeding
-            if(down.getStatus() == 6) {
+        for (DownloadList down : list) {
+            // SEED: 6 # Seeding
+            if (down.getStatus() == 6) {
                 Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
-                if(rdown.isPresent()) {
+                if (rdown.isPresent()) {
                     downloadListRepository.save(down);
 
                     ids.add(down.getId());
-                    if(sendTelegram && !transmissionCallback) {
+                    if (sendTelegram && !transmissionCallback) {
                         sendTelegram(down);
                     }
 
                     logger.debug("removeDirectory");
-                    List<String> inners = CommonUtils.removeDirectory(down.getDownloadPath(), down.getName(), settingRepository);
-                
+                    List<String> inners = CommonUtils.removeDirectory(down.getDownloadPath(), down.getName(),
+                            settingRepository);
+
                     Optional<DownloadList> optionalDown = downloadListRepository.findById(down.getId());
-                    if(optionalDown.isPresent()) {
+                    if (optionalDown.isPresent()) {
                         String rename = optionalDown.get().getRename();
                         if (!StringUtils.isBlank(rename)) {
                             logger.debug("getRename: " + rename);
-                            if(inners == null) {
+                            if (inners == null) {
                                 CommonUtils.renameFile(down.getDownloadPath(), down.getName(), rename);
                             } else {
-                                for(String name: inners) {
-                                    if(StringUtils.contains(down.getName(), name)) {
+                                for (String name : inners) {
+                                    if (StringUtils.contains(down.getName(), name)) {
                                         CommonUtils.renameFile(down.getDownloadPath(), name, rename);
                                     }
                                 }
@@ -154,11 +155,11 @@ public class SchedulerService {
             }
         }
 
-        if(ids.size() > 0 && doneDelete) {
+        if (ids.size() > 0 && doneDelete) {
             transmissionService.torrentRemove(ids);
         }
     }
-            
+
     public void downloadStationJob() {
         // 다운로드 스테이션 완료 체크 
         logger.info("=== Download Station Check Done ===");
@@ -247,7 +248,7 @@ public class SchedulerService {
                                 }
 
                                 if(srcs.size() > 0) {
-                                    String taskId = fileStationService.move(StringUtils.join(srcs, ","), path);
+                                    String taskId = fileStationService.move(srcs, path);
                                     tdown.setTask(true);
                                     tdown.setTaskId(taskId);
                                     tdown.setDeletePath(path + File.separator + down.getName());
@@ -282,9 +283,12 @@ public class SchedulerService {
         List<DownloadList> tasks = downloadListRepository.findByTask(true);
         for(DownloadList task: tasks) {
             logger.debug("moveDone: " + task.getTaskId());
-            if(fileStationService.moveTask(task.getTaskId())) {
+            int resCode = fileStationService.moveTask(task.getTaskId());
+            if(resCode != 0) {
                 logger.debug("finished");
-                fileStationService.delete(task.getDeletePath());
+                if(resCode == 1) {
+                    fileStationService.delete(task.getDeletePath());
+                }
                 task.setTask(false);
                 downloadListRepository.save(task);
             }
@@ -294,11 +298,11 @@ public class SchedulerService {
     private void sendTelegram(DownloadList down) {
         Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
         logger.debug(rdown.toString());
-        if(rdown.isPresent()) {
-            if(rdown.get().getIsSentAlert() == false) {
+        if (rdown.isPresent()) {
+            if (rdown.get().getIsSentAlert() == false) {
                 String target = StringUtils.isEmpty(down.getFileName()) ? rdown.get().getName() : down.getFileName();
                 logger.info("Send Telegram: " + target);
-                if(telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
+                if (telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
                     DownloadList sdown = rdown.get();
                     sdown.setIsSentAlert(true);
 
@@ -307,5 +311,5 @@ public class SchedulerService {
             }
         }
     }
-           
+
 }

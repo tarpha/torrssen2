@@ -31,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import lombok.Getter;
+
 public class SynologyApiUtils {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -49,17 +51,15 @@ public class SynologyApiUtils {
 
     protected CloseableHttpClient httpClient = null;
 
+    @Getter
     protected String sid = null;
 
     protected String session = "DownloadStation";
 
     @PostConstruct
     protected void setBaseUrl() {
-        this.baseUrl = "http://" +
-            settingService.getSettingValue("DS_HOST") +
-            ":" + 
-            settingService.getSettingValue("DS_PORT") +
-            "/webapi";
+        this.baseUrl = "http://" + settingService.getSettingValue("DS_HOST") + ":"
+                + settingService.getSettingValue("DS_PORT") + "/webapi";
     }
 
     protected void initialize() {
@@ -72,19 +72,17 @@ public class SynologyApiUtils {
         } catch (UnsupportedEncodingException | GeneralSecurityException e) {
             logger.error(e.getMessage());
         }
-        this.baseUrl = "http://" +
-            settingService.getSettingValue("DS_HOST") +
-            ":" + 
-            settingService.getSettingValue("DS_PORT") +
-            "/webapi";
+        this.baseUrl = "http://" + settingService.getSettingValue("DS_HOST") + ":"
+                + settingService.getSettingValue("DS_PORT") + "/webapi";
 
         if (StringUtils.isEmpty(this.sid)) {
             try {
                 URIBuilder builder = new URIBuilder(this.baseUrl + "/auth.cgi");
-                builder.setParameter("api", "SYNO.API.Auth").setParameter("version", "2")
-                        .setParameter("method", "login").setParameter("session", session)
-                        .setParameter("format", "sid").setParameter("account", this.username)
-                        .setParameter("passwd", this.password);
+                builder.setParameter("api", "SYNO.API.Auth").setParameter("version", "3")
+                        .setParameter("method", "login").setParameter("session", session).setParameter("format", "sid")
+                        .setParameter("account", this.username).setParameter("passwd", this.password);
+
+                logger.debug(builder.toString());
 
                 HttpGet httpGet = new HttpGet(builder.build());
 
@@ -95,8 +93,8 @@ public class SynologyApiUtils {
                     logger.debug("init-response-code: " + response.getStatusLine().getStatusCode());
                     JSONObject resJson = new JSONObject(EntityUtils.toString(response.getEntity()));
 
-                    if(Boolean.parseBoolean(resJson.get("success").toString())) {
-                        if(resJson.getJSONObject("data").has("sid")) {
+                    if (Boolean.parseBoolean(resJson.get("success").toString())) {
+                        if (resJson.getJSONObject("data").has("sid")) {
                             this.sid = resJson.getJSONObject("data").getString("sid");
                         }
                     }
@@ -116,9 +114,10 @@ public class SynologyApiUtils {
         JSONObject ret = null;
         CloseableHttpResponse response = null;
 
-        if(httpClient == null) {
+        if (httpClient == null) {
             this.sid = null;
-            initialize();;
+            initialize();
+            ;
         }
 
         try {
@@ -129,15 +128,16 @@ public class SynologyApiUtils {
             ret = new JSONObject(EntityUtils.toString(response.getEntity()));
             logger.debug(ret.toString());
 
-            if(ret.has("success") && ret.has("error")) {
-                if(Boolean.parseBoolean(ret.get("success").toString()) == false ) {
-                    if(ret.getJSONObject("error").has("code")) {
-                        if (ret.getJSONObject("error").getInt("code") == 105) {
+            if (ret.has("success") && ret.has("error")) {
+                if (Boolean.parseBoolean(ret.get("success").toString()) == false) {
+                    if (ret.getJSONObject("error").has("code")) {
+                        int resCode = ret.getJSONObject("error").getInt("code");
+                        if (resCode == 105 || resCode == 401) {
                             this.sid = null;
                             httpClient.close();
                             initialize();
-        
-                            if(httpClient != null) {
+
+                            if (httpClient != null) {
                                 response.close();
                                 builder.setParameter("_sid", this.sid);
                                 httpGet = new HttpGet(builder.build());
@@ -153,7 +153,7 @@ public class SynologyApiUtils {
             HttpClientUtils.closeQuietly(response);
             HttpClientUtils.closeQuietly(httpClient);
             httpClient = null;
-        } 
+        }
         HttpClientUtils.closeQuietly(response);
 
         return ret;
@@ -163,9 +163,10 @@ public class SynologyApiUtils {
         JSONObject ret = null;
         CloseableHttpResponse response = null;
 
-        if(httpClient == null) {
+        if (httpClient == null) {
             this.sid = null;
-            initialize();;
+            initialize();
+            ;
         }
 
         try {
@@ -173,18 +174,18 @@ public class SynologyApiUtils {
             builder.setParameter("_sid", this.sid);
 
             UrlEncodedFormEntity entity = new UrlEncodedFormEntity(form, StandardCharsets.UTF_8);
-            
+
             HttpPost httpPost = new HttpPost(builder.build());
             httpPost.setEntity(entity);
-            
+
             response = httpClient.execute(httpPost);
             logger.debug("post-response-code: " + response.getStatusLine().getStatusCode());
 
             ret = new JSONObject(EntityUtils.toString(response.getEntity()));
 
-            if(ret.has("success") && ret.has("error")) {
-                if(Boolean.parseBoolean(ret.get("success").toString()) == false ) {
-                    if(ret.getJSONObject("error").has("code")) {
+            if (ret.has("success") && ret.has("error")) {
+                if (Boolean.parseBoolean(ret.get("success").toString()) == false) {
+                    if (ret.getJSONObject("error").has("code")) {
                         if (ret.getJSONObject("error").getInt("code") == 105) {
                             this.sid = null;
                             httpClient.close();
@@ -194,7 +195,7 @@ public class SynologyApiUtils {
                             builder.setParameter("_sid", this.sid);
                             httpPost = new HttpPost(builder.build());
                             response = httpClient.execute(httpPost);
-                            ret= new JSONObject(EntityUtils.toString(response.getEntity()));
+                            ret = new JSONObject(EntityUtils.toString(response.getEntity()));
                         }
                     }
                 }
