@@ -121,6 +121,14 @@ public class SynologyApiUtils {
         HttpResponse response = null;
         String url = "http://" + host + ":" + port + "/webapi";
 
+        if(StringUtils.equals(settingService.getSettingValue("DS_PASSWORD"), pwd)) {
+            try {
+                pwd = cryptoService.decrypt(pwd);
+            } catch (UnsupportedEncodingException | GeneralSecurityException e) {
+                logger.error(e.getMessage());
+            }
+        }
+
         try {
             URIBuilder builder = new URIBuilder(url+ "/auth.cgi");
             builder.setParameter("api", "SYNO.API.Auth").setParameter("version", "3")

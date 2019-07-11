@@ -125,6 +125,14 @@ public class TransmissionService {
 
         String url = "http://" + host + ":" + port + "/transmission/rpc";
 
+        if(StringUtils.equals(settingService.getSettingValue("TRANSMISSION_PASSWORD"), pwd)) {
+            try {
+                pwd = cryptoService.decrypt(pwd);
+            } catch (UnsupportedEncodingException | GeneralSecurityException e) {
+                logger.error(e.getMessage());
+            }
+        }
+
         CredentialsProvider provider = new BasicCredentialsProvider();
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(id, pwd);
         provider.setCredentials(AuthScope.ANY, credentials);
