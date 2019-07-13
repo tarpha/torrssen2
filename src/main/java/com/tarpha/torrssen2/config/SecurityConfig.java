@@ -103,7 +103,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers("/login").permitAll()
                     .antMatchers("/h2-console/**").permitAll()
                     .anyRequest().authenticated()
-                    .and().formLogin().permitAll()
+                    .and().formLogin().permitAll().defaultSuccessUrl("/", true)
                     .and().headers().frameOptions().sameOrigin()
                     .and().csrf().disable();
             }
