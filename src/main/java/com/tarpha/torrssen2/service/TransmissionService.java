@@ -154,7 +154,8 @@ public class TransmissionService {
             HttpClientUtils.closeQuietly(response);
             HttpClientUtils.closeQuietly(httpClient);
         }
-        
+
+        httpClient = null;
         return ret;
     }
 

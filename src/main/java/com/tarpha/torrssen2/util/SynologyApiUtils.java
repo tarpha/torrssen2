@@ -161,8 +161,10 @@ public class SynologyApiUtils {
             logger.error(e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(response);
+            HttpClientUtils.closeQuietly(httpClient);
         }
         
+        httpClient = null;
         return ret;
     }
 
