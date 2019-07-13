@@ -237,6 +237,7 @@ export default {
                 msg = '저장하지 못했습니다.'
               }
             })
+            break
           }
         }
         let msg = '저장하였습니다.'
