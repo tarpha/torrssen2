@@ -35,6 +35,8 @@ public class WatchList {
     private String rename;
     
     private Boolean use = true;
+
+    private Boolean subtitle = false;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();

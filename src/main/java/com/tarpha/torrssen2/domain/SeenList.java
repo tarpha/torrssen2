@@ -27,6 +27,8 @@ public class SeenList {
     private String downloadPath;
     
     private String rename;
+
+    private Boolean subtitle = false;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();

@@ -140,11 +140,19 @@
 						<v-flex xs6>
 							<v-text-field v-model="editedItem.releaseGroup" label="릴 그룹"></v-text-field>
 						</v-flex>
-						<v-flex xs12>
+						<v-flex xs12 md6>
 							<v-combobox
 								v-model.lazy="editedItem.downloadPath" 
 								label="다운로드 경로" 
 								:items="pathList"
+								required
+							></v-combobox>
+						</v-flex>
+						<v-flex xs12 md6>
+							<v-combobox
+								v-model="editedItem.subtitle" 
+								label="자막여부" 
+								:items="[true, false]"
 								required
 							></v-combobox>
 						</v-flex>
@@ -226,6 +234,7 @@ export default {
         startEpisode: '01',
         endSeason: '99',
         endEpisode: '999',
+        subtitle: false,
         rename: '',
         createDt: new Date()
       },

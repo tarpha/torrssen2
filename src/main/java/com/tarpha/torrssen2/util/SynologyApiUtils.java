@@ -172,10 +172,11 @@ public class SynologyApiUtils {
         JSONObject ret = null;
         CloseableHttpResponse response = null;
 
+        logger.debug(builder.toString());
+
         if (httpClient == null) {
             this.sid = null;
             initialize();
-            ;
         }
 
         try {

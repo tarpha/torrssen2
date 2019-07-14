@@ -131,10 +131,12 @@ export default {
       this.$store.commit('setting/setShowDownloadStatus', false)
     },
     deleteItem: function (id) {
-      if (confirm('이 항목을 삭제하시겠습니까?')) {
+      if (!id) {
+        this.$store.commit('snackbar/show', '삭제하지 못했습니다.')
+      } else if (confirm('이 항목을 삭제하시겠습니까?')) {
         axios.post('/api/download/remove', { 'id': id }).then(res => {
           let msg = '삭제되었습니다.'
-          if (res.status !== 200 || res.data === -1) {
+          if (res.status !== 200 || res.data < 0) {
             msg = '삭제하지 못했습니다.'
           }
           this.$store.commit('snackbar/show', msg)

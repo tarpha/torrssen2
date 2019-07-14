@@ -160,10 +160,28 @@ public class RssLoadService {
         if (optionalWatchList.isPresent()) {
             WatchList watchList = optionalWatchList.get();
             logger.info("Matched Feed: " + rssFeed.getTitle());
+
+            boolean seenDone = false;
+            boolean subtitleDone = false;
+
             if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
-                    rssFeed.getRssEpisode()) > 0) {
+                rssFeed.getRssEpisode(), false) > 0) {
+                seenDone = true;
+            }
+
+            if(seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                rssFeed.getRssEpisode(), true) > 0 || !watchList.getSubtitle()) {
+                subtitleDone = true;
+            }
+
+            if (seenDone && subtitleDone) {
                 logger.info("Rejected by Seen: " + rssFeed.getTitle());
             } else {
+                if(!watchList.getSubtitle() && StringUtils.contains(rssFeed.getTitle(), "자막") &&
+                    !StringUtils.startsWith(rssFeed.getLink(), "magnet")) {
+                    logger.info("Rejected by Subtitle: " + rssFeed.getTitle());
+                    return;
+                }
                 try{
                     int startSeason = Integer.parseInt(watchList.getStartSeason());
                     int endSeason = Integer.parseInt(watchList.getEndSeason());
@@ -249,6 +267,11 @@ public class RssLoadService {
         seenList.setDownloadPath(path);
         seenList.setSeason(rssFeed.getRssSeason());
         seenList.setEpisode(rssFeed.getRssEpisode());
+
+        if(StringUtils.contains(rssFeed.getTitle(), "자막") && !StringUtils.startsWith(rssFeed.getLink(), "magnet")) {
+            seenList.setSubtitle(true);   
+            seenList.setTitle("[자막]" + rssFeed.getRssTitle());   
+        }
 
         seenListRepository.save(seenList);
     }
