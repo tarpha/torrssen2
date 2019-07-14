@@ -377,3 +377,5 @@ UPDATE SETTING SET group_label = '시놀로지' WHERE group_label = '다운로�
 DELETE FROM SETTING WHERE key = 'CORS_URL';
 DELETE FROM SETTING WHERE key = 'EMBEDDED_LIMIT';
 UPDATE RSS_FEED SET rss_poster = 'http://t1.daumcdn.net/contentshub/sdb/bef6099c0dd6098dc2b5329ead5e0954787466043d1eaa1b2644f3ae886201c8' where rss_poster = 'http://t1.daumcdn.net/movie/265872b8652b4c8f8ca006653cd153ab1560756176069';
+UPDATE WATCH_LIST SET subtitle = false WHERE subtitle IS NULL;
+UPDATE SEEN_LIST SET subtitle = false WHERE subtitle IS NULL;
