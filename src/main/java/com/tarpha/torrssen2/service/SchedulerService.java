@@ -199,6 +199,7 @@ public class SchedulerService {
                 downloadListRepository.save(down);
 
                 if (down.getDone()) {
+                    rdown = downloadListRepository.findFirstByUriAndDoneOrderByCreateDtDesc(down.getUri(), true);
                     if (rdown.isPresent()) {
                         DownloadList tdown = rdown.get();
                         // Telegram Message를 발송한다.
