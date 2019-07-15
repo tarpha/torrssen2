@@ -9,6 +9,7 @@ export const state = () => ({
   toggle: false,
   download: {
     active: false,
+    done: false,
     stop: false,
     vueIndex: -1,
     id: 0
@@ -43,5 +44,6 @@ export const mutations = {
     state.download.stop = obj.stop
     state.download.vueIndex = obj.vueIndex
     state.download.id = obj.id
+    state.download.done = obj.done
   }
 }

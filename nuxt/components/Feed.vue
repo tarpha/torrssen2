@@ -15,7 +15,7 @@
 			<v-list-tile-content>
 				<v-list-tile-title icon>
           <v-icon v-if="item.watch" size="1.2em" color="yellow darken-3">star</v-icon>
-          <v-icon v-if="item.downloaded" size="1.2em" color="red darken-3">done</v-icon>
+          <v-icon v-if="item.downloaded || stomp.done" size="1.2em" color="red darken-3">done</v-icon>
           <v-icon v-if="item.link && !item.link.startsWith('magnet')" size="1.2em">attachment</v-icon>
           {{ item.rssTitle }}
         </v-list-tile-title>

@@ -175,6 +175,7 @@ export default {
           this.$store.commit('download/toggle', {
             active: true,
             stop: false,
+            done: false,
             vueIndex: this.$store.state.download.index,
             id: ret.data
           })

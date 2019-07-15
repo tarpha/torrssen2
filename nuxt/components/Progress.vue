@@ -41,6 +41,7 @@ export default {
         this.$store.commit('download/toggle', {
           active: false,
           stop: false,
+          done: false,
           vueIndex: this.index,
           id: 0
         })
@@ -92,6 +93,7 @@ export default {
           this.$store.commit('download/toggle', {
             active: false,
             stop: false,
+            done: true,
             vueIndex: this.index,
             id: 0
           })
@@ -102,6 +104,7 @@ export default {
           this.$store.commit('download/toggle', {
             active: false,
             stop: false,
+            done: false,
             vueIndex: this.index,
             id: 0
           })

@@ -95,6 +95,7 @@
         this.stomps[this.download.vueIndex].active = this.download.active
         this.stomps[this.download.vueIndex].stop = this.download.stop
         this.stomps[this.download.vueIndex].id = this.download.id
+        this.stomps[this.download.vueIndex].done = this.download.done
       },
       darkTheme: function (val) {
         this.dark = val
@@ -161,6 +162,7 @@
           active: obj.downloading === true,
           stop: false,
           delete: false,
+          done: false,
           id: obj.downloading === true ? obj.downloadId : 0
         })
       }
@@ -214,6 +216,7 @@
           this.$store.commit('download/toggle', {
             active: true,
             stop: false,
+            done: false,
             vueIndex: json.vueIndex,
             id: json.id
           })
