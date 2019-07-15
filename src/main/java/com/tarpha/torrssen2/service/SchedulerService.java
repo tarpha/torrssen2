@@ -191,15 +191,14 @@ public class SchedulerService {
             }
 
             if (down.getId() > 0) {
-                Optional<DownloadList> optinalDown = downloadListRepository.findById(down.getId());
-                if (optinalDown.isPresent()) {
-                    down.setRename(optinalDown.get().getRename());
-                    down.setIsSentAlert(optinalDown.get().getIsSentAlert());
+                Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
+                if (rdown.isPresent()) {
+                    down.setRename(rdown.get().getRename());
+                    down.setIsSentAlert(rdown.get().getIsSentAlert());
                 }
                 downloadListRepository.save(down);
 
                 if (down.getDone()) {
-                    Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
                     if (rdown.isPresent()) {
                         DownloadList tdown = rdown.get();
                         // Telegram Message를 발송한다.
