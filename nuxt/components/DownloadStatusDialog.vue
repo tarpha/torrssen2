@@ -136,7 +136,7 @@ export default {
       } else if (confirm('이 항목을 삭제하시겠습니까?')) {
         axios.post('/api/download/remove', { 'id': id }).then(res => {
           let msg = '삭제되었습니다.'
-          if (res.status !== 200 || res.data < 0) {
+          if (res.status !== 200 || res.data == -2) {
             msg = '삭제하지 못했습니다.'
           }
           this.$store.commit('snackbar/show', msg)
