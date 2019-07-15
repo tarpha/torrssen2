@@ -195,7 +195,7 @@ public class DownloadStationService extends SynologyApiUtils {
         try {
             URIBuilder builder = new URIBuilder(baseUrl + "/DownloadStation/task.cgi");
             builder.setParameter("api", "SYNO.DownloadStation.Task").setParameter("version", "3")
-                    .setParameter("method", "delete").setParameter("force_complete", "true")
+                    .setParameter("method", "delete").setParameter("force_complete", "false")
                     .setParameter("id", StringUtils.join(ids, ",")).setParameter("_sid", this.sid);
 
             JSONObject resJson = executeGet(builder);
