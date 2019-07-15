@@ -225,7 +225,7 @@ public class RssLoadService {
                             addToSeenList(rssFeed, path);
 
                             // Add to Download List
-                            addToDownloadList((long) torrentAddedId, rssFeed, watchList, path, null);
+                            addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
                         }
                     } else if (StringUtils.equals(optionalSetting.get().getValue(), "DOWNLOAD_STATION")) {
                         // Request Download to Download Station
@@ -239,12 +239,12 @@ public class RssLoadService {
                                 if (StringUtils.equals(rssFeed.getLink(), down.getUri())) {
                                     isExist = true;
                                     // downloadListRepository.save(down);
-                                    addToDownloadList(down.getId(), rssFeed, watchList, path, down.getDbid());
+                                    addToDownloadList(down, rssFeed, watchList);
                                 }
                             }
 
                             if (isExist == false) {
-                                addToDownloadList(0L, rssFeed, watchList, path, null);
+                                addToDownloadList(0L, rssFeed, watchList, path);
                             }
                         }
                     } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
@@ -256,7 +256,7 @@ public class RssLoadService {
                             addToSeenList(rssFeed, path);
 
                             // Add to Download List
-                            addToDownloadList((long) torrentAddedId, rssFeed, watchList, path, null);
+                            addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
                         }
                     }
                 }
@@ -280,13 +280,22 @@ public class RssLoadService {
         seenListRepository.save(seenList);
     }
 
-    private void addToDownloadList(Long id, RssFeed rssFeed, WatchList watchList, String path, String dbid) {
+    private void addToDownloadList(Long id, RssFeed rssFeed, WatchList watchList, String path) {
         DownloadList download = new DownloadList();
         download.setId(id);
         download.setName(rssFeed.getTitle());
         download.setUri(rssFeed.getLink());
         download.setDownloadPath(path);
-        download.setDbid(dbid);
+        if (!StringUtils.isBlank(watchList.getRename())) {
+            download.setRename(CommonUtils.getRename(watchList.getRename(), rssFeed.getRssTitle(),
+                    rssFeed.getRssSeason(), rssFeed.getRssEpisode(), rssFeed.getRssQuality(),
+                    rssFeed.getRssReleaseGroup(), rssFeed.getRssDate()));
+        }
+
+        downloadListRepository.save(download);
+    }
+
+    private void addToDownloadList(DownloadList download, RssFeed rssFeed, WatchList watchList) {
         if (!StringUtils.isBlank(watchList.getRename())) {
             download.setRename(CommonUtils.getRename(watchList.getRename(), rssFeed.getRssTitle(),
                     rssFeed.getRssSeason(), rssFeed.getRssEpisode(), rssFeed.getRssQuality(),
