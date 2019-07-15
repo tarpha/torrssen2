@@ -143,8 +143,10 @@ public class DownloadService {
             WatchList watchList = new WatchList();
             watchList.setTitle(download.getRssTitle());
             watchList.setDownloadPath(download.getDownloadPath());
-            watchList.setReleaseGroup(download.getRssReleaseGroup());
-
+            if(!StringUtils.equals(download.getRssReleaseGroup(), "OTHERS")) {
+                watchList.setReleaseGroup(download.getRssReleaseGroup());
+            }
+            
             watchListRepository.save(watchList);
         }
 
