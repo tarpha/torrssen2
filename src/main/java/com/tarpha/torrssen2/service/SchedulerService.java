@@ -124,6 +124,7 @@ public class SchedulerService {
             if (down.getStatus() == 6) {
                 Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
                 if (rdown.isPresent()) {
+                    down.setIsSentAlert(rdown.get().getIsSentAlert());
                     downloadListRepository.save(down);
 
                     ids.add(down.getId());
@@ -135,23 +136,20 @@ public class SchedulerService {
                     List<String> inners = CommonUtils.removeDirectory(down.getDownloadPath(), down.getName(),
                             settingRepository);
 
-                    Optional<DownloadList> optionalDown = downloadListRepository.findById(down.getId());
-                    if (optionalDown.isPresent()) {
-                        String rename = optionalDown.get().getRename();
-                        if (!StringUtils.isBlank(rename)) {
-                            logger.debug("getRename: " + rename);
-                            if (inners == null) {
-                                CommonUtils.renameFile(down.getDownloadPath(), down.getName(), rename);
-                            } else {
-                                for (String name : inners) {
-                                    if (StringUtils.contains(down.getName(), name)) {
-                                        CommonUtils.renameFile(down.getDownloadPath(), name, rename);
-                                    }
+                    String rename = rdown.get().getRename();
+                    if (!StringUtils.isBlank(rename)) {
+                        logger.debug("getRename: " + rename);
+                        if (inners == null) {
+                            CommonUtils.renameFile(down.getDownloadPath(), down.getName(), rename);
+                        } else {
+                            for (String name : inners) {
+                                if (StringUtils.contains(down.getName(), name)) {
+                                    CommonUtils.renameFile(down.getDownloadPath(), name, rename);
                                 }
                             }
                         }
                     }
-                }
+                }   
             }
         }
 
@@ -196,6 +194,7 @@ public class SchedulerService {
                 Optional<DownloadList> optinalDown = downloadListRepository.findById(down.getId());
                 if (optinalDown.isPresent()) {
                     down.setRename(optinalDown.get().getRename());
+                    down.setIsSentAlert(optinalDown.get().getIsSentAlert());
                 }
                 downloadListRepository.save(down);
 
@@ -305,9 +304,12 @@ public class SchedulerService {
             if (rdown.get().getIsSentAlert() == false) {
                 String target = StringUtils.isEmpty(down.getFileName()) ? rdown.get().getName() : down.getFileName();
                 logger.info("Send Telegram: " + target);
-                if (telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
+                boolean ret = telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.");
+                logger.debug("send telegram result: " + ret);
+                if (ret) {
                     DownloadList sdown = rdown.get();
                     sdown.setIsSentAlert(true);
+                    logger.debug(sdown.toString());
 
                     downloadListRepository.save(sdown);
                 }
