@@ -37,10 +37,7 @@
 					rows-per-page-text=""
 				>
 					<template v-slot:items="props">
-						<td>{{ props.item.title }}</td>
-						<td>{{ props.item.use }}</td>
-						<td>{{ props.item.downloadPath }}</td>
-						<td class="justify-center layout px-0">
+            <td>
 							<v-icon
 								small
 								class="mr-2"
@@ -55,6 +52,9 @@
 								delete
 							</v-icon>
 						</td>
+						<td>{{ props.item.title }}</td>
+						<td>{{ props.item.use }}</td>
+						<td>{{ props.item.downloadPath }}</td>
 					</template>
 				</v-data-table>
 			<v-card-actions>
@@ -140,7 +140,7 @@
 						<v-flex xs6>
 							<v-text-field v-model="editedItem.releaseGroup" label="릴 그룹"></v-text-field>
 						</v-flex>
-						<v-flex xs12 md6>
+						<v-flex xs12>
 							<v-combobox
 								v-model.lazy="editedItem.downloadPath" 
 								label="다운로드 경로" 
@@ -148,10 +148,18 @@
 								required
 							></v-combobox>
 						</v-flex>
-						<v-flex xs12 md6>
+						<v-flex xs6>
 							<v-combobox
 								v-model="editedItem.subtitle" 
 								label="자막여부" 
+								:items="[true, false]"
+								required
+							></v-combobox>
+						</v-flex>
+						<v-flex xs6>
+							<v-combobox
+								v-model="editedItem.series" 
+								label="시리즈여부" 
 								:items="[true, false]"
 								required
 							></v-combobox>
@@ -235,14 +243,15 @@ export default {
         endSeason: '99',
         endEpisode: '999',
         subtitle: false,
+        series: true,
         rename: '',
         createDt: new Date()
       },
       headers: [
+        { text: '동작', value: 'title', sortable: false },
         { text: '포함할 단어', value: 'title', sortable: false },
         { text: '사용여부', value: 'use', sortable: false },
-        { text: '다운로드 경로', value: 'downloadPath', sortable: false },
-        { text: '동작', value: 'title', sortable: false }
+        { text: '다운로드 경로', value: 'downloadPath', sortable: false }
       ]
     }
   },

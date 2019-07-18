@@ -1,5 +1,7 @@
 package com.tarpha.torrssen2.repository;
 
+import java.util.Optional;
+
 import com.tarpha.torrssen2.domain.SeenList;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +20,5 @@ public interface SeenListRepository extends JpaRepository<SeenList, Long> {
       , nativeQuery = true)
     public int countByParams(String link, String title, String season, String episode, boolean subtitle);
 
+    public Optional<SeenList> findFirstByLinkAndSubtitle(String link, boolean subtitle);
 }

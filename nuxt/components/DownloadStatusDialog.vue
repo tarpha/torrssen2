@@ -14,17 +14,13 @@
         </v-btn>
         <v-toolbar-title>다운로드 상태 보기</v-toolbar-title>
       </v-toolbar>
-			<!-- <v-card-title class="headline" v-html="'다운로드 상태 보기'"></v-card-title> -->
 				<v-data-table
 					:headers="headers"
 					:items="downloadStatus"
 					rows-per-page-text=""
 				>
 					<template v-slot:items="props">
-						<td>{{ props.item.name }}</td>
-						<td>{{ props.item.downloadPath }}</td>
-						<td>{{ props.item.percentDone }}</td>
-						<td class="justify-center layout px-0">
+            <td class="justify-center layout px-0">
 							<v-icon
 								small
 								@click="deleteItem(props.item.id)"
@@ -32,18 +28,11 @@
 								delete
 							</v-icon>
 						</td>
+						<td>{{ props.item.name }}</td>
+						<td>{{ props.item.downloadPath }}</td>
+						<td>{{ props.item.percentDone }}</td>
 					</template>
 				</v-data-table>
-			<!-- <v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn
-					color="primary"
-					flat="flat"
-					@click="close"
-				>
-					닫기
-				</v-btn>
-			</v-card-actions> -->
 		</v-card>
 	</v-dialog>
 	</div>
@@ -103,10 +92,10 @@ export default {
       windowWidth: 0,
       count: 0,
       headers: [
+        { text: '동작', value: 'title', sortable: false },
         { text: '제목', value: 'title', sortable: false },
         { text: '다운로드 경로', value: 'downloadPath', sortable: false },
-        { text: '진행율 (%)', value: 'percentDone', sortable: false },
-        { text: '동작', value: 'title', sortable: false }
+        { text: '진행율 (%)', value: 'percentDone', sortable: false }
       ]
     }
   },

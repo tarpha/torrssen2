@@ -24,17 +24,13 @@
           </v-btn>
         </template>
       </v-toolbar>
-			<!-- <v-card-title class="headline" v-html="'자동 다운로드 이력'"></v-card-title> -->
 				<v-data-table
 					:headers="headers"
 					:items="items"
 					rows-per-page-text=""
 				>
 					<template v-slot:items="props">
-						<td>{{ props.item.title }}</td>
-						<td>{{ props.item.downloadPath }}</td>
-						<td>{{ props.item.episode }}</td>
-						<td class="justify-center layout px-0">
+            <td>
 							<v-icon
 								small
 								@click="deleteItem(props.item)"
@@ -42,25 +38,11 @@
 								delete
 							</v-icon>
 						</td>
+						<td>{{ props.item.title }}</td>
+						<td>{{ props.item.downloadPath }}</td>
+						<td>{{ props.item.episode }}</td>
 					</template>
 				</v-data-table>
-			<!-- <v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn
-					color="primary"
-					flat="flat"
-					@click="close"
-				>
-					닫기
-				</v-btn>
-				<v-btn
-					color="primary"
-					flat="flat"
-					@click="deleteAll"
-				>
-					전체 삭제
-				</v-btn>
-			</v-card-actions> -->
 		</v-card>
 	</v-dialog>
 	</div>
@@ -95,10 +77,10 @@ export default {
       dialog: false,
       windowWidth: 0,
       headers: [
+        { text: '동작', value: 'title', sortable: false },
         { text: '제목', value: 'title', sortable: false },
         { text: '다운로드 경로', value: 'downloadPath', sortable: false },
-        { text: '에피소드', value: 'episode', sortable: false },
-        { text: '동작', value: 'title', sortable: false }
+        { text: '에피소드', value: 'episode', sortable: false }
       ]
     }
   },

@@ -24,17 +24,13 @@
           </v-btn>
         </template>
       </v-toolbar>
-			<!-- <v-card-title class="headline" v-html="'다운로드 이력 관리'"></v-card-title> -->
 				<v-data-table
 					:headers="headers"
 					:items="items"
 					rows-per-page-text=""
 				>
 					<template v-slot:items="props">
-						<td>{{ props.item.name }}</td>
-						<td>{{ props.item.downloadPath }}</td>
-						<td>{{ props.item.done }}</td>
-						<td class="justify-center layout px-0">
+            <td class="justify-center layout px-0">
 							<v-icon
 								small
 								@click="deleteItem(props.item)"
@@ -42,25 +38,11 @@
 								delete
 							</v-icon>
 						</td>
+						<td>{{ props.item.name }}</td>
+						<td>{{ props.item.downloadPath }}</td>
+						<td>{{ props.item.done }}</td>
 					</template>
 				</v-data-table>
-			<!-- <v-card-actions>
-				<v-spacer></v-spacer>
-				<v-btn
-					color="primary"
-					flat="flat"
-					@click="close"
-				>
-					닫기
-				</v-btn>
-				<v-btn
-					color="primary"
-					flat="flat"
-					@click="deleteAll"
-				>
-					전체 삭제
-				</v-btn>
-			</v-card-actions> -->
 		</v-card>
 	</v-dialog>
 	</div>
@@ -96,10 +78,10 @@ export default {
       intervalObj: '',
       windowWidth: 0,
       headers: [
+        { text: '동작', value: 'title', sortable: false },
         { text: '제목', value: 'title', sortable: false },
         { text: '다운로드 경로', value: 'downloadPath', sortable: false },
-        { text: '완료여부', value: 'done', sortable: false },
-        { text: '동작', value: 'title', sortable: false }
+        { text: '완료여부', value: 'done', sortable: false }
       ]
     }
   },

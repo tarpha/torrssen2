@@ -165,15 +165,26 @@ public class RssLoadService {
             boolean seenDone = false;
             boolean subtitleDone = false;
 
-            if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+            if(watchList.getSeries()) {
+                if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
                     rssFeed.getRssEpisode(), false) > 0) {
-                seenDone = true;
-            }
+                    seenDone = true;
+                }
 
-            if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
-                    rssFeed.getRssEpisode(), true) > 0 || !watchList.getSubtitle()) {
-                subtitleDone = true;
+                if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                        rssFeed.getRssEpisode(), true) > 0 || !watchList.getSubtitle()) {
+                    subtitleDone = true;
+                }
+            } else {
+                if(seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), false).isPresent()) {
+                    seenDone = true;
+                }
+
+                if(seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), true).isPresent() || !watchList.getSubtitle()) {
+                    subtitleDone = true;
+                }
             }
+            
 
             if (seenDone && subtitleDone) {
                 logger.info("Rejected by Seen: " + rssFeed.getTitle());
@@ -183,26 +194,28 @@ public class RssLoadService {
                     logger.info("Rejected by Subtitle: " + rssFeed.getTitle());
                     return;
                 }
-                try {
-                    int startSeason = Integer.parseInt(watchList.getStartSeason());
-                    int endSeason = Integer.parseInt(watchList.getEndSeason());
-                    int startEpisode = Integer.parseInt(watchList.getStartEpisode());
-                    int endEpisode = Integer.parseInt(watchList.getEndEpisode());
-                    int currSeason = Integer.parseInt(rssFeed.getRssSeason());
-                    int currEpisode = Integer.parseInt(rssFeed.getRssEpisode());
+                if(watchList.getSeries()) {
+                    try {
+                        int startSeason = Integer.parseInt(watchList.getStartSeason());
+                        int endSeason = Integer.parseInt(watchList.getEndSeason());
+                        int startEpisode = Integer.parseInt(watchList.getStartEpisode());
+                        int endEpisode = Integer.parseInt(watchList.getEndEpisode());
+                        int currSeason = Integer.parseInt(rssFeed.getRssSeason());
+                        int currEpisode = Integer.parseInt(rssFeed.getRssEpisode());
 
-                    if (currSeason < startSeason || currSeason > endSeason) {
-                        logger.info("Rejected by Season: Start: " + startSeason + " End: " + endSeason + " Feed: "
-                                + currSeason);
-                        return;
+                        if (currSeason < startSeason || currSeason > endSeason) {
+                            logger.info("Rejected by Season: Start: " + startSeason + " End: " + endSeason + " Feed: "
+                                    + currSeason);
+                            return;
+                        }
+                        if (currEpisode < startEpisode || currEpisode > endEpisode) {
+                            logger.info("Rejected by Episode: Start: " + startEpisode + " End: " + endEpisode + " Feed: "
+                                    + currEpisode);
+                            return;
+                        }
+                    } catch (NumberFormatException e) {
+                        logger.info(e.getMessage());
                     }
-                    if (currEpisode < startEpisode || currEpisode > endEpisode) {
-                        logger.info("Rejected by Episode: Start: " + startEpisode + " End: " + endEpisode + " Feed: "
-                                + currEpisode);
-                        return;
-                    }
-                } catch (NumberFormatException e) {
-                    logger.info(e.getMessage());
                 }
 
                 logger.info("Download Repuest: " + rssFeed.getTitle());
