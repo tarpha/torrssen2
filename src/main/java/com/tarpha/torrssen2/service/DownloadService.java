@@ -11,16 +11,14 @@ import com.tarpha.torrssen2.repository.WatchListRepository;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class DownloadService {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private DownloadListRepository downloadListRepository;
 
@@ -71,7 +69,7 @@ public class DownloadService {
 
     public List<DownloadList> list() {
         List<DownloadList> ret = null;
-        logger.debug("downloadList");
+        log.debug("downloadList");
 
         String app = settingService.getDownloadApp();
         if (StringUtils.equals(app, "DOWNLOAD_STATION")) {
@@ -121,7 +119,7 @@ public class DownloadService {
                 Optional<DownloadList> optionalSeq = downloadListRepository.findTopByOrderByIdDesc();
                 if (optionalSeq.isPresent()) {
                     Long id = optionalSeq.get().getId() + 100L;                    
-                    logger.debug("id: " + id);
+                    log.debug("id: " + id);
                     ret = id;
                 } else {
                     ret = 100L;
@@ -179,7 +177,7 @@ public class DownloadService {
                     downloadListRepository.save(temp);
                     ret = temp.getVueItemIndex();
                 } catch (NullPointerException e) {
-                    logger.error(e.getMessage());
+                    log.error(e.getMessage());
                 }
             } else {
                 ret = -2;

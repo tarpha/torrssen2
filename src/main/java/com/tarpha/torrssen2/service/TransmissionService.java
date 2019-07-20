@@ -30,18 +30,16 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class TransmissionService {
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private DownloadListRepository downloadListRepository;
 
@@ -78,7 +76,7 @@ public class TransmissionService {
         try {
             password = cryptoService.decrypt(settingService.getSettingValue("TRANSMISSION_PASSWORD"));
         } catch (UnsupportedEncodingException | GeneralSecurityException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
         baseUrl = "http://" +
             settingService.getSettingValue("TRANSMISSION_HOST") +
@@ -99,7 +97,7 @@ public class TransmissionService {
                 response = httpClient.execute(new HttpGet(baseUrl));
                 xTransmissionSessionId = response.getFirstHeader("X-Transmission-Session-Id").getValue();
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                log.error(e.getMessage());
             } finally {
                 HttpClientUtils.closeQuietly(response);
                 HttpClientUtils.closeQuietly(httpClient);
@@ -129,7 +127,7 @@ public class TransmissionService {
             try {
                 pwd = cryptoService.decrypt(pwd);
             } catch (UnsupportedEncodingException | GeneralSecurityException e) {
-                logger.error(e.getMessage());
+                log.error(e.getMessage());
             }
         }
 
@@ -149,7 +147,7 @@ public class TransmissionService {
                 }
             }
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(response);
             HttpClientUtils.closeQuietly(httpClient);
@@ -169,7 +167,7 @@ public class TransmissionService {
         HttpPost httpPost = new HttpPost(baseUrl);
         CloseableHttpResponse response = null;
 
-        logger.debug(params.toString());
+        log.debug(params.toString());
 
         try {
             httpPost.setEntity(new StringEntity(params.toString(), "UTF-8"));
@@ -184,11 +182,11 @@ public class TransmissionService {
                 response = httpClient.execute(httpPost);
             }
 
-            logger.debug("transmission-execute-response-code: " + response.getStatusLine().getStatusCode());
+            log.debug("transmission-execute-response-code: " + response.getStatusLine().getStatusCode());
             if (response.getStatusLine().getStatusCode() == 200) {
                 JSONObject resJson = new JSONObject(EntityUtils.toString(response.getEntity()));
 
-                logger.debug(resJson.toString());
+                log.debug(resJson.toString());
 
                 ret = new TransmissionVO();
 
@@ -201,7 +199,7 @@ public class TransmissionService {
             }
 
         } catch (IOException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             HttpClientUtils.closeQuietly(response);
             HttpClientUtils.closeQuietly(httpClient);
             httpClient = null;
@@ -224,7 +222,7 @@ public class TransmissionService {
             if (!StringUtils.isEmpty(downloadDir)) {
                 args.put("download-dir", downloadDir);
             }
-            logger.debug(args.toString());
+            log.debug(args.toString());
 
             params.put("arguments", args);
 
@@ -237,7 +235,7 @@ public class TransmissionService {
                 }
             }
         } catch (JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return ret;
@@ -266,7 +264,7 @@ public class TransmissionService {
             if(ids != null && ids.size() > 0) {
                 args.put("ids", new JSONArray(ids));
             }
-            logger.debug(args.toString());
+            log.debug(args.toString());
 
             params.put("arguments", args);
 
@@ -295,7 +293,7 @@ public class TransmissionService {
             }
 
         } catch (JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return ret;
@@ -312,7 +310,7 @@ public class TransmissionService {
             JSONObject args = new JSONObject();
             args.put("ids", new JSONArray(ids));
             args.put("delete-local-data", false);
-            logger.debug(args.toString());
+            log.debug(args.toString());
 
             params.put("arguments", args);
 
@@ -324,7 +322,7 @@ public class TransmissionService {
             }
 
         } catch (JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return ret;

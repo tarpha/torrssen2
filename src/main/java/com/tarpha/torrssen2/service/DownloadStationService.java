@@ -20,7 +20,10 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class DownloadStationService extends SynologyApiUtils {
 
     @Autowired
@@ -50,12 +53,12 @@ public class DownloadStationService extends SynologyApiUtils {
             try {
                 Long sizeDownloaded = json.getJSONObject("additional").getJSONObject("transfer").getLong("size_downloaded");
                 Long fileSize = json.getLong("size");
-                logger.debug("percent-done: " + sizeDownloaded.toString() + " / " + fileSize.toString() + " = " + String.valueOf(((double)sizeDownloaded / (double)fileSize) * 100));
+                log.debug("percent-done: " + sizeDownloaded.toString() + " / " + fileSize.toString() + " = " + String.valueOf(((double)sizeDownloaded / (double)fileSize) * 100));
                 if(fileSize > 0L) {
                     down.setPercentDone((int)(((double)sizeDownloaded / (double)fileSize) * 100));
                 }
             } catch (ArithmeticException ae) {
-                logger.error(ae.getMessage());
+                log.error(ae.getMessage());
             }
         }
 
@@ -63,7 +66,7 @@ public class DownloadStationService extends SynologyApiUtils {
     }
 
     public List<DownloadList> list() {
-        logger.info("Download Station list");
+        log.info("Download Station list");
         List<DownloadList> ret = new ArrayList<DownloadList>();
 
         try {
@@ -92,14 +95,14 @@ public class DownloadStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         } 
         
         return ret;
     }
 
     public DownloadList getInfo(String id) {
-        logger.info("Download Station getInfo");
+        log.info("Download Station getInfo");
         DownloadList ret = null;
 
         try {
@@ -121,14 +124,14 @@ public class DownloadStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         } 
 
         return ret;
     }
 
     public List<DownloadList> getInfo(List<String> ids) {
-        logger.info("Download Station getInfo");
+        log.info("Download Station getInfo");
         List<DownloadList> ret = new ArrayList<DownloadList>();
 
         try {
@@ -150,14 +153,14 @@ public class DownloadStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         } 
 
         return ret;
     }
 
     public boolean create(String uri, String downloadDir) {
-        logger.info("Download Station create");
+        log.info("Download Station create");
         boolean ret = false;
 
         List<NameValuePair> form = new ArrayList<NameValuePair>();
@@ -181,7 +184,7 @@ public class DownloadStationService extends SynologyApiUtils {
                     ret = true;
                 } 
             } catch (JSONException e) {
-                logger.error(e.getMessage());
+                log.error(e.getMessage());
             } 
         }
 
@@ -189,7 +192,7 @@ public class DownloadStationService extends SynologyApiUtils {
     }
 
     public boolean delete(List<String> ids) {
-        logger.info("Download Station delete");
+        log.info("Download Station delete");
         boolean ret = true;
         
         try {
@@ -215,7 +218,7 @@ public class DownloadStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         } 
 
         return ret;

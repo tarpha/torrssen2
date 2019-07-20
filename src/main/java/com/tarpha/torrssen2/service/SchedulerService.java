@@ -16,16 +16,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class SchedulerService {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private SettingRepository settingRepository;
 
@@ -61,7 +59,7 @@ public class SchedulerService {
     }
 
     public void killTask() {
-        logger.debug("killTask");
+        log.debug("killTask");
         Optional<Setting> optionalSetting = settingRepository.findByKey("USE_CRON");
         if (optionalSetting.isPresent()) {
             if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
@@ -73,15 +71,15 @@ public class SchedulerService {
                     boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
                     if (script.isFile()) {
                         if (!isWindows) {
-                            logger.debug("run kill.sh");
+                            log.debug("run kill.sh");
                             Runtime.getRuntime().exec(String.format("sh -c %s", File.separator + "kill.sh"));
                         }
                     } else {
-                        logger.debug("run ps -ef kill");
+                        log.debug("run ps -ef kill");
                         Runtime.getRuntime().exec("ps - ef | grep torrssen2.jar | awk '{print $1}' | xargs kill");
                     }
                 } catch (InterruptedException | IOException e) {
-                    logger.error(e.getMessage());
+                    log.error(e.getMessage());
                 }
             }
         }
@@ -116,7 +114,7 @@ public class SchedulerService {
             }
         }
 
-        logger.info("=== Transmission Stop Seeding ===");
+        log.info("=== Transmission Stop Seeding ===");
         List<DownloadList> list = transmissionService.torrentGet(null);
         List<Long> ids = new ArrayList<Long>();
         for (DownloadList down : list) {
@@ -132,13 +130,13 @@ public class SchedulerService {
                         sendTelegram(down);
                     }
 
-                    logger.debug("removeDirectory");
+                    log.debug("removeDirectory");
                     List<String> inners = CommonUtils.removeDirectory(down.getDownloadPath(), down.getName(),
                             settingRepository);
 
                     String rename = rdown.get().getRename();
                     if (!StringUtils.isBlank(rename)) {
-                        logger.debug("getRename: " + rename);
+                        log.debug("getRename: " + rename);
                         if (inners == null) {
                             CommonUtils.renameFile(down.getDownloadPath(), down.getName(), rename);
                         } else {
@@ -160,7 +158,7 @@ public class SchedulerService {
 
     public void downloadStationJob() {
         // 다운로드 스테이션 완료 체크
-        logger.info("=== Download Station Check Done ===");
+        log.info("=== Download Station Check Done ===");
         List<DownloadList> list = downloadStationService.list();
 
         boolean doneDelete = false;
@@ -208,7 +206,7 @@ public class SchedulerService {
                         }
                         // 완료 시 삭제 여부
                         if (doneDelete) {
-                            logger.info("Remove Torrent: " + down.getFileName());
+                            log.info("Remove Torrent: " + down.getFileName());
 
                             List<String> ids = new ArrayList<String>();
                             ids.add(tdown.getDbid());
@@ -221,7 +219,7 @@ public class SchedulerService {
                             if (Boolean.parseBoolean(delDirSetting.get().getValue())
                                     && !StringUtils.isEmpty(down.getName())) {
 
-                                logger.debug("removeDirectory");
+                                log.debug("removeDirectory");
                                 String path = down.getDownloadPath();
                                 if (!StringUtils.startsWith(path, File.separator)) {
                                     path = File.separator + path;
@@ -258,7 +256,7 @@ public class SchedulerService {
                                 }
 
                                 if (!StringUtils.isBlank(down.getRename())) {
-                                    logger.debug("getRename: " + down.getRename());
+                                    log.debug("getRename: " + down.getRename());
                                     if (jsonArray == null) {
                                         fileStationService.rename(path + File.separator + down.getName(),
                                                 path + File.separator + down.getRename());
@@ -284,10 +282,10 @@ public class SchedulerService {
 
         List<DownloadList> tasks = downloadListRepository.findByTask(true);
         for (DownloadList task : tasks) {
-            logger.debug("moveDone: " + task.getTaskId());
+            log.debug("moveDone: " + task.getTaskId());
             int resCode = fileStationService.moveTask(task.getTaskId());
             if (resCode != 0) {
-                logger.debug("finished");
+                log.debug("finished");
                 if (resCode == 1) {
                     fileStationService.delete(task.getDeletePath());
                 }
@@ -299,17 +297,17 @@ public class SchedulerService {
 
     private void sendTelegram(DownloadList down) {
         Optional<DownloadList> rdown = downloadListRepository.findById(down.getId());
-        logger.debug(rdown.toString());
+        log.debug(rdown.toString());
         if (rdown.isPresent()) {
             if (rdown.get().getIsSentAlert() == false) {
                 String target = StringUtils.isEmpty(down.getFileName()) ? rdown.get().getName() : down.getFileName();
-                logger.info("Send Telegram: " + target);
+                log.info("Send Telegram: " + target);
                 boolean ret = telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.");
-                logger.debug("send telegram result: " + ret);
+                log.debug("send telegram result: " + ret);
                 if (ret) {
                     DownloadList sdown = rdown.get();
                     sdown.setIsSentAlert(true);
-                    logger.debug(sdown.toString());
+                    log.debug(sdown.toString());
 
                     downloadListRepository.save(sdown);
                 }

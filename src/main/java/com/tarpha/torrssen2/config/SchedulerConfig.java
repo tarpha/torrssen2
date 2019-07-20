@@ -10,8 +10,6 @@ import com.tarpha.torrssen2.repository.SettingRepository;
 import com.tarpha.torrssen2.service.RssLoadService;
 import com.tarpha.torrssen2.service.SchedulerService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
@@ -21,9 +19,6 @@ import org.springframework.scheduling.support.CronTrigger;
 
 @Configuration
 public class SchedulerConfig implements SchedulingConfigurer {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     RssLoadService rssLoadService;
 

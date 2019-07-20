@@ -4,8 +4,6 @@ import com.tarpha.torrssen2.auth.MyUserPrincipal;
 import com.tarpha.torrssen2.domain.User;
 import com.tarpha.torrssen2.repository.UserRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MyUserDetailsService implements UserDetailsService {
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
- 
     @Autowired
     private UserRepository userRepository;
  

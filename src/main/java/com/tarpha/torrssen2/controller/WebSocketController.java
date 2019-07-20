@@ -5,8 +5,6 @@ import java.util.List;
 import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.service.DownloadService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -14,9 +12,6 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class WebSocketController {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private DownloadService downloadService;
 

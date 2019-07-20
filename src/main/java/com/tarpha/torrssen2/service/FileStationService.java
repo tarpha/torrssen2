@@ -13,7 +13,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class FileStationService extends SynologyApiUtils {
 
     public FileStationService() {
@@ -21,7 +24,7 @@ public class FileStationService extends SynologyApiUtils {
     }
 
     public boolean createFolder(String path, String name) {
-        logger.info("File Station createFolder");
+        log.info("File Station createFolder");
         boolean ret = false;
 
         try {
@@ -36,10 +39,10 @@ public class FileStationService extends SynologyApiUtils {
 
             JSONObject resJson = executeGet(builder);
 
-            logger.debug(builder.toString());
+            log.debug(builder.toString());
 
             if (resJson != null) {
-                logger.debug(resJson.toString());
+                log.debug(resJson.toString());
                 if (resJson.has("success")) {
                     if (Boolean.parseBoolean(resJson.get("success").toString())) {
                         // JSONArray jsonArray = resJson.getJSONObject("data").getJSONArray("folders");
@@ -49,7 +52,7 @@ public class FileStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return ret;
@@ -68,10 +71,10 @@ public class FileStationService extends SynologyApiUtils {
 
             JSONObject resJson = executeGet(builder);
 
-            logger.debug(builder.toString());
+            log.debug(builder.toString());
 
             if (resJson != null) {
-                logger.debug(resJson.toString());
+                log.debug(resJson.toString());
                 if (resJson.has("success")) {
                     if (Boolean.parseBoolean(resJson.get("success").toString())) {
                         if (resJson.has("data")) {
@@ -84,14 +87,14 @@ public class FileStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return null;
     }
 
     public String move(List<String> paths, String dest) {
-        logger.info("File Station CopyMove");
+        log.info("File Station CopyMove");
         String taskId = null;
 
         try {
@@ -107,10 +110,10 @@ public class FileStationService extends SynologyApiUtils {
 
             JSONObject resJson = executeGet(builder);
 
-            logger.debug(builder.toString());
+            log.debug(builder.toString());
 
             if (resJson != null) {
-                logger.debug(resJson.toString());
+                log.debug(resJson.toString());
                 if (resJson.has("success")) {
                     if (Boolean.parseBoolean(resJson.get("success").toString())) {
                         if (resJson.has("data")) {
@@ -123,7 +126,7 @@ public class FileStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return taskId;
@@ -142,10 +145,10 @@ public class FileStationService extends SynologyApiUtils {
 
             JSONObject resJson = executeGet(builder);
 
-            logger.debug(builder.toString());
+            log.debug(builder.toString());
 
             if (resJson != null) {
-                logger.debug(resJson.toString());
+                log.debug(resJson.toString());
                 if (resJson.has("success")) {
                     if (Boolean.parseBoolean(resJson.get("success").toString())) {
                         if (resJson.has("data")) {
@@ -167,14 +170,14 @@ public class FileStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return ret;
     }
 
     public boolean delete(String path) {
-        logger.info("File Station Delete");
+        log.info("File Station Delete");
         boolean ret = false;
 
         try {
@@ -188,10 +191,10 @@ public class FileStationService extends SynologyApiUtils {
 
             JSONObject resJson = executeGet(builder);
 
-            logger.debug(builder.toString());
+            log.debug(builder.toString());
 
             if (resJson != null) {
-                logger.debug(resJson.toString());
+                log.debug(resJson.toString());
                 if (resJson.has("success")) {
                     if (Boolean.parseBoolean(resJson.get("success").toString())) {
                         ret = true;
@@ -200,14 +203,14 @@ public class FileStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return ret;
     }
 
     public boolean rename(String path, String name) {
-        logger.info("File Station Rename");
+        log.info("File Station Rename");
         boolean ret = false;
 
         try {
@@ -221,10 +224,10 @@ public class FileStationService extends SynologyApiUtils {
 
             JSONObject resJson = executeGet(builder);
 
-            logger.debug(builder.toString());
+            log.debug(builder.toString());
 
             if (resJson != null) {
-                logger.debug(resJson.toString());
+                log.debug(resJson.toString());
                 if (resJson.has("success")) {
                     if (Boolean.parseBoolean(resJson.get("success").toString())) {
                         ret = true;
@@ -233,7 +236,7 @@ public class FileStationService extends SynologyApiUtils {
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return ret;

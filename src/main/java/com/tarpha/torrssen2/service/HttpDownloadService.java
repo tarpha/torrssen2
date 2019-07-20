@@ -19,19 +19,17 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class HttpDownloadService {
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private TransmissionService transmissionService;
 
@@ -70,7 +68,7 @@ public class HttpDownloadService {
             String content = header[0].getValue();
             for(String str: StringUtils.split(content, ";")) {
                 if(StringUtils.containsIgnoreCase(str, "filename=")) {
-                    logger.debug(str);
+                    log.debug(str);
                     String[] attachment = StringUtils.split(str, "=");
                     File directory = new File(path);
     
@@ -120,7 +118,7 @@ public class HttpDownloadService {
             response.close();
             httpClient.close();
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
     }
 

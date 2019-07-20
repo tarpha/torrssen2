@@ -15,17 +15,15 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 
 @Service
+@Slf4j
 public class TelegramService {
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private SettingService settingService;
 
@@ -69,13 +67,13 @@ public class TelegramService {
 
                 response = httpClient.execute(httpPost);
 
-                logger.debug("telegram-send-message-response-code: " + response.getStatusLine().getStatusCode());
+                log.debug("telegram-send-message-response-code: " + response.getStatusLine().getStatusCode());
                 if (response.getStatusLine().getStatusCode() == 200) {
                     ret = true;
                 } 
             }
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(response);
         }
@@ -95,8 +93,8 @@ public class TelegramService {
         HttpPost httpPost = new HttpPost(baseUrl);
         CloseableHttpResponse response = null;
 
-        logger.debug("token:" + inToken);
-        logger.debug("chatId: " + chatId);
+        log.debug("token:" + inToken);
+        log.debug("chatId: " + chatId);
 
         try {
             JSONObject params = new JSONObject();
@@ -107,12 +105,12 @@ public class TelegramService {
 
             response = httpClient.execute(httpPost);
 
-            logger.debug("telegram-send-message-response-code: " + response.getStatusLine().getStatusCode());
+            log.debug("telegram-send-message-response-code: " + response.getStatusLine().getStatusCode());
             if (response.getStatusLine().getStatusCode() == 200) {
                 ret = true;
             } 
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(response);
         }

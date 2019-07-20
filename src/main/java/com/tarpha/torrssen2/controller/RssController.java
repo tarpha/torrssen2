@@ -15,8 +15,6 @@ import com.tarpha.torrssen2.repository.WatchListRepository;
 import com.tarpha.torrssen2.service.DownloadService;
 import com.tarpha.torrssen2.service.RssLoadService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,9 +34,6 @@ import io.swagger.annotations.Api;
 @CrossOrigin(origins = "*")
 @Api
 public class RssController {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private RssFeedRepository rssFeedRepository;
 

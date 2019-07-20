@@ -30,8 +30,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -45,11 +43,11 @@ import bt.metainfo.Torrent;
 import bt.metainfo.TorrentFile;
 import bt.runtime.BtClient;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class BtService {
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     DownloadListRepository downloadListRepository;
 
@@ -85,7 +83,7 @@ public class BtService {
         Optional<DownloadList> optionalSeq = downloadListRepository.findTopByOrderByIdDesc();
         if (optionalSeq.isPresent()) {
             id = optionalSeq.get().getId() + 1L;
-            logger.debug("id: " + id);
+            log.debug("id: " + id);
         }
         setConcurrentSize();
     }
@@ -119,7 +117,7 @@ public class BtService {
         for (int i = 0; i < list.size(); i++) {
             TorrentFile torrent = list.get(i);
             String pathElement = StringUtils.join(torrent.getPathElements(), File.pathSeparator);
-            logger.debug("pathElement : " + pathElement);
+            log.debug("pathElement : " + pathElement);
             if (StringUtils.contains(pathElement, name)) {
                 return pathElement;
             }
@@ -132,7 +130,7 @@ public class BtService {
         for (int i = 0; i < list.size(); i++) {
             TorrentFile torrent = list.get(i);
             String pathElement = StringUtils.join(torrent.getPathElements(), File.separator);
-            logger.debug("pathElement : " + pathElement);
+            log.debug("pathElement : " + pathElement);
             ret.add(pathElement);
         }
         return ret;
@@ -157,8 +155,8 @@ public class BtService {
     public void check() {
         setConcurrentSize();
 
-        logger.debug("jobs size: " + jobs.size());
-        logger.debug("concurrentSize: " + concurrentSize);
+        log.debug("jobs size: " + jobs.size());
+        log.debug("concurrentSize: " + concurrentSize);
 
         for(Long key: jobs.keySet()) {
             if(jobs.get(key).getDone()) {
@@ -202,12 +200,12 @@ public class BtService {
             CloseableHttpResponse response = httpClient.execute(httpGet);
 
             Header[] header = response.getHeaders("Content-Disposition");
-            // logger.debug(header.length + "");
-            // logger.debug(header[0].getValue());
+            // log.debug(header.length + "");
+            // log.debug(header[0].getValue());
 
             if(StringUtils.containsIgnoreCase(header[0].getValue(), "filename=")) {
                 String[] attachment = StringUtils.split(header[0].getValue(), "=");
-                // logger.debug(attachment[1]);
+                // log.debug(attachment[1]);
 
                 File directory = new File(path);
 
@@ -233,7 +231,7 @@ public class BtService {
             response.close();
             httpClient.close();
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             bt.setError(true);
         }
 
@@ -260,8 +258,8 @@ public class BtService {
             if (StringUtils.startsWith(link, "magnet")) {
                 BtClient client = Bt.client().autoLoadModules().module(dhtModule).storage(storage).magnet(link)
                         .afterTorrentFetched(torrent -> {
-                            logger.debug("getName: " + torrent.getName());
-                            logger.debug("getFiles: " + torrent.getFiles().toString());
+                            log.debug("getName: " + torrent.getName());
+                            log.debug("getFiles: " + torrent.getFiles().toString());
                             if (jobs.containsKey(currentId)) {
                                 setInfo(currentId, torrent);
                             }
@@ -272,23 +270,23 @@ public class BtService {
                     if (jobs.containsKey(currentId)) {
                         BtVo vo = jobs.get(currentId);
 
-                        logger.debug("getDownloaded: " + state.getDownloaded());
-                        logger.debug("getPiecesTotal: " + state.getPiecesTotal());
-                        logger.debug("getPiecesComplete: " + state.getPiecesComplete());
-                        logger.debug("percentDone: "
+                        log.debug("getDownloaded: " + state.getDownloaded());
+                        log.debug("getPiecesTotal: " + state.getPiecesTotal());
+                        log.debug("getPiecesComplete: " + state.getPiecesComplete());
+                        log.debug("percentDone: "
                                 + ((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100);
-                        logger.debug("getPiecesRemaining: " + state.getPiecesRemaining());
+                        log.debug("getPiecesRemaining: " + state.getPiecesRemaining());
                         vo.setPercentDone(
                                 (int) (((float) state.getPiecesComplete() / (float) state.getPiecesTotal()) * 100));
                         jobs.put(currentId, vo);
 
                         if(vo.getCancel()) {
-                            logger.debug("=== cancel ====");
+                            log.debug("=== cancel ====");
                             jobs.remove(currentId);
                             client.stop();
                         }
                     }
-                    logger.debug(jobs.get(currentId).toString());
+                    log.debug(jobs.get(currentId).toString());
                     if (state.getPiecesRemaining() == 0) {
                         Optional<DownloadList> optionalDownload = downloadListRepository.findById(currentId);
                         if (optionalDownload.isPresent()) {
@@ -302,7 +300,7 @@ public class BtService {
                                     if (download.getIsSentAlert() == false) {
                                         String target = StringUtils.isEmpty(download.getFileName()) ? download.getName()
                                                 : download.getFileName();
-                                        logger.info("Send Telegram: " + target);
+                                        log.info("Send Telegram: " + target);
                                         if (telegramService.sendMessage("<b>" + target + "</b>의 다운로드가 완료되었습니다.")) {
                                             download.setIsSentAlert(true);
 
@@ -314,12 +312,12 @@ public class BtService {
 
                             if (jobs.containsKey(currentId)) {
                                 BtVo vo = jobs.get(currentId);
-                                logger.debug("removeDirectory");
+                                log.debug("removeDirectory");
                                 if (CommonUtils.removeDirectory(vo.getPath(), vo.getFilename(), vo.getInnerList(), settingRepository)) {
                                     vo.setFilename(vo.getInnerFile());
                                 }
                                 if (!StringUtils.isBlank(download.getRename())) {
-                                    logger.debug("getRename: " + download.getRename());
+                                    log.debug("getRename: " + download.getRename());
                                     CommonUtils.renameFile(vo.getPath(), vo.getFilename(), download.getRename());
                                 }
                                 jobs.remove(currentId);
@@ -343,7 +341,7 @@ public class BtService {
                 httpDownload(currentId, link, path);
                 // client = Bt.client().storage(storage).torrent(new URL(link))
                 //         .afterTorrentFetched(torrent -> {
-                //             logger.debug("getName: " + torrent.getName());
+                //             log.debug("getName: " + torrent.getName());
                 //             if (jobs.containsKey(currentId)) {
                 //                 setInfo(currentId, torrent);
                 //             }
@@ -351,7 +349,7 @@ public class BtService {
             }
 
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             // return -1L;
             if (jobs.containsKey(currentId)) {
                 BtVo vo = jobs.get(currentId);
@@ -371,7 +369,7 @@ public class BtService {
                     FileUtils.forceDelete(file);
                 }
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                log.error(e.getMessage());
                 return false;
             }
             // jobs.remove(id);
@@ -405,7 +403,7 @@ public class BtService {
             }
         }
 
-        logger.debug(ret.toString());
+        log.debug(ret.toString());
 
         return ret;
     }

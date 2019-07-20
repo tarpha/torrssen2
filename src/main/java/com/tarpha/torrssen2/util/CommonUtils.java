@@ -16,13 +16,11 @@ import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class CommonUtils {
-
-    protected static Logger logger = LoggerFactory.getLogger(CommonUtils.class);
-
     public static String getRename(String rename, String title, String season, String episode, String quality,
             String releaseGroup, String rssDate) {
         return StringUtils.replaceEach(rename,
@@ -31,7 +29,7 @@ public class CommonUtils {
     }
 
     public static boolean renameFile(String path, String from, String to) {
-        logger.info("Rename File To: " + to);
+        log.info("Rename File To: " + to);
         File srcFile = new File(path + File.separator, from);
         File destFile = new File(path, to + "." + FilenameUtils.getExtension(from));
 
@@ -57,7 +55,7 @@ public class CommonUtils {
                         FileUtils.moveFileToDirectory(src, trg, true);
                         FileUtils.forceDelete(new File(path, outer));
                     } catch (IOException e) {
-                        logger.error(e.getMessage());
+                        log.error(e.getMessage());
                         ret = false;
                     }
                 } else {
@@ -80,10 +78,10 @@ public class CommonUtils {
         
         Optional<Setting> delDirSetting = settingRepository.findByKey("DEL_DIR");
 
-        logger.debug("delete List");
+        log.debug("delete List");
         
         if (delDirSetting.isPresent()) {
-            logger.debug(delDirSetting.get().getValue());
+            log.debug(delDirSetting.get().getValue());
             if(Boolean.parseBoolean(delDirSetting.get().getValue())) {
                 boolean ret = true;
 
@@ -103,7 +101,7 @@ public class CommonUtils {
                         }
                         FileUtils.forceDelete(new File(path, outer));
                     } catch (IOException e) {
-                        logger.error(e.getMessage());
+                        log.error(e.getMessage());
                         ret = false;
                     }
                 } else {
@@ -141,7 +139,7 @@ public class CommonUtils {
 
                     try {
                         for(File subFile: subFiles) {
-                            logger.debug(subFile.getPath() + ":" + subFile.getName());
+                            log.debug(subFile.getPath() + ":" + subFile.getName());
                             File remove = new File(path, subFile.getName());
                             if (remove.isFile()) {
                                 FileUtils.forceDelete(remove);
@@ -151,7 +149,7 @@ public class CommonUtils {
                         }
                         FileUtils.forceDelete(new File(path, outer));
                     } catch (IOException e) {
-                        logger.error(e.getMessage());
+                        log.error(e.getMessage());
                     }
 
                     return ret;

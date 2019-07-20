@@ -27,16 +27,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class SynologyApiUtils {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     protected SettingService settingService;
 
@@ -63,14 +60,14 @@ public class SynologyApiUtils {
     }
 
     protected boolean initialize() {
-        logger.info("Initialize File Station Http Client");
+        log.info("Initialize File Station Http Client");
         HttpResponse response = null;
 
         this.username = settingService.getSettingValue("DS_USERNAME");
         try {
             password = cryptoService.decrypt(settingService.getSettingValue("DS_PASSWORD"));
         } catch (UnsupportedEncodingException | GeneralSecurityException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         }
         this.baseUrl = "http://" + settingService.getSettingValue("DS_HOST") + ":"
                 + settingService.getSettingValue("DS_PORT") + "/webapi";
@@ -82,7 +79,7 @@ public class SynologyApiUtils {
                         .setParameter("method", "login").setParameter("session", session).setParameter("format", "sid")
                         .setParameter("account", this.username).setParameter("passwd", this.password);
 
-                logger.debug(builder.toString());
+                log.debug(builder.toString());
 
                 HttpGet httpGet = new HttpGet(builder.build());
 
@@ -90,7 +87,7 @@ public class SynologyApiUtils {
                     httpClient = HttpClientBuilder.create().build();
                     response = httpClient.execute(httpGet);
 
-                    logger.debug("init-response-code: " + response.getStatusLine().getStatusCode());
+                    log.debug("init-response-code: " + response.getStatusLine().getStatusCode());
                     JSONObject resJson = new JSONObject(EntityUtils.toString(response.getEntity()));
 
                     if (Boolean.parseBoolean(resJson.get("success").toString())) {
@@ -99,11 +96,11 @@ public class SynologyApiUtils {
                         }
                     }
                 } catch (IOException e) {
-                    logger.error(e.getMessage());
+                    log.error(e.getMessage());
                 }
 
             } catch (URISyntaxException | ParseException | JSONException e) {
-                logger.error(e.getMessage());
+                log.error(e.getMessage());
             } finally {
                 HttpClientUtils.closeQuietly(response);
             }
@@ -125,7 +122,7 @@ public class SynologyApiUtils {
             try {
                 pwd = cryptoService.decrypt(pwd);
             } catch (UnsupportedEncodingException | GeneralSecurityException e) {
-                logger.error(e.getMessage());
+                log.error(e.getMessage());
             }
         }
 
@@ -135,7 +132,7 @@ public class SynologyApiUtils {
                     .setParameter("method", "login").setParameter("session", session).setParameter("format", "sid")
                     .setParameter("account", id).setParameter("passwd", pwd);
 
-            logger.debug(builder.toString());
+            log.debug(builder.toString());
 
             HttpGet httpGet = new HttpGet(builder.build());
 
@@ -143,7 +140,7 @@ public class SynologyApiUtils {
                 httpClient = HttpClientBuilder.create().build();
                 response = httpClient.execute(httpGet);
 
-                logger.debug("init-response-code: " + response.getStatusLine().getStatusCode());
+                log.debug("init-response-code: " + response.getStatusLine().getStatusCode());
                 JSONObject resJson = new JSONObject(EntityUtils.toString(response.getEntity()));
 
                 if (Boolean.parseBoolean(resJson.get("success").toString())) {
@@ -154,11 +151,11 @@ public class SynologyApiUtils {
                     }
                 }
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                log.error(e.getMessage());
             }
 
         } catch (URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(response);
             HttpClientUtils.closeQuietly(httpClient);
@@ -172,7 +169,7 @@ public class SynologyApiUtils {
         JSONObject ret = null;
         CloseableHttpResponse response = null;
 
-        logger.debug(builder.toString());
+        log.debug(builder.toString());
 
         if (httpClient == null) {
             this.sid = null;
@@ -182,10 +179,10 @@ public class SynologyApiUtils {
         try {
             HttpGet httpGet = new HttpGet(builder.build());
             response = httpClient.execute(httpGet);
-            logger.debug("get-response-code: " + response.getStatusLine().getStatusCode());
+            log.debug("get-response-code: " + response.getStatusLine().getStatusCode());
 
             ret = new JSONObject(EntityUtils.toString(response.getEntity()));
-            logger.debug(ret.toString());
+            log.debug(ret.toString());
 
             if (ret.has("success") && ret.has("error")) {
                 if (Boolean.parseBoolean(ret.get("success").toString()) == false) {
@@ -208,7 +205,7 @@ public class SynologyApiUtils {
                 }
             }
         } catch (IOException | URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             HttpClientUtils.closeQuietly(response);
             HttpClientUtils.closeQuietly(httpClient);
             httpClient = null;
@@ -238,7 +235,7 @@ public class SynologyApiUtils {
             httpPost.setEntity(entity);
 
             response = httpClient.execute(httpPost);
-            logger.debug("post-response-code: " + response.getStatusLine().getStatusCode());
+            log.debug("post-response-code: " + response.getStatusLine().getStatusCode());
 
             ret = new JSONObject(EntityUtils.toString(response.getEntity()));
 
@@ -261,7 +258,7 @@ public class SynologyApiUtils {
             }
 
         } catch (IOException | URISyntaxException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
             HttpClientUtils.closeQuietly(response);
             HttpClientUtils.closeQuietly(httpClient);
             httpClient = null;

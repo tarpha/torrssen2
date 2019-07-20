@@ -7,8 +7,6 @@ import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.service.DownloadService;
 import com.tarpha.torrssen2.service.SettingService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,9 +25,6 @@ import io.swagger.annotations.Api;
 @CrossOrigin(origins = "*")
 @Api
 public class DownloadController {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-    
     @Autowired
     private DownloadListRepository downloadListRepository;
 

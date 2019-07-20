@@ -32,21 +32,23 @@
         </rollingPolicy>
     </appender>
      
-    <!-- LOG everything at ERROR level -->
+    <!-- LOG everything at INFO level -->
     <root level="error">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </root>
 
-    <logger name="bt.net" level="off" additivity="false">
-        <appender-ref ref="RollingFile" />
-        <appender-ref ref="Console" />
-    </logger>
- 
-    <!-- LOG "com.baeldung*" at ERROR level -->
-    <logger name="com.tarpha" level="error" additivity="false">
-        <appender-ref ref="RollingFile" />
-        <appender-ref ref="Console" />
-    </logger>
+    <springProfile name="default">
+        <logger name="com.tarpha" level="error" additivity="false">
+            <appender-ref ref="RollingFile" />
+            <appender-ref ref="Console" />
+        </logger>
+    </springProfile>
+    <springProfile name="dev">
+        <logger name="com.tarpha" level="debug" additivity="false">
+            <appender-ref ref="RollingFile" />
+            <appender-ref ref="Console" />
+        </logger>
+    </springProfile>
  
 </configuration>

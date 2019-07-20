@@ -1,4 +1,6 @@
 spring:
+    profiles:
+        active: default
     h2:
         console: 
             enabled: true
@@ -13,6 +15,10 @@ spring:
         url: jdbc:h2:~/data/h2;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE
         username: torrssen
         password: torrssen
+# logging:
+#     level:
+#         root: warn
+#         com.tarpha: debug
 
 crypto:
     key: 3t6w9z$C&F)J@NcRfUjWnZr4u7x!A%D*

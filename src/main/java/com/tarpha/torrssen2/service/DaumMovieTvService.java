@@ -15,16 +15,14 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-@Service
-public class DaumMovieTvService {
-    
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
+import lombok.extern.slf4j.Slf4j;
 
+@Service
+@Slf4j
+public class DaumMovieTvService {
     // https://suggest-bar.daum.net/suggest?id=movie&cate=tv&multiple=0&mod=json&code=utf_in_out&q=${query}&limit=10
     @Value("${daum-movie-tv.search-url}")
     private String baseUrl;
@@ -35,7 +33,7 @@ public class DaumMovieTvService {
     private CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
     public String getPoster(String query) {
-        logger.info("Get Poster: " + query);
+        log.info("Get Poster: " + query);
         CloseableHttpResponse response = null;
 
         try {
@@ -48,7 +46,7 @@ public class DaumMovieTvService {
             response = httpClient.execute(httpGet);
 
             JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
-            logger.debug(json.toString());
+            log.debug(json.toString());
 
             if(json.has("items")) {
                 JSONArray jarr = json.getJSONArray("items");
@@ -63,7 +61,7 @@ public class DaumMovieTvService {
                 }   
             }
         } catch (URISyntaxException | IOException | ParseException | JSONException e) {
-            logger.error(e.getMessage());
+            log.error(e.getMessage());
         } finally {
             HttpClientUtils.closeQuietly(response);
         }

@@ -13,8 +13,6 @@ import com.tarpha.torrssen2.service.TransmissionService;
 import com.tarpha.torrssen2.util.CommonUtils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,16 +21,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@Slf4j
 @RequestMapping(value = "/api/transmission/")
 // @CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "*")
 @Api
 public class TransmissionController {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private SettingRepository settingRepository;
 
@@ -48,8 +45,8 @@ public class TransmissionController {
     @PostMapping(value = "/download-done")
     public int downloadDone(@RequestBody DownloadList downloadList) throws Exception {
         int ret = 0;
-        logger.debug("download-done");
-        logger.debug(downloadList.toString());
+        log.debug("download-done");
+        log.debug(downloadList.toString());
         
         // 다운로드 정보를 가져온다.
         Optional<DownloadList> optionalInfo = downloadListRepository.findById(downloadList.getId());
@@ -77,7 +74,7 @@ public class TransmissionController {
             Optional<Setting> optionalSetting = settingRepository.findByKey("SEND_TELEGRAM");
             if (optionalSetting.isPresent()) {
                 if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
-                    logger.info("Send Telegram: " + info.getName());
+                    log.info("Send Telegram: " + info.getName());
                     if(telegramService.sendMessage("<b>" + info.getName() + "</b>의 다운로드가 완료되었습니다.")) {
                         info.setIsSentAlert(true);
                     }
@@ -93,7 +90,7 @@ public class TransmissionController {
         if (optionalSetting.isPresent()) {
             if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
                 Thread.sleep(10000);
-                logger.info("Remove Torrent: " + downloadList.getFileName());
+                log.info("Remove Torrent: " + downloadList.getFileName());
                 
                 List<Long> ids = new ArrayList<Long>();
                 ids.add(downloadList.getId());
@@ -101,11 +98,11 @@ public class TransmissionController {
             }
         }
 
-        logger.debug("removeDirectory");
+        log.debug("removeDirectory");
         List<String> inners = CommonUtils.removeDirectory(downloadList.getDownloadPath(), downloadList.getFileName(), settingRepository);
         
         if (!StringUtils.isBlank(downloadList.getRename())) {
-            logger.debug("getRename: " + downloadList.getRename());
+            log.debug("getRename: " + downloadList.getRename());
             if(inners == null) {
                 CommonUtils.renameFile(downloadList.getDownloadPath(), downloadList.getFileName(), downloadList.getRename());
             } else {
