@@ -25,18 +25,16 @@ import com.tarpha.torrssen2.repository.WatchListRepository;
 import com.tarpha.torrssen2.util.CommonUtils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class RssLoadService {
-
-    protected Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private RssListRepository rssListRepository;
 
@@ -74,7 +72,7 @@ public class RssLoadService {
     private SimpMessagingTemplate simpMessagingTemplate;
 
     public void loadRss() {
-        logger.info("=== Load RSS ===");
+        log.info("=== Load RSS ===");
 
         deleteFeed();
 
@@ -125,14 +123,14 @@ public class RssLoadService {
                         // rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
                         rssFeedList.add(rssFeed);
 
-                        logger.info("Add Feed: " + rssFeed.getTitle());
+                        log.info("Add Feed: " + rssFeed.getTitle());
 
                         // Watch List를 체크하여 다운로드 요청한다.
                         checkWatchList(rssFeed);
                     }
                 }
             } catch (Exception e) {
-                logger.error(e.getMessage());
+                log.error(e.getMessage());
             }
         }
 
@@ -152,22 +150,44 @@ public class RssLoadService {
     }
 
     private void checkWatchList(RssFeed rssFeed) {
-        if (StringUtils.isEmpty(rssFeed.getRssQuality())) {
-            rssFeed.setRssQuality("720p");
+        if (StringUtils.isBlank(rssFeed.getRssQuality())) {
+            rssFeed.setRssQuality("100p");
         }
         Optional<WatchList> optionalWatchList = watchListRepository.findByTitleRegex(rssFeed.getTitle(),
                 rssFeed.getRssQuality());
 
         if (optionalWatchList.isPresent()) {
             WatchList watchList = optionalWatchList.get();
-            logger.info("Matched Feed: " + rssFeed.getTitle());
+            log.info("Matched Feed: " + rssFeed.getTitle());
 
             boolean seenDone = false;
             boolean subtitleDone = false;
+            boolean checkQuality = false;
 
-            if(watchList.getSeries()) {
+            if (StringUtils.isBlank(watchList.getQuality())) {
+                watchList.setQuality("100p");
+            }
+
+            try {
+                if (StringUtils.endsWithIgnoreCase(watchList.getQuality(), "P+")) {
+                    checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(),
+                            "P")) >= Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P+"));
+                } else {
+                    checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(),
+                            "P")) == Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P"));
+                }
+            } catch (NumberFormatException e) {
+                log.error(e.getMessage());
+            }
+
+            if (!checkQuality) {
+                log.info("Rejected by Quality: " + rssFeed.getTitle());
+                return;
+            }
+
+            if (watchList.getSeries()) {
                 if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
-                    rssFeed.getRssEpisode(), false) > 0) {
+                        rssFeed.getRssEpisode(), false) > 0) {
                     seenDone = true;
                 }
 
@@ -176,25 +196,25 @@ public class RssLoadService {
                     subtitleDone = true;
                 }
             } else {
-                if(seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), false).isPresent()) {
+                if (seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), false).isPresent()) {
                     seenDone = true;
                 }
 
-                if(seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), true).isPresent() || !watchList.getSubtitle()) {
+                if (seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), true).isPresent()
+                        || !watchList.getSubtitle()) {
                     subtitleDone = true;
                 }
             }
-            
 
             if (seenDone && subtitleDone) {
-                logger.info("Rejected by Seen: " + rssFeed.getTitle());
+                log.info("Rejected by Seen: " + rssFeed.getTitle());
             } else {
                 if (!watchList.getSubtitle() && StringUtils.contains(rssFeed.getTitle(), "자막")
                         && !StringUtils.startsWith(rssFeed.getLink(), "magnet")) {
-                    logger.info("Rejected by Subtitle: " + rssFeed.getTitle());
+                    log.info("Rejected by Subtitle: " + rssFeed.getTitle());
                     return;
                 }
-                if(watchList.getSeries()) {
+                if (watchList.getSeries()) {
                     try {
                         int startSeason = Integer.parseInt(watchList.getStartSeason());
                         int endSeason = Integer.parseInt(watchList.getEndSeason());
@@ -204,21 +224,21 @@ public class RssLoadService {
                         int currEpisode = Integer.parseInt(rssFeed.getRssEpisode());
 
                         if (currSeason < startSeason || currSeason > endSeason) {
-                            logger.info("Rejected by Season: Start: " + startSeason + " End: " + endSeason + " Feed: "
+                            log.info("Rejected by Season: Start: " + startSeason + " End: " + endSeason + " Feed: "
                                     + currSeason);
                             return;
                         }
                         if (currEpisode < startEpisode || currEpisode > endEpisode) {
-                            logger.info("Rejected by Episode: Start: " + startEpisode + " End: " + endEpisode + " Feed: "
+                            log.info("Rejected by Episode: Start: " + startEpisode + " End: " + endEpisode + " Feed: "
                                     + currEpisode);
                             return;
                         }
                     } catch (NumberFormatException e) {
-                        logger.info(e.getMessage());
+                        log.info(e.getMessage());
                     }
                 }
 
-                logger.info("Download Repuest: " + rssFeed.getTitle());
+                log.info("Download Repuest: " + rssFeed.getTitle());
 
                 String path = downloadPathRepository.computedPath(watchList.getDownloadPath(), rssFeed.getRssTitle(),
                         rssFeed.getRssSeason());
@@ -231,7 +251,7 @@ public class RssLoadService {
                     if (StringUtils.equals(optionalSetting.get().getValue(), "TRANSMISSION")) {
                         // Request Download to Transmission
                         int torrentAddedId = transmissionService.torrentAdd(rssFeed.getLink(), path);
-                        logger.info("Transmission ID: " + torrentAddedId);
+                        log.info("Transmission ID: " + torrentAddedId);
 
                         if (torrentAddedId > 0) {
                             // Add to Seen
@@ -262,7 +282,7 @@ public class RssLoadService {
                         }
                     } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
                         Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
-                        logger.info("Embeded ID: " + torrentAddedId);
+                        log.info("Embeded ID: " + torrentAddedId);
 
                         if (torrentAddedId > 0) {
                             // Add to Seen
