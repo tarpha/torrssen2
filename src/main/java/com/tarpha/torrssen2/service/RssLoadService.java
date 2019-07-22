@@ -150,8 +150,8 @@ public class RssLoadService {
     }
 
     private void checkWatchList(RssFeed rssFeed) {
-        if (StringUtils.isEmpty(rssFeed.getRssQuality())) {
-            rssFeed.setRssQuality("720p");
+        if (StringUtils.isBlank(rssFeed.getRssQuality())) {
+            rssFeed.setRssQuality("100p");
         }
         Optional<WatchList> optionalWatchList = watchListRepository.findByTitleRegex(rssFeed.getTitle(),
                 rssFeed.getRssQuality());
@@ -162,10 +162,32 @@ public class RssLoadService {
 
             boolean seenDone = false;
             boolean subtitleDone = false;
+            boolean checkQuality = false;
 
-            if(watchList.getSeries()) {
+            if (StringUtils.isBlank(watchList.getQuality())) {
+                watchList.setQuality("100p");
+            }
+
+            try {
+                if (StringUtils.endsWithIgnoreCase(watchList.getQuality(), "P+")) {
+                    checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(),
+                            "P")) >= Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P+"));
+                } else {
+                    checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(),
+                            "P")) == Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P"));
+                }
+            } catch (NumberFormatException e) {
+                log.error(e.getMessage());
+            }
+
+            if (!checkQuality) {
+                log.info("Rejected by Quality: " + rssFeed.getTitle());
+                return;
+            }
+
+            if (watchList.getSeries()) {
                 if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
-                    rssFeed.getRssEpisode(), false) > 0) {
+                        rssFeed.getRssEpisode(), false) > 0) {
                     seenDone = true;
                 }
 
@@ -174,15 +196,15 @@ public class RssLoadService {
                     subtitleDone = true;
                 }
             } else {
-                if(seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), false).isPresent()) {
+                if (seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), false).isPresent()) {
                     seenDone = true;
                 }
 
-                if(seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), true).isPresent() || !watchList.getSubtitle()) {
+                if (seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), true).isPresent()
+                        || !watchList.getSubtitle()) {
                     subtitleDone = true;
                 }
             }
-            
 
             if (seenDone && subtitleDone) {
                 log.info("Rejected by Seen: " + rssFeed.getTitle());
@@ -192,7 +214,7 @@ public class RssLoadService {
                     log.info("Rejected by Subtitle: " + rssFeed.getTitle());
                     return;
                 }
-                if(watchList.getSeries()) {
+                if (watchList.getSeries()) {
                     try {
                         int startSeason = Integer.parseInt(watchList.getStartSeason());
                         int endSeason = Integer.parseInt(watchList.getEndSeason());
