@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.tarpha.torrssen2.domain.WatchList;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -26,4 +27,5 @@ public interface WatchListRepository extends JpaRepository<WatchList, Long> {
             , nativeQuery = true)
     public Optional<WatchList> findByTitleRegex(String title, String quality);
 
+    public List<WatchList> findByTitleContaining(String title, Sort sort);
 }

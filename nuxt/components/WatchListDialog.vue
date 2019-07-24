@@ -14,7 +14,19 @@
         </v-btn>
         <v-toolbar-title>자동 다운로드 관리</v-toolbar-title>
         <template v-slot:extension>
+          <v-text-field
+            v-model="searchTitle"
+            label="검색"
+            @keyup.enter="search"
+          ></v-text-field>
           <v-spacer></v-spacer>
+          <v-btn
+						color="primary"
+						flat="flat"
+						@click="changeAll"
+					>
+						일괄 변경
+					</v-btn>
 					<v-btn
 						color="primary"
 						flat="flat"
@@ -89,6 +101,7 @@
 					<v-layout wrap>
 						<v-flex xs12 >
 							<v-text-field 
+                v-if="!changeAllMode"
 								ref="title"
 								v-model="editedItem.title"
 								label="포함될 단어" 
@@ -103,7 +116,10 @@
 								required
 							></v-combobox>
 						</v-flex>
-						<v-flex xs5>
+						<v-flex 
+              :xs5="!changeAllMode"
+              :xs6="changeAllMode"
+            >
 							<v-combobox
 								v-model="editedItem.useRegex" 
 								label="정규식 사용" 
@@ -111,7 +127,11 @@
 								required
 							></v-combobox>
 						</v-flex>
-						<v-flex xs1 style="margin-top: 0.3rem">
+						<v-flex 
+              v-if="!changeAllMode"
+              xs1 
+              style="margin-top: 0.3rem"
+            >
 							<v-tooltip bottom>
 								<template v-slot:activator="{ on }">
 									<v-icon v-on="on" @click="testRegex">check</v-icon>
@@ -208,6 +228,7 @@ export default {
   watch: {
     show: function (val) {
       if (val === true) {
+        this.searchTitle = ''
         axios.get('/api/setting/watch-list?sort=createDt,desc').then(res => {
           this.items = res.data
         })
@@ -231,6 +252,8 @@ export default {
       regexItems: [],
       regexShow: false,
       windowWidth: 0,
+      changeAllMode: false,
+      searchTitle: '',
       defaultItem: {
         title: '',
         use: true,
@@ -265,6 +288,7 @@ export default {
       this.$store.commit('setting/setShowWatchList', false)
     },
     add: function () {
+      this.changeAllMode = false
       this.dialog = true
       this.formTitle = '자동 다운로드 추가'
       this.editedIndex = -1
@@ -280,6 +304,7 @@ export default {
       })
     },
     editItem: function (item) {
+      this.changeAllMode = false
       this.editedIndex = this.items.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.formTitle = '자동 다운로드 편집'
@@ -300,9 +325,12 @@ export default {
     },
     save: function () {
       // this.editedItem.downloadPath = this.editedItem.downloadPath.name
-      this.$refs.title.focus()
+      if (!this.changeAllMode) {
+        this.$refs.title.focus()
+      }
+      let postUrl = this.changeAllMode ? '/api/setting/watch-list/all' : '/api/setting/watch-list'
       setTimeout(() =>
-        axios.post('/api/setting/watch-list', this.editedItem).then(res => {
+        axios.post(postUrl, this.editedItem).then(res => {
           let msg = '저장하였습니다.'
           if (res.status !== 200) {
             msg = '저장하지 못했습니다.'
@@ -330,6 +358,23 @@ export default {
         this.regexShow = false
         this.regexItems = []
       }, 6000)
+    },
+    changeAll: function () {
+      this.changeAllMode = true
+      this.dialog = true
+      this.formTitle = '일괄 변경'
+      this.editedIndex = -1
+      this.editedItem = Object.assign({}, this.defaultItem)
+    },
+    search: function () {
+      axios.get('/api/setting/watch-list/search', {
+        params: {
+          title: this.searchTitle,
+          sort: 'createDt,desc'
+        }
+      }).then(res => {
+        this.items = res.data
+      })
     }
   }
 }

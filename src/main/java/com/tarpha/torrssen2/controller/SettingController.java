@@ -190,9 +190,22 @@ public class SettingController {
         return watchListRepository.findAll(sort);
     }
 
+    @GetMapping(value = "/watch-list/search")
+    public List<WatchList> searchWatchList(@RequestParam("title") String title, Sort sort) {
+        return watchListRepository.findByTitleContaining(title, sort);
+    }
+
     @PostMapping(value = "/watch-list")
     public void setWatchList(@RequestBody WatchList watchList) {
         watchListRepository.save(watchList);
+    }
+
+    @PostMapping(value = "/watch-list/all")
+    public void setWatchListAll(@RequestBody WatchList watchList) {
+        for(WatchList watch: watchListRepository.findAll()) {
+            watchList.setTitle(watch.getTitle());
+            watchListRepository.save(watchList);
+        }
     }
 
     @PostMapping(value = "/watch-list/execute")
