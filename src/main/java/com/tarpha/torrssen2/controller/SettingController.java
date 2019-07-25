@@ -204,6 +204,8 @@ public class SettingController {
     public void setWatchListAll(@RequestBody WatchList watchList) {
         for(WatchList watch: watchListRepository.findAll()) {
             watchList.setTitle(watch.getTitle());
+            watchList.setDownloadPath(watch.getDownloadPath());
+            watchList.setRename(watch.getRename());
             watchListRepository.save(watchList);
         }
     }

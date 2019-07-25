@@ -17,7 +17,9 @@
           <v-text-field
             v-model="searchTitle"
             label="검색"
+            clearable
             @keyup.enter="search"
+            @click:clear="clear"
           ></v-text-field>
           <v-spacer></v-spacer>
           <v-btn
@@ -162,6 +164,7 @@
 						</v-flex>
 						<v-flex xs12>
 							<v-combobox
+                v-if="!changeAllMode"
 								v-model.lazy="editedItem.downloadPath" 
 								label="다운로드 경로" 
 								:items="pathList"
@@ -198,6 +201,7 @@
 						</v-flex>
 						<v-flex xs12>
 							<v-text-field 
+                v-if="!changeAllMode"
 								v-model="editedItem.rename"
 								label="변경할 파일명"
 								hint="${TITLE}, ${SEASON}, ${EPISODE}, ${QUALITY}, ${RELEASE_GROUP}, ${DATE} 변수 사용 가능"
@@ -327,6 +331,10 @@ export default {
       // this.editedItem.downloadPath = this.editedItem.downloadPath.name
       if (!this.changeAllMode) {
         this.$refs.title.focus()
+      } else {
+        if (!confirm('일괄 변경하시겠습니까?')) {
+          return
+        }
       }
       let postUrl = this.changeAllMode ? '/api/setting/watch-list/all' : '/api/setting/watch-list'
       setTimeout(() =>
@@ -373,6 +381,11 @@ export default {
           sort: 'createDt,desc'
         }
       }).then(res => {
+        this.items = res.data
+      })
+    },
+    clear: function () {
+      axios.get('/api/setting/watch-list?sort=createDt,desc').then(res => {
         this.items = res.data
       })
     }

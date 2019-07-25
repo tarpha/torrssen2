@@ -125,6 +125,11 @@ public class RssLoadService {
 
                         log.info("Add Feed: " + rssFeed.getTitle());
 
+                        if(rss.getDownloadAll()) {
+                            log.info("RSS Download Repuest All: " + rssFeed.getTitle());
+                            download(rssFeed, rss);
+                        }
+
                         // Watch List를 체크하여 다운로드 요청한다.
                         checkWatchList(rssFeed);
                     }
@@ -240,59 +245,60 @@ public class RssLoadService {
 
                 log.info("Download Repuest: " + rssFeed.getTitle());
 
-                String path = downloadPathRepository.computedPath(watchList.getDownloadPath(), rssFeed.getRssTitle(),
-                        rssFeed.getRssSeason());
-                if (StringUtils.isBlank(path)) {
-                    path = watchList.getDownloadPath();
-                }
+                download(rssFeed, watchList);
+                // String path = downloadPathRepository.computedPath(watchList.getDownloadPath(), rssFeed.getRssTitle(),
+                //         rssFeed.getRssSeason());
+                // if (StringUtils.isBlank(path)) {
+                //     path = watchList.getDownloadPath();
+                // }
 
-                Optional<Setting> optionalSetting = settingRepository.findByKey("DOWNLOAD_APP");
-                if (optionalSetting.isPresent()) {
-                    if (StringUtils.equals(optionalSetting.get().getValue(), "TRANSMISSION")) {
-                        // Request Download to Transmission
-                        int torrentAddedId = transmissionService.torrentAdd(rssFeed.getLink(), path);
-                        log.info("Transmission ID: " + torrentAddedId);
+                // Optional<Setting> optionalSetting = settingRepository.findByKey("DOWNLOAD_APP");
+                // if (optionalSetting.isPresent()) {
+                //     if (StringUtils.equals(optionalSetting.get().getValue(), "TRANSMISSION")) {
+                //         // Request Download to Transmission
+                //         int torrentAddedId = transmissionService.torrentAdd(rssFeed.getLink(), path);
+                //         log.info("Transmission ID: " + torrentAddedId);
 
-                        if (torrentAddedId > 0) {
-                            // Add to Seen
-                            addToSeenList(rssFeed, path);
+                //         if (torrentAddedId > 0) {
+                //             // Add to Seen
+                //             addToSeenList(rssFeed, path);
 
-                            // Add to Download List
-                            addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
-                        }
-                    } else if (StringUtils.equals(optionalSetting.get().getValue(), "DOWNLOAD_STATION")) {
-                        // Request Download to Download Station
-                        if (downloadStationService.create(rssFeed.getLink(), path)) {
-                            // Add to Seen
-                            addToSeenList(rssFeed, path);
+                //             // Add to Download List
+                //             addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
+                //         }
+                //     } else if (StringUtils.equals(optionalSetting.get().getValue(), "DOWNLOAD_STATION")) {
+                //         // Request Download to Download Station
+                //         if (downloadStationService.create(rssFeed.getLink(), path)) {
+                //             // Add to Seen
+                //             addToSeenList(rssFeed, path);
 
-                            // Add to Download List
-                            boolean isExist = false;
-                            for (DownloadList down : downloadStationService.list()) {
-                                if (StringUtils.equals(rssFeed.getLink(), down.getUri())) {
-                                    isExist = true;
-                                    // downloadListRepository.save(down);
-                                    addToDownloadList(down, rssFeed, watchList);
-                                }
-                            }
+                //             // Add to Download List
+                //             boolean isExist = false;
+                //             for (DownloadList down : downloadStationService.list()) {
+                //                 if (StringUtils.equals(rssFeed.getLink(), down.getUri())) {
+                //                     isExist = true;
+                //                     // downloadListRepository.save(down);
+                //                     addToDownloadList(down, rssFeed, watchList);
+                //                 }
+                //             }
 
-                            if (isExist == false) {
-                                addToDownloadList(0L, rssFeed, watchList, path);
-                            }
-                        }
-                    } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
-                        Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
-                        log.info("Embeded ID: " + torrentAddedId);
+                //             if (isExist == false) {
+                //                 addToDownloadList(0L, rssFeed, watchList, path);
+                //             }
+                //         }
+                //     } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
+                //         Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
+                //         log.info("Embeded ID: " + torrentAddedId);
 
-                        if (torrentAddedId > 0) {
-                            // Add to Seen
-                            addToSeenList(rssFeed, path);
+                //         if (torrentAddedId > 0) {
+                //             // Add to Seen
+                //             addToSeenList(rssFeed, path);
 
-                            // Add to Download List
-                            addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
-                        }
-                    }
-                }
+                //             // Add to Download List
+                //             addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
+                //         }
+                //     }
+                // }
             }
         }
     }
@@ -328,6 +334,16 @@ public class RssLoadService {
         downloadListRepository.save(download);
     }
 
+    private void addToDownloadList(Long id, RssFeed rssFeed, String path) {
+        DownloadList download = new DownloadList();
+        download.setId(id);
+        download.setName(rssFeed.getTitle());
+        download.setUri(rssFeed.getLink());
+        download.setDownloadPath(path);
+
+        downloadListRepository.save(download);
+    }
+
     private void addToDownloadList(DownloadList download, RssFeed rssFeed, WatchList watchList) {
         if (!StringUtils.isBlank(watchList.getRename())) {
             download.setRename(CommonUtils.getRename(watchList.getRename(), rssFeed.getRssTitle(),
@@ -345,6 +361,117 @@ public class RssLoadService {
                 Optional<Setting> limitCnt = settingRepository.findByKey("LIMIT_COUNT");
                 if (limitCnt.isPresent()) {
                     rssFeedRepository.deleteByLimitCount(Integer.parseInt(limitCnt.get().getValue()));
+                }
+            }
+        }
+    }
+
+    private void download(RssFeed rssFeed, WatchList watchList) {
+        String path = downloadPathRepository.computedPath(watchList.getDownloadPath(), rssFeed.getRssTitle(),
+            rssFeed.getRssSeason());
+        if (StringUtils.isBlank(path)) {
+            path = watchList.getDownloadPath();
+        }
+
+        Optional<Setting> optionalSetting = settingRepository.findByKey("DOWNLOAD_APP");
+        if (optionalSetting.isPresent()) {
+            if (StringUtils.equals(optionalSetting.get().getValue(), "TRANSMISSION")) {
+                // Request Download to Transmission
+                int torrentAddedId = transmissionService.torrentAdd(rssFeed.getLink(), path);
+                log.info("Transmission ID: " + torrentAddedId);
+
+                if (torrentAddedId > 0) {
+                    // Add to Seen
+                    addToSeenList(rssFeed, path);
+
+                    // Add to Download List
+                    addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
+                }
+            } else if (StringUtils.equals(optionalSetting.get().getValue(), "DOWNLOAD_STATION")) {
+                // Request Download to Download Station
+                if (downloadStationService.create(rssFeed.getLink(), path)) {
+                    // Add to Seen
+                    addToSeenList(rssFeed, path);
+
+                    // Add to Download List
+                    boolean isExist = false;
+                    for (DownloadList down : downloadStationService.list()) {
+                        if (StringUtils.equals(rssFeed.getLink(), down.getUri())) {
+                            isExist = true;
+                            // downloadListRepository.save(down);
+                            addToDownloadList(down, rssFeed, watchList);
+                        }
+                    }
+
+                    if (isExist == false) {
+                        addToDownloadList(0L, rssFeed, watchList, path);
+                    }
+                }
+            } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
+                Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
+                log.info("Embeded ID: " + torrentAddedId);
+
+                if (torrentAddedId > 0) {
+                    // Add to Seen
+                    addToSeenList(rssFeed, path);
+
+                    // Add to Download List
+                    addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
+                }
+            }
+        }
+    }
+
+    private void download(RssFeed rssFeed, RssList rssList) {
+        String path = downloadPathRepository.computedPath(rssList.getDownloadPath(), rssFeed.getRssTitle(),
+            rssFeed.getRssSeason());
+        if (StringUtils.isBlank(path)) {
+            path = rssList.getDownloadPath();
+        }
+
+        Optional<Setting> optionalSetting = settingRepository.findByKey("DOWNLOAD_APP");
+        if (optionalSetting.isPresent()) {
+            if (StringUtils.equals(optionalSetting.get().getValue(), "TRANSMISSION")) {
+                // Request Download to Transmission
+                int torrentAddedId = transmissionService.torrentAdd(rssFeed.getLink(), path);
+                log.info("Transmission ID: " + torrentAddedId);
+
+                if (torrentAddedId > 0) {
+                    // Add to Seen
+                    // addToSeenList(rssFeed, path);
+
+                    // Add to Download List
+                    addToDownloadList((long) torrentAddedId, rssFeed, path);
+                }
+            } else if (StringUtils.equals(optionalSetting.get().getValue(), "DOWNLOAD_STATION")) {
+                // Request Download to Download Station
+                if (downloadStationService.create(rssFeed.getLink(), path)) {
+                    // Add to Seen
+                    // addToSeenList(rssFeed, path);
+
+                    // Add to Download List
+                    boolean isExist = false;
+                    for (DownloadList down : downloadStationService.list()) {
+                        if (StringUtils.equals(rssFeed.getLink(), down.getUri())) {
+                            isExist = true;
+                            downloadListRepository.save(down);
+                        }
+                    }
+
+                    if (isExist == false) {
+                        addToDownloadList(0L, rssFeed, path);
+                    }
+                }
+            } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
+                Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
+                log.info("Embeded ID: " + torrentAddedId);
+
+                if (torrentAddedId > 0) {
+                    // Add to Seen
+                    // addToSeenList(rssFeed, path);
+
+                    // Add to Download List
+                    addToDownloadList((long) torrentAddedId, rssFeed, path);
                 }
             }
         }

@@ -70,7 +70,7 @@
 											required
 										></v-text-field>
 									</v-flex>
-									<v-flex xs12 sm6>
+									<v-flex xs6>
 										<v-combobox
 											v-model="item.useDb" 
 											label="사용여부" 
@@ -78,7 +78,7 @@
 											required
 										></v-combobox>
 									</v-flex>
-									<v-flex xs12 sm6>
+									<v-flex xs6>
 										<v-combobox
 											v-model="item.tvSeries" 
 											label="TV 시리즈 여부 (제목 파싱)" 
@@ -86,6 +86,22 @@
 											required
 										></v-combobox>
 									</v-flex>
+									<v-flex xs3>
+										<v-combobox
+											v-model="item.downloadAll" 
+											label="전체 다운로드" 
+											:items="[true, false]"
+											required
+										></v-combobox>
+									</v-flex>
+                  <v-flex xs9>
+                    <v-combobox
+                      v-model.lazy="item.downloadPath" 
+                      label="다운로드 경로" 
+                      :items="pathList"
+                      required
+                    ></v-combobox>
+                  </v-flex>
 									<!-- <v-flex xs12 sm6>
 										<v-text-field
 											v-model="item.linkKey" 
@@ -120,6 +136,7 @@ export default {
     return {
       currentItem: 0,
       windowWidth: 0,
+      pathList: [],
       items: []
     }
   },
@@ -138,6 +155,12 @@ export default {
       if (val === true) {
         axios.get('/api/setting/rss-list').then(res => {
           this.items = res.data
+        })
+        axios.get('/api/setting/path').then(res => {
+          this.pathList = []
+          for (let i = 0; i < res.data.length; i++) {
+            this.pathList.push(res.data[i].name)
+          }
         })
       }
     }

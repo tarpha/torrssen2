@@ -25,6 +25,10 @@ public class RssList {
     private Boolean tvSeries = true;
 
     private String linkKey = "link";
+
+    private Boolean downloadAll = false;
+
+    private String downloadPath;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();
