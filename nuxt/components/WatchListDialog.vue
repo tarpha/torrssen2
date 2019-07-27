@@ -78,12 +78,13 @@
 	</v-dialog>
 	<v-dialog 
 		v-model="dialog"
+    persistent
 		max-width="650px"
 		:fullscreen="windowWidth < 400"
 	>
 		<v-card>
 			<v-toolbar flat extended>
-        <v-btn icon @click="editClose">
+        <v-btn icon @click="dialog = false">
           <v-icon>close</v-icon>
         </v-btn>
         <v-toolbar-title>{{ formTitle }}</v-toolbar-title>
@@ -102,8 +103,7 @@
 				<v-container grid-list-md>
 					<v-layout wrap>
 						<v-flex xs12 >
-							<v-text-field 
-                v-if="!changeAllMode"
+							<v-text-field
 								ref="title"
 								v-model="editedItem.title"
 								label="포함될 단어" 
@@ -118,10 +118,7 @@
 								required
 							></v-combobox>
 						</v-flex>
-						<v-flex 
-              :xs5="!changeAllMode"
-              :xs6="changeAllMode"
-            >
+						<v-flex xs5>
 							<v-combobox
 								v-model="editedItem.useRegex" 
 								label="정규식 사용" 
@@ -129,8 +126,7 @@
 								required
 							></v-combobox>
 						</v-flex>
-						<v-flex 
-              v-if="!changeAllMode"
+						<v-flex
               xs1 
               style="margin-top: 0.3rem"
             >
@@ -164,7 +160,6 @@
 						</v-flex>
 						<v-flex xs12>
 							<v-combobox
-                v-if="!changeAllMode"
 								v-model.lazy="editedItem.downloadPath" 
 								label="다운로드 경로" 
 								:items="pathList"
@@ -200,9 +195,144 @@
 							<v-text-field v-model="editedItem.endEpisode" label="다운로드 종료 에피소드"></v-text-field>
 						</v-flex>
 						<v-flex xs12>
-							<v-text-field 
-                v-if="!changeAllMode"
+							<v-text-field
 								v-model="editedItem.rename"
+								label="변경할 파일명"
+								hint="${TITLE}, ${SEASON}, ${EPISODE}, ${QUALITY}, ${RELEASE_GROUP}, ${DATE} 변수 사용 가능"
+							></v-text-field>
+						</v-flex>
+					</v-layout>
+				</v-container>
+			</v-card-text>
+		</v-card>
+	</v-dialog>
+  <v-dialog 
+		v-model="changeAllMode"
+    persistent
+		max-width="650px"
+		:fullscreen="windowWidth < 400"
+	>
+		<v-card>
+			<v-toolbar flat extended>
+        <v-btn icon @click="changeAllMode = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-toolbar-title>일괄 변경</v-toolbar-title>
+        <template v-slot:extension>
+          <v-spacer></v-spacer>
+          <v-btn
+						color="primary"
+						flat="flat"
+						@click="saveAll"
+					>
+						저장
+					</v-btn>
+        </template>
+      </v-toolbar>
+			<v-card-text>
+				<v-container grid-list-md>
+					<v-layout wrap>
+            <v-flex xs12>
+							<v-combobox
+                v-model="selected" 
+								label="항목 선택" 
+								:items="editedAllItemList"
+								multiple
+                chips
+							></v-combobox>
+						</v-flex>
+						<v-flex xs12>
+							<v-combobox
+                v-if="selected.find(obj => obj.value === 'use')"
+								v-model="editedAllItem.use" 
+								label="사용여부" 
+								:items="[true, false]"
+								required
+							></v-combobox>
+						</v-flex>
+						<v-flex xs12>
+							<v-combobox
+                v-if="selected.find(obj => obj.value === 'useRegex')"
+								v-model="editedAllItem.useRegex" 
+								label="정규식 사용" 
+								:items="[true, false]"
+								required
+							></v-combobox>
+						</v-flex>
+						<v-flex xs12>
+							<v-text-field
+                v-if="selected.find(obj => obj.value === 'quality')"
+								v-model="editedAllItem.quality" 
+								label="화질"
+								hint="+로 상위 화질 검색 ex) 720p+"
+							></v-text-field>
+						</v-flex>
+						<v-flex xs12>
+							<v-text-field
+                v-if="selected.find(obj => obj.value === 'releaseGroup')"
+                v-model="editedAllItem.releaseGroup"
+                label="릴 그룹"
+              ></v-text-field>
+						</v-flex>
+						<v-flex xs12>
+							<v-combobox
+                v-if="selected.find(obj => obj.value === 'downloadPath')"
+								v-model.lazy="editedAllItem.downloadPath" 
+								label="다운로드 경로" 
+								:items="pathList"
+								required
+							></v-combobox>
+						</v-flex>
+						<v-flex xs12>
+							<v-combobox
+                v-if="selected.find(obj => obj.value === 'subtitle')"
+								v-model="editedAllItem.subtitle" 
+								label="자막여부" 
+								:items="[true, false]"
+								required
+							></v-combobox>
+						</v-flex>
+						<v-flex xs12>
+							<v-combobox
+                v-if="selected.find(obj => obj.value === 'series')"
+								v-model="editedAllItem.series" 
+								label="시리즈여부" 
+								:items="[true, false]"
+								required
+							></v-combobox>
+						</v-flex>
+						<v-flex xs12>
+							<v-text-field
+                v-if="selected.find(obj => obj.value === 'startSeason')"
+                v-model="editedAllItem.startSeason"
+                label="다운로드 시작 시즌"
+              ></v-text-field>
+						</v-flex>
+						<v-flex xs12>
+							<v-text-field
+                v-if="selected.find(obj => obj.value === 'startEpisode')"
+                v-model="editedAllItem.startEpisode"
+                label="다운로드 시작 에피소드"
+              ></v-text-field>
+						</v-flex>
+						<v-flex xs12>
+							<v-text-field
+                v-if="selected.find(obj => obj.value === 'endSeason')"
+                v-model="editedAllItem.endSeason"
+                label="다운로드 종료 시즌"
+              ></v-text-field>
+						</v-flex>
+						<v-flex xs12>
+							<v-text-field
+                v-if="selected.find(obj => obj.value === 'endEpisode')"
+                v-model="editedAllItem.endEpisode"
+                label="다운로드 종료 에피소드"
+              ></v-text-field>
+						</v-flex>
+						<v-flex xs12>
+							<v-text-field
+                v-if="selected.find(obj => obj.value === 'rename')"
+								v-model="editedAllItem.rename"
 								label="변경할 파일명"
 								hint="${TITLE}, ${SEASON}, ${EPISODE}, ${QUALITY}, ${RELEASE_GROUP}, ${DATE} 변수 사용 가능"
 							></v-text-field>
@@ -249,9 +379,11 @@ export default {
     return {
       items: [],
       pathList: [],
+      selected: [],
       dialog: false,
       formTitle: '',
       editedItem: {},
+      editedAllItem: {},
       editedIndex: -1,
       regexItems: [],
       regexShow: false,
@@ -274,6 +406,20 @@ export default {
         rename: '',
         createDt: new Date()
       },
+      editedAllItemList: [
+        { text: '사용여부', value: 'use' },
+        { text: '정규식 사용', value: 'useRegex' },
+        { text: '화질', value: 'quality' },
+        { text: '릴 그룹', value: 'releaseGroup' },
+        { text: '다운로드 경로', value: 'downloadPath' },
+        { text: '자막여부', value: 'subtitle' },
+        { text: '시리즈여부', value: 'series' },
+        { text: '다운로드 시작 시즌', value: 'startSeason' },
+        { text: '다운로드 종료 시즌', value: 'endSeason' },
+        { text: '다운로드 시작 에피소드', value: 'startEpisode' },
+        { text: '다운로드 종료 에피소드', value: 'endEpisode' },
+        { text: '변경할 파일명', value: 'rename' }
+      ],
       headers: [
         { text: '동작', value: 'title', sortable: false },
         { text: '포함할 단어', value: 'title', sortable: false },
@@ -328,17 +474,9 @@ export default {
       }
     },
     save: function () {
-      // this.editedItem.downloadPath = this.editedItem.downloadPath.name
-      if (!this.changeAllMode) {
-        this.$refs.title.focus()
-      } else {
-        if (!confirm('일괄 변경하시겠습니까?')) {
-          return
-        }
-      }
-      let postUrl = this.changeAllMode ? '/api/setting/watch-list/all' : '/api/setting/watch-list'
+      this.$refs.title.focus()
       setTimeout(() =>
-        axios.post(postUrl, this.editedItem).then(res => {
+        axios.post('/api/setting/watch-list', this.editedItem).then(res => {
           let msg = '저장하였습니다.'
           if (res.status !== 200) {
             msg = '저장하지 못했습니다.'
@@ -351,8 +489,23 @@ export default {
           this.dialog = false
         }), 100)
     },
-    editClose: function () {
-      this.dialog = false
+    saveAll: function () {
+      if (confirm('일괄 변경하시겠습니까?')) {
+        axios.post('/api/setting/watch-list/all', {
+          watchList: this.editedAllItem,
+          selectList: this.selected
+        }).then(res => {
+          let msg = '저장하였습니다.'
+          if (res.status !== 200) {
+            msg = '저장하지 못했습니다.'
+          }
+          this.$store.commit('snackbar/show', msg)
+          axios.get('/api/setting/watch-list').then(res => {
+            this.items = res.data
+          })
+          this.changeAllMode = false
+        })
+      }
     },
     testRegex: async function () {
       const res = await axios.get('/api/rss/feed/regex/test', {
@@ -368,11 +521,9 @@ export default {
       }, 6000)
     },
     changeAll: function () {
+      this.selected = []
+      this.editedAllItem = Object.assign({}, this.defaultItem)
       this.changeAllMode = true
-      this.dialog = true
-      this.formTitle = '일괄 변경'
-      this.editedIndex = -1
-      this.editedItem = Object.assign({}, this.defaultItem)
     },
     search: function () {
       axios.get('/api/setting/watch-list/search', {

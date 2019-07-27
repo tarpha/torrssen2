@@ -1,5 +1,6 @@
 package com.tarpha.torrssen2.controller;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,8 @@ import com.tarpha.torrssen2.service.CryptoService;
 import com.tarpha.torrssen2.service.RssLoadService;
 import com.tarpha.torrssen2.service.SchedulerService;
 import com.tarpha.torrssen2.service.TelegramService;
+import com.tarpha.torrssen2.vo.TextValueVO;
+import com.tarpha.torrssen2.vo.WatchListVO;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -201,11 +205,14 @@ public class SettingController {
     }
 
     @PostMapping(value = "/watch-list/all")
-    public void setWatchListAll(@RequestBody WatchList watchList) {
-        for(WatchList watch: watchListRepository.findAll()) {
-            watchList.setTitle(watch.getTitle());
-            watchList.setDownloadPath(watch.getDownloadPath());
-            watchList.setRename(watch.getRename());
+    public void setWatchListAll(@RequestBody WatchListVO watchListVO) throws Exception {
+        WatchList watch = watchListVO.getWatchList();
+        for(WatchList watchList: watchListRepository.findAll()) {
+            for(TextValueVO vo:  watchListVO.getSelectList()) {
+                Method getter = WatchList.class.getMethod("get" + StringUtils.capitalize(vo.getValue()));
+                Method setter = WatchList.class.getMethod("set" + StringUtils.capitalize(vo.getValue()), getter.invoke(watch).getClass());
+                setter.invoke(watchList, getter.invoke(watch));
+            }
             watchListRepository.save(watchList);
         }
     }
