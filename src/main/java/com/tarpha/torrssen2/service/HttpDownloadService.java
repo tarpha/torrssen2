@@ -11,7 +11,6 @@ import com.tarpha.torrssen2.domain.DownloadList;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -105,7 +104,8 @@ public class HttpDownloadService {
 
                     downloadListRepository.save(download);
 
-                    if(StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(attachment[1]), "torrent")) {
+                    // if(StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(attachment[1]), "torrent")) {
+                    if(StringUtils.containsIgnoreCase(filename, ".torrent")) {
                         long ret = transmissionService.torrentAdd(path + File.separator + filename, path);
                         if(ret > 0L) {
                             download.setId(ret);
