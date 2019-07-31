@@ -303,13 +303,14 @@ public class RssLoadService {
         }
     }
 
-    private void addToSeenList(RssFeed rssFeed, String path) {
+    private void addToSeenList(RssFeed rssFeed, String path, String rename) {
         SeenList seenList = new SeenList();
         seenList.setTitle(rssFeed.getRssTitle());
         seenList.setLink(rssFeed.getLink());
         seenList.setDownloadPath(path);
         seenList.setSeason(rssFeed.getRssSeason());
         seenList.setEpisode(rssFeed.getRssEpisode());
+        seenList.setRenameStatus(StringUtils.isBlank(rename) ? "N/A" : "false");
 
         if (StringUtils.contains(rssFeed.getTitle(), "자막") && !StringUtils.startsWith(rssFeed.getLink(), "magnet")) {
             seenList.setSubtitle(true);
@@ -382,7 +383,7 @@ public class RssLoadService {
 
                 if (torrentAddedId > 0) {
                     // Add to Seen
-                    addToSeenList(rssFeed, path);
+                    addToSeenList(rssFeed, path, watchList.getRename());
 
                     // Add to Download List
                     addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
@@ -391,7 +392,7 @@ public class RssLoadService {
                 // Request Download to Download Station
                 if (downloadStationService.create(rssFeed.getLink(), path)) {
                     // Add to Seen
-                    addToSeenList(rssFeed, path);
+                    addToSeenList(rssFeed, path, watchList.getRename());
 
                     // Add to Download List
                     boolean isExist = false;
@@ -413,7 +414,7 @@ public class RssLoadService {
 
                 if (torrentAddedId > 0) {
                     // Add to Seen
-                    addToSeenList(rssFeed, path);
+                    addToSeenList(rssFeed, path, watchList.getRename());
 
                     // Add to Download List
                     addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);

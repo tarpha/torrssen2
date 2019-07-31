@@ -29,6 +29,8 @@ public class SeenList {
     private String rename;
 
     private Boolean subtitle = false;
+
+    private String renameStatus;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();

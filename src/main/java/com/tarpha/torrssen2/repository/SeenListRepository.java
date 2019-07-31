@@ -21,4 +21,6 @@ public interface SeenListRepository extends JpaRepository<SeenList, Long> {
     public int countByParams(String link, String title, String season, String episode, boolean subtitle);
 
     public Optional<SeenList> findFirstByLinkAndSubtitle(String link, boolean subtitle);
+
+    public Optional<SeenList> findFirstByLink(String link);
 }

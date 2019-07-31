@@ -380,4 +380,5 @@ UPDATE RSS_FEED SET rss_poster = 'http://t1.daumcdn.net/contentshub/sdb/bef6099c
 UPDATE WATCH_LIST SET subtitle = false WHERE subtitle IS NULL;
 UPDATE WATCH_LIST SET series = true WHERE series IS NULL;
 UPDATE SEEN_LIST SET subtitle = false WHERE subtitle IS NULL;
+UPDATE SEEN_LIST SET rename_status = 'N/A' WHERE rename_status IS NULL;
 UPDATE RSS_LIST SET download_all = false WHERE download_all IS NULL;

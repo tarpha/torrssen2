@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tarpha.torrssen2.domain.DownloadList;
+import com.tarpha.torrssen2.domain.SeenList;
 import com.tarpha.torrssen2.domain.Setting;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
+import com.tarpha.torrssen2.repository.SeenListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
 import com.tarpha.torrssen2.util.CommonUtils;
 
@@ -26,6 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 public class SchedulerService {
     @Autowired
     private SettingRepository settingRepository;
+
+    @Autowired
+    private SeenListRepository seenListRepository;
 
     @Autowired
     private DownloadListRepository downloadListRepository;
@@ -138,11 +143,13 @@ public class SchedulerService {
                     if (!StringUtils.isBlank(rename)) {
                         log.debug("getRename: " + rename);
                         if (inners == null) {
-                            CommonUtils.renameFile(down.getDownloadPath(), down.getName(), rename);
+                            boolean renameStatus = CommonUtils.renameFile(down.getDownloadPath(), down.getName(), rename);
+                            setSeenList(down.getUri(), String.valueOf(renameStatus));
                         } else {
                             for (String name : inners) {
                                 if (StringUtils.contains(down.getName(), name)) {
-                                    CommonUtils.renameFile(down.getDownloadPath(), name, rename);
+                                    boolean renameStatus = CommonUtils.renameFile(down.getDownloadPath(), name, rename);
+                                    setSeenList(down.getUri(), String.valueOf(renameStatus));
                                 }
                             }
                         }
@@ -258,16 +265,20 @@ public class SchedulerService {
                                 if (!StringUtils.isBlank(down.getRename())) {
                                     log.debug("getRename: " + down.getRename());
                                     if (jsonArray == null) {
-                                        fileStationService.rename(path + File.separator + down.getName(),
+                                        boolean renameStatus = 
+                                            fileStationService.rename(path + File.separator + down.getName(),
                                                 path + File.separator + down.getRename());
+                                        setSeenList(down.getUri(), String.valueOf(renameStatus));
                                     } else {
                                         for (int i = 0; i < jsonArray.length(); i++) {
                                             JSONObject object = jsonArray.getJSONObject(i);
                                             if (object.has("name")) {
                                                 String name = object.getString("name");
                                                 if (StringUtils.contains(name, down.getName())) {
-                                                    fileStationService.rename(path + File.separator + name,
+                                                    boolean renameStatus = 
+                                                        fileStationService.rename(path + File.separator + name,
                                                             down.getRename() + "." + FilenameUtils.getExtension(name));
+                                                    setSeenList(down.getUri(), String.valueOf(renameStatus));
                                                 }
                                             }
                                         }
@@ -293,6 +304,16 @@ public class SchedulerService {
                 downloadListRepository.save(task);
             }
         }
+    }
+
+    private void setSeenList(String link, String renameStatus) {
+        Optional<SeenList> optionalSeen = seenListRepository.findFirstByLink(link);
+        if(optionalSeen.isPresent()) {
+            SeenList seen = optionalSeen.get();
+            seen.setRenameStatus(renameStatus);
+            seenListRepository.save(seen);
+        }
+        
     }
 
     private void sendTelegram(DownloadList down) {

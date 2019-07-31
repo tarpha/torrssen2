@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.tarpha.torrssen2.domain.DownloadList;
+import com.tarpha.torrssen2.domain.SeenList;
 import com.tarpha.torrssen2.domain.Setting;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
+import com.tarpha.torrssen2.repository.SeenListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
 import com.tarpha.torrssen2.service.TelegramService;
 import com.tarpha.torrssen2.service.TransmissionService;
@@ -32,6 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 public class TransmissionController {
     @Autowired
     private SettingRepository settingRepository;
+
+    @Autowired
+    private SeenListRepository seenListRepository;
 
     @Autowired
     private DownloadListRepository downloadListRepository;
@@ -104,17 +109,29 @@ public class TransmissionController {
         if (!StringUtils.isBlank(downloadList.getRename())) {
             log.debug("getRename: " + downloadList.getRename());
             if(inners == null) {
-                CommonUtils.renameFile(downloadList.getDownloadPath(), downloadList.getFileName(), downloadList.getRename());
+                boolean renameStatus = CommonUtils.renameFile(downloadList.getDownloadPath(), downloadList.getFileName(), downloadList.getRename());
+                setSeenList(downloadList.getUri(), String.valueOf(renameStatus));
             } else {
                 for(String name: inners) {
                     if(StringUtils.contains(downloadList.getFileName(), name)) {
-                        CommonUtils.renameFile(downloadList.getDownloadPath(), name, downloadList.getRename());
+                        boolean renameStatus = CommonUtils.renameFile(downloadList.getDownloadPath(), name, downloadList.getRename());
+                        setSeenList(downloadList.getUri(), String.valueOf(renameStatus));
                     }
                 }
             }
         }
 
         return ret;
+    }
+
+    private void setSeenList(String link, String renameStatus) {
+        Optional<SeenList> optionalSeen = seenListRepository.findFirstByLink(link);
+        if(optionalSeen.isPresent()) {
+            SeenList seen = optionalSeen.get();
+            seen.setRenameStatus(renameStatus);
+            seenListRepository.save(seen);
+        }
+        
     }
     
 }
