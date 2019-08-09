@@ -382,3 +382,5 @@ UPDATE WATCH_LIST SET series = true WHERE series IS NULL;
 UPDATE SEEN_LIST SET subtitle = false WHERE subtitle IS NULL;
 UPDATE SEEN_LIST SET rename_status = 'N/A' WHERE rename_status IS NULL;
 UPDATE RSS_LIST SET download_all = false WHERE download_all IS NULL;
+
+ALTER TABLE IF EXISTS DOWNLOAD_LIST ALTER COLUMN URI VARCHAR(2048);

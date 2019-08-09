@@ -2,6 +2,7 @@ package com.tarpha.torrssen2.domain;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
@@ -26,6 +27,7 @@ public class DownloadList {
 
     private String rename;
 
+    @Column(length = 2048)
     private String uri;
 
     private String rssTitle;
@@ -53,7 +55,7 @@ public class DownloadList {
     private String taskId;
 
     private String deletePath;
-    
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();
 
