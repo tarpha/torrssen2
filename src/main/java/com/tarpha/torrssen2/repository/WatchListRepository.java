@@ -18,6 +18,7 @@ public interface WatchListRepository extends JpaRepository<WatchList, Long> {
             + "       REPLACE(UPPER(CONCAT('%', w.title, '%', IFNULL(w.release_group, ''), '%')), ' ', '')) OR "
             + "      (w.use_regex = true  AND REGEXP_LIKE(?1, w.title, 'i')) AND REPLACE(UPPER(?1), ' ', '') LIKE "
             + "       REPLACE(UPPER(CONCAT('%', IFNULL(w.release_group, ''), '%')), ' ', '')) "
+            + "     LIMIT 1"
     // + "AND ((IFNULL(w.quality, '100P+') LIKE '%+' AND "
     // + " CAST(REPLACE(UPPER(IFNULL(?2, '100')), 'P', '') AS INTEGER) "
     // + " >= CAST(REPLACE(UPPER(IFNULL(w.quality, '100P+')), 'P+', '' ) AS
