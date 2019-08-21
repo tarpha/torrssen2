@@ -200,9 +200,9 @@ public class SchedulerService {
                 if (rdown.isPresent()) {
                     down.setRename(rdown.get().getRename());
                     down.setIsSentAlert(rdown.get().getIsSentAlert());
+                    downloadListRepository.save(down);
                 }
-                downloadListRepository.save(down);
-
+                
                 if (down.getDone()) {
                     rdown = downloadListRepository.findFirstByUriAndDoneOrderByCreateDtDesc(down.getUri(), true);
                     if (rdown.isPresent()) {
