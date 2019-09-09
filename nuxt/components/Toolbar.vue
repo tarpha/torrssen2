@@ -24,6 +24,7 @@
           <v-btn
             icon
             v-on="on"
+            @click="loadRssList"
           >
             <v-icon>rss_feed</v-icon>
           </v-btn>
@@ -207,18 +208,6 @@ export default {
       deep: true
     }
   },
-  mounted () {
-    axios.get('/api/setting/rss-list').then(res => {
-      this.rss = res.data
-      let list = []
-      for (let i = 0; i < res.data.length; i++) {
-        if (res.data[i].show === true) {
-          list.push(res.data[i].name)
-        }
-      }
-      this.$store.commit('setting/setRssList', list)
-    })
-  },
   methods: {
     submit: function () {
       this.$store.commit('toolbar/toggle')
@@ -233,6 +222,18 @@ export default {
           msg = '갱신 요청에 실패하였습니다.'
         }
         this.$store.commit('snackbar/show', msg)
+      })
+    },
+    loadRssList: function () {
+      axios.get('/api/setting/rss-list').then(res => {
+        this.rss = res.data
+        let list = []
+        for (let i = 0; i < res.data.length; i++) {
+          if (res.data[i].show === true) {
+            list.push(res.data[i].name)
+          }
+        }
+        this.$store.commit('setting/setRssList', list)
       })
     },
     openGithub: function () {
