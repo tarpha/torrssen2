@@ -95,7 +95,6 @@ public class RssLoadService {
 
                     if (!rssFeedRepository.findByLink(rssFeed.getLinkByKey(rss.getLinkKey(), feed)).isPresent()) {
                         rssFeed.setTitle(feed.getTitle());
-                        // rssFeed.setDesc(feed.getDescription().getValue());
                         rssFeed.setRssSite(rss.getName());
                         rssFeed.setTvSeries(rss.getTvSeries());
 
@@ -106,6 +105,10 @@ public class RssLoadService {
                         rssFeed.setRssReleaseGroupByTitle(feed.getTitle());
                         rssFeed.setRssDateBytitle(feed.getTitle());
                         rssFeed.setLinkByKey(rss.getLinkKey(), feed);
+
+                        if(!StringUtils.isEmpty(feed.getDescription().getValue())) {
+                            rssFeed.setDesc(feed.getDescription().getValue());
+                        }
 
                         String[] rssTitleSplit = StringUtils.split(rssFeed.getRssTitle());
                         if (rssTitleSplit.length == 1) {

@@ -208,6 +208,18 @@ export default {
       deep: true
     }
   },
+  mounted () {
+    axios.get('/api/setting/rss-list').then(res => {
+      this.rss = res.data
+      let list = []
+      for (let i = 0; i < res.data.length; i++) {
+        if (res.data[i].show === true) {
+          list.push(res.data[i].name)
+        }
+      }
+      this.$store.commit('setting/setRssList', list)
+    })
+  },
   methods: {
     submit: function () {
       this.$store.commit('toolbar/toggle')
