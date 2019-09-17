@@ -106,8 +106,12 @@ public class RssLoadService {
                         rssFeed.setRssDateBytitle(feed.getTitle());
                         rssFeed.setLinkByKey(rss.getLinkKey(), feed);
 
-                        if(!StringUtils.isEmpty(feed.getDescription().getValue())) {
-                            rssFeed.setDesc(feed.getDescription().getValue());
+                        try {
+                            if(!StringUtils.isEmpty(feed.getDescription().getValue())) {
+                                rssFeed.setDesc(feed.getDescription().getValue());
+                            }
+                        } catch (NullPointerException ne) {
+                            log.error(ne.toString());
                         }
 
                         String[] rssTitleSplit = StringUtils.split(rssFeed.getRssTitle());

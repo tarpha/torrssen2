@@ -18,7 +18,7 @@
           <v-icon v-if="item.downloaded || stomp.done" size="1.2em" color="red darken-3">done</v-icon>
           <v-icon v-if="item.link && !item.link.startsWith('magnet')" size="1.2em">attachment</v-icon>
           {{ item.rssTitle }}
-          <v-icon v-if="item.desc && item.link.startsWith('http')" size="1.2em" @click="openUrl(item.desc)">scatter_plot</v-icon>
+          <v-icon v-if="item.desc && item.desc.startsWith('http')" size="1.2em" @click="openUrl(item.desc)">scatter_plot</v-icon>
         </v-list-tile-title>
 				<v-list-tile-sub-title
 					v-html="getSubTitle(item)"

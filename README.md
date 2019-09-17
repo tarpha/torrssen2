@@ -23,6 +23,7 @@ Torrent RSS Site를 등록/관리하고, 다운로드를 요청/관리하고, �
 
 ## 수정이력
 
+- 0.9.28: RSS Load 오류 수정
 - 0.9.27: RSS Feed description에 http link가 있을 경우 표시
 - 0.9.26: RSS List 저장 오류 수정
 - 0.9.25: 다운로드 스테이션 외부 요청 건 필터링 로직 보안
