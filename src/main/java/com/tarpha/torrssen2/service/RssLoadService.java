@@ -93,6 +93,8 @@ public class RssLoadService {
                     SyndEntry feed = feedList.getEntries().get(i);
                     RssFeed rssFeed = new RssFeed();
 
+                    // log.debug(feed.toString());
+
                     if (!rssFeedRepository.findByLink(rssFeed.getLinkByKey(rss.getLinkKey(), feed)).isPresent()) {
                         rssFeed.setTitle(feed.getTitle());
                         rssFeed.setRssSite(rss.getName());
@@ -111,7 +113,7 @@ public class RssLoadService {
                                 rssFeed.setDesc(feed.getDescription().getValue());
                             }
                         } catch (NullPointerException ne) {
-                            log.error(ne.toString());
+                            log.debug("description: " + ne.toString());
                         }
 
                         String[] rssTitleSplit = StringUtils.split(rssFeed.getRssTitle());

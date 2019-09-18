@@ -13,6 +13,7 @@ import com.tarpha.torrssen2.domain.Setting;
 import com.tarpha.torrssen2.domain.WatchList;
 import com.tarpha.torrssen2.repository.DownloadListRepository;
 import com.tarpha.torrssen2.repository.DownloadPathRepository;
+import com.tarpha.torrssen2.repository.RssFeedRepository;
 import com.tarpha.torrssen2.repository.RssListRepository;
 import com.tarpha.torrssen2.repository.SeenListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
@@ -55,6 +56,9 @@ public class SettingController {
 
     @Autowired
     private RssListRepository rssListRepository;
+
+    @Autowired
+    private RssFeedRepository rssFeedRepository;
 
     @Autowired
     private SettingRepository settingRepository;
@@ -144,6 +148,8 @@ public class SettingController {
                 if(StringUtils.equals(ori.getName(), rss.getName())) {
                     delete = false;
                     break;
+                } else if(StringUtils.equals(ori.getUrl(), rss.getUrl())) {
+                    rssFeedRepository.updateByRssSite(ori.getName(), rss.getName());
                 }
             }
 

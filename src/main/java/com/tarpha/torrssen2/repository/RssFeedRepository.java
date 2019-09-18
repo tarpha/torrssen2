@@ -53,4 +53,13 @@ public interface RssFeedRepository extends JpaRepository<RssFeed, Long> {
       , nativeQuery = true)
     public void deleteByLimitCount(int limitCount);
 
+    @Transactional
+    @Modifying 
+    @Query(
+        value = "UPDATE RSS_FEED " +
+                "SET    RSS_SITE = ?2 " +
+                "WHERE  RSS_SITE = ?1 "
+      , nativeQuery = true)
+    public void updateByRssSite(String oriRssSite, String trgRssSite);
+
 }
