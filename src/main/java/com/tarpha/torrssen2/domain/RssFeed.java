@@ -27,6 +27,7 @@ public class RssFeed {
 
     private String title;
 
+    @Column(length = 1024)
     private String desc;
 
     private String rssEpisode;
