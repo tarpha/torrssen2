@@ -2,6 +2,7 @@ package com.tarpha.torrssen2.domain;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
@@ -14,6 +15,7 @@ import lombok.Data;
 public class SeenList {
 
     @Id
+    @Column(length = 2048)
     private String link;
 
     private String title;

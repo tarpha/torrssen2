@@ -224,8 +224,8 @@ public class SettingController {
     }
 
     @PostMapping(value = "/watch-list/execute")
-    public void executeWatchList() {
-        rssLoadService.checkWatchListFromDb();
+    public void executeWatchList(@RequestBody List<WatchList> list) {
+        rssLoadService.checkWatchListFromDb(list);
     }
 
     @PostMapping(value = "/watch-list/delete")

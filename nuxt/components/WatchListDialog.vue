@@ -46,12 +46,23 @@
         </template>
       </v-toolbar>
 				<v-data-table
+					v-model="tableSelected"
 					:headers="headers"
 					:items="items"
 					rows-per-page-text=""
+					item-key="title"
+					select-all
 				>
 					<template v-slot:items="props">
-            <td>
+						<td>
+							<v-checkbox
+								v-model="props.selected"
+								:input-value="props.selected"
+								primary
+								hide-details
+							></v-checkbox>
+						</td>
+						<td>
 							<v-icon
 								small
 								class="mr-2"
@@ -363,6 +374,7 @@ export default {
     show: function (val) {
       if (val === true) {
         this.searchTitle = ''
+        this.tableSelected = []
         axios.get('/api/setting/watch-list?sort=createDt,desc').then(res => {
           this.items = res.data
         })
@@ -380,6 +392,7 @@ export default {
       items: [],
       pathList: [],
       selected: [],
+      tableSelected: [],
       dialog: false,
       formTitle: '',
       editedItem: {},
@@ -445,7 +458,11 @@ export default {
       this.editedItem = Object.assign({}, this.defaultItem)
     },
     execute: function () {
-      axios.post('/api/setting/watch-list/execute', {}).then(res => {
+      if (this.tableSelected.length === 0) {
+        alert('실행할 항목을 선택해 주세요.')
+        return
+      }
+      axios.post('/api/setting/watch-list/execute', this.tableSelected).then(res => {
         let msg = '실행 요청하였습니다.'
         if (res.status !== 200) {
           msg = '실행 요청에 실패하였습니다.'

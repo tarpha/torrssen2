@@ -88,66 +88,72 @@ public class RssLoadService {
                 SyndFeedInput input = new SyndFeedInput();
                 SyndFeed feedList = input.build(new XmlReader(feedSource));
 
-                // for (SyndEntry feed : feedList.getEntries()) {
                 for (int i = feedList.getEntries().size() - 1; i >= 0; i--) {
-                    SyndEntry feed = feedList.getEntries().get(i);
-                    RssFeed rssFeed = new RssFeed();
+                    //Feed 한 건이 오류가 발생하여도 전체 로드에는 문제 없도록 예외처리를 추가한다.
+                    try {
+                        SyndEntry feed = feedList.getEntries().get(i);
+                        RssFeed rssFeed = new RssFeed();
 
-                    // log.debug(feed.toString());
+                        // log.debug(feed.toString());
 
-                    if (!rssFeedRepository.findByLink(rssFeed.getLinkByKey(rss.getLinkKey(), feed)).isPresent()) {
-                        rssFeed.setTitle(feed.getTitle());
-                        rssFeed.setRssSite(rss.getName());
-                        rssFeed.setTvSeries(rss.getTvSeries());
+                        if (!rssFeedRepository.findByLink(rssFeed.getLinkByKey(rss.getLinkKey(), feed)).isPresent()) {
+                            rssFeed.setTitle(feed.getTitle());
+                            rssFeed.setRssSite(rss.getName());
+                            rssFeed.setTvSeries(rss.getTvSeries());
 
-                        rssFeed.setRssTitleByTitle(feed.getTitle());
-                        rssFeed.setRssEpisodeByTitle(feed.getTitle());
-                        rssFeed.setRssSeasonByTitle(feed.getTitle());
-                        rssFeed.setRssQualityBytitle(feed.getTitle());
-                        rssFeed.setRssReleaseGroupByTitle(feed.getTitle());
-                        rssFeed.setRssDateBytitle(feed.getTitle());
-                        rssFeed.setLinkByKey(rss.getLinkKey(), feed);
+                            rssFeed.setRssTitleByTitle(feed.getTitle());
+                            rssFeed.setRssEpisodeByTitle(feed.getTitle());
+                            rssFeed.setRssSeasonByTitle(feed.getTitle());
+                            rssFeed.setRssQualityBytitle(feed.getTitle());
+                            rssFeed.setRssReleaseGroupByTitle(feed.getTitle());
+                            rssFeed.setRssDateBytitle(feed.getTitle());
+                            rssFeed.setLinkByKey(rss.getLinkKey(), feed);
 
-                        try {
-                            if(!StringUtils.isEmpty(feed.getDescription().getValue())) {
-                                rssFeed.setDesc(feed.getDescription().getValue());
-                            }
-                        } catch (NullPointerException ne) {
-                            log.debug("description: " + ne.toString());
-                        }
-
-                        String[] rssTitleSplit = StringUtils.split(rssFeed.getRssTitle());
-                        if (rssTitleSplit.length == 1) {
-                            rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
-                        } else {
-                            for (int j = rssTitleSplit.length - 1; j > 0; j--) {
-                                StringBuffer posterTitle = new StringBuffer();
-                                for (int k = 0; k <= j; k++) {
-                                    posterTitle.append(rssTitleSplit[k] + " ");
+                            try {
+                                if(!StringUtils.isEmpty(feed.getDescription().getValue())) {
+                                    rssFeed.setDesc(feed.getDescription().getValue());
                                 }
-                                String posterUrl = daumMovieTvService
-                                        .getPoster(StringUtils.trim(posterTitle.toString()));
-                                if (!StringUtils.isEmpty(posterUrl)) {
-                                    rssFeed.setRssPoster(posterUrl);
-                                    break;
+                            } catch (NullPointerException ne) {
+                                log.debug("description: " + ne.toString());
+                            }
+
+                            String[] rssTitleSplit = StringUtils.split(rssFeed.getRssTitle());
+                            if (rssTitleSplit.length == 1) {
+                                rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
+                            } else {
+                                for (int j = rssTitleSplit.length - 1; j > 0; j--) {
+                                    StringBuffer posterTitle = new StringBuffer();
+                                    for (int k = 0; k <= j; k++) {
+                                        posterTitle.append(rssTitleSplit[k] + " ");
+                                    }
+                                    String posterUrl = daumMovieTvService
+                                            .getPoster(StringUtils.trim(posterTitle.toString()));
+                                    if (!StringUtils.isEmpty(posterUrl)) {
+                                        rssFeed.setRssPoster(posterUrl);
+                                        break;
+                                    }
                                 }
                             }
+                            // rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
+                            rssFeedList.add(rssFeed);
+
+                            log.info("Add Feed: " + rssFeed.getTitle());
+
+                            if(rss.getDownloadAll()) {
+                                log.info("RSS Download Repuest All: " + rssFeed.getTitle());
+                                download(rssFeed, rss);
+                            }
+
+                            // Watch List를 체크하여 다운로드 요청한다.
+                            checkWatchList(rssFeed, null);
                         }
-                        // rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
-                        rssFeedList.add(rssFeed);
-
-                        log.info("Add Feed: " + rssFeed.getTitle());
-
-                        if(rss.getDownloadAll()) {
-                            log.info("RSS Download Repuest All: " + rssFeed.getTitle());
-                            download(rssFeed, rss);
-                        }
-
-                        // Watch List를 체크하여 다운로드 요청한다.
-                        checkWatchList(rssFeed);
+                    } catch (Exception e) {
+                        //Feed 개별 건에 대한 Exception 처리
+                        log.error(e.getMessage());
                     }
                 }
             } catch (Exception e) {
+                //Feed Site에 대한 Exception 처리
                 log.error(e.getMessage());
             }
         }
@@ -156,9 +162,9 @@ public class RssLoadService {
         simpMessagingTemplate.convertAndSend("/topic/feed/update", true);
     }
 
-    public void checkWatchListFromDb() {
+    public void checkWatchListFromDb(List<WatchList> list) {
         for (RssFeed rssFeed : rssFeedRepository.findAll()) {
-            checkWatchList(rssFeed);
+            checkWatchList(rssFeed, list);
         }
     }
 
@@ -166,17 +172,41 @@ public class RssLoadService {
     public void asyncLoadRss() {
         loadRss();
     }
+ 
+    /**
+     * Feed가 WatchList에 존재할 경우 다운로드 요청을 한다.
+     * 
+     * @param rssFeed   WatchList에 존재하는지 검사할 대상이 되는 개별 RSS Feed 
+     * @param list      사용자가 화면에서 WatchList 개별 건을 선택해서 직접 실행 했을 때 그 List를 받아올 인자
+     */
+    private void checkWatchList(RssFeed rssFeed, List<WatchList> list) {
 
-    private void checkWatchList(RssFeed rssFeed) {
         if (StringUtils.isBlank(rssFeed.getRssQuality())) {
             rssFeed.setRssQuality("100p");
         }
         Optional<WatchList> optionalWatchList = watchListRepository.findByTitleRegex(rssFeed.getTitle(),
-                rssFeed.getRssQuality());
+            rssFeed.getRssQuality());
 
         if (optionalWatchList.isPresent()) {
             WatchList watchList = optionalWatchList.get();
             log.info("Matched Feed: " + rssFeed.getTitle());
+
+            if(list != null) {
+                log.info("Custom Execute");
+                boolean isExists = false;
+                for(WatchList wl : list) {
+                    if(StringUtils.equals(watchList.getTitle(), wl.getTitle())) {
+                        log.info("Custom Execute Matched: " + rssFeed.getTitle());
+                        isExists = true;
+                        break;
+                    }
+                }
+
+                if(!isExists) {
+                    log.info("Custom Execute Not Matched: " + rssFeed.getTitle());
+                    return;
+                }
+            }
 
             boolean seenDone = false;
             boolean subtitleDone = false;

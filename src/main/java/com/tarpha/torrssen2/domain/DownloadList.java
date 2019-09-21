@@ -21,6 +21,7 @@ public class DownloadList {
 
     private String name;
 
+    @Column(length = 1024)
     private String fileName;
 
     private String downloadPath;
