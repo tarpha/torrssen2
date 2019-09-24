@@ -1,5 +1,6 @@
 package com.tarpha.torrssen2.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -39,6 +40,8 @@ public class WatchList {
     private Boolean subtitle = false;
 
     private Boolean series = true;
+
+    private ArrayList<String> rssList = new ArrayList<>();
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();

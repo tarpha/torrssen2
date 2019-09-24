@@ -177,6 +177,16 @@
 								required
 							></v-combobox>
 						</v-flex>
+						<v-flex xs12>
+							<v-combobox
+								v-model.lazy="editedItem.rssList" 
+								label="RSS 사이트" 
+								:items="rssList"
+								required
+								multiple
+								chips
+							></v-combobox>
+						</v-flex>
 						<v-flex xs6>
 							<v-combobox
 								v-model="editedItem.subtitle" 
@@ -384,6 +394,12 @@ export default {
             this.pathList.push(res.data[i].name)
           }
         })
+        axios.get('/api/setting/rss-list').then(res => {
+          this.rssList = []
+          for (let i = 0; i < res.data.length; i++) {
+            this.rssList.push(res.data[i].name)
+          }
+        })
       }
     }
   },
@@ -391,6 +407,7 @@ export default {
     return {
       items: [],
       pathList: [],
+      rssList: [],
       selected: [],
       tableSelected: [],
       dialog: false,
@@ -408,6 +425,7 @@ export default {
         use: true,
         useRegex: false,
         downloadPath: '',
+        rssList: [],
         quality: '720p+',
         releaseGroup: '',
         startSeason: '01',

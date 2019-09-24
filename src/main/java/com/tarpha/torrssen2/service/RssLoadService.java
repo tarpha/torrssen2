@@ -191,6 +191,17 @@ public class RssLoadService {
             WatchList watchList = optionalWatchList.get();
             log.info("Matched Feed: " + rssFeed.getTitle());
 
+            try {
+                if (optionalWatchList.get().getRssList() != null && optionalWatchList.get().getRssList().size() > 0) {
+                    if (!optionalWatchList.get().getRssList().contains(rssFeed.getRssSite())) {
+                        log.info("Skipped by RSS List");
+                        return;
+                    }
+                }
+            } catch (NullPointerException e) {
+                log.error(e.toString());
+            }
+
             if(list != null) {
                 log.info("Custom Execute");
                 boolean isExists = false;

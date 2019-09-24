@@ -37,11 +37,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
+@Slf4j
 @RestController
 @RequestMapping(value = "/api/setting/")
 // @CrossOrigin(origins = "http://localhost:3000")
@@ -207,6 +208,7 @@ public class SettingController {
 
     @PostMapping(value = "/watch-list")
     public void setWatchList(@RequestBody WatchList watchList) {
+        log.debug(watchList.toString());
         watchListRepository.save(watchList);
     }
 
