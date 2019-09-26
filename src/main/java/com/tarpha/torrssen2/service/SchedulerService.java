@@ -265,9 +265,12 @@ public class SchedulerService {
                                 if (!StringUtils.isBlank(down.getRename())) {
                                     log.debug("getRename: " + down.getRename());
                                     if (jsonArray == null) {
+                                        // boolean renameStatus = 
+                                        //     fileStationService.rename(path + File.separator + down.getName(),
+                                        //         path + File.separator + down.getRename());
                                         boolean renameStatus = 
-                                            fileStationService.rename(path + File.separator + down.getName(),
-                                                path + File.separator + down.getRename());
+                                                fileStationService.rename(path + File.separator + down.getName(),
+                                                    down.getRename() + "." + FilenameUtils.getExtension(down.getName()));
                                         setSeenList(down.getUri(), String.valueOf(renameStatus));
                                     } else {
                                         for (int i = 0; i < jsonArray.length(); i++) {
