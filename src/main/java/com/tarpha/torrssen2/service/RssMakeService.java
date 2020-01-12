@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
@@ -22,7 +21,6 @@ import java.util.regex.Pattern;
 import com.tarpha.torrssen2.domain.RssFeed;
 import com.tarpha.torrssen2.domain.RssList;
 import com.tarpha.torrssen2.domain.Setting;
-import com.tarpha.torrssen2.repository.RssFeedRepository;
 import com.tarpha.torrssen2.repository.RssListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
 
@@ -124,8 +122,6 @@ public class RssMakeService {
             }
         }
 
-        log.debug(rssFeedList.toString());
-
         return rssFeedList;
     }
 
@@ -135,11 +131,13 @@ public class RssMakeService {
         Optional<Setting> optionalHost = settingRepository.findByKey("PROXY_HOST");
         Optional<Setting> optionalPort = settingRepository.findByKey("PROXY_PORT");
         if (optionalHost.isPresent() && optionalPort.isPresent()) {
+            log.info("Use Proxy");
             String proxyHost = optionalHost.get().getValue();
             int proxyPort = Integer.parseInt(optionalPort.get().getValue());
 
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
             HttpURLConnection uc = (HttpURLConnection)url.openConnection(proxy);
+            uc.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.13) Gecko/20150702 Firefox/3.6.13 (.NET CLR 3.5.30729)");
 
             uc.connect();
 
@@ -153,6 +151,7 @@ public class RssMakeService {
 
             return Jsoup.parse(String.valueOf(tmp));
         } else {
+            log.info("No Proxy");
             return Jsoup.connect(urlString).get();
         }
         
