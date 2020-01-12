@@ -161,8 +161,14 @@ public class RssLoadService {
             }
         }
 
+        for(RssFeed rssFeed: rssMakeService.makeRss()) {
+            if (!rssFeedRepository.findByLink(rssFeed.getLink()).isPresent()) {
+                rssFeedList.add(rssFeed);
+            }
+        }
+
         rssFeedRepository.saveAll(rssFeedList);
-        rssFeedRepository.saveAll(rssMakeService.makeRss());
+        // rssFeedRepository.saveAll(rssMakeService.makeRss());
 
         simpMessagingTemplate.convertAndSend("/topic/feed/update", true);
     }
