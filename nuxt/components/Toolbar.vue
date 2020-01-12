@@ -31,10 +31,10 @@
         </template>
         <v-list>
           <v-list-tile
-            v-for="(item, index) in rss"
+            v-for="(item, index) in useRss"
             :key="index"
           >
-            <v-list-tile-content>
+            <v-list-tile-content v-if="item.useDb">
               <v-checkbox
                 style="padding-top: 0 !important;"
                 v-model="rssList" 
@@ -183,6 +183,15 @@ export default {
       set (array) {
         this.$store.commit('setting/setRssList', array)
       }
+    },
+    useRss: function () {
+      let showList = []
+      for (let i = 0; i < this.rss.length; i++) {
+        if (this.rss[i].useDb === true) {
+          showList.push(JSON.parse(JSON.stringify(this.rss[i])))
+        }
+      }
+      return showList
     }
   },
   watch: {

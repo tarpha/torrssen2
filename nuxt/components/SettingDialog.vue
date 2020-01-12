@@ -42,11 +42,11 @@
 							<v-container grid-list-md style="padding-top: 0; padding-bottom: 0">
 								<v-layout wrap>
 									<v-flex :xs12="item.type == 'text' || item.type == 'password' || item.type == 'app'"
-                    :xs6="item.type == 'number' || item.type == 'boolean'" 
+                    :xs6="item.type == 'number' || item.type == 'boolean' || item.type == 'host'" 
                     v-show="item.type !== 'init'"
                     v-for="(item, index) in item.arr" :key="index">
 										<v-text-field 
-											v-if="item.type == 'text' || item.type == 'number' || item.type == 'password'"
+											v-if="item.type == 'text' || item.type == 'number' || item.type == 'password' || item.type == 'host'"
 											v-model="item.value" 
 											:label="item.label" 
 											:type="item.type"
@@ -94,6 +94,7 @@
                     </v-flex>
                   </template>
                   <template v-if="item.name === 'FEED 관리'">
+                    <v-flex xs6></v-flex>
                     <v-select
                       v-model="selected" 
                       :items="siteList"
@@ -101,14 +102,14 @@
                       multiple
                       chips
                     ></v-select>
-                  <v-flex xs12 sm1 style="margin-top: 0.4rem">
-                    <v-tooltip bottom>
-                      <template v-slot:activator="{ on }">
-                        <v-icon v-on="on" @click="deleteFeed">delete</v-icon>
-                      </template>
-                      <span>선택 항목 삭제</span>
-                    </v-tooltip>
-                  </v-flex>
+                    <v-flex xs12 sm1 style="margin-top: 0.4rem">
+                      <v-tooltip bottom>
+                        <template v-slot:activator="{ on }">
+                          <v-icon v-on="on" @click="deleteFeed">delete</v-icon>
+                        </template>
+                        <span>선택 항목 삭제</span>
+                      </v-tooltip>
+                    </v-flex>
                   </template>
 								</v-layout>
 							</v-container>

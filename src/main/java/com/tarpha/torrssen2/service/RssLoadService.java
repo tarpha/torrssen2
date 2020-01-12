@@ -73,6 +73,9 @@ public class RssLoadService {
     private DaumMovieTvService daumMovieTvService;
 
     @Autowired
+    private RssMakeService rssMakeService;
+
+    @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
     public void loadRss() {
@@ -82,7 +85,7 @@ public class RssLoadService {
 
         List<RssFeed> rssFeedList = new ArrayList<RssFeed>();
 
-        for (RssList rss : rssListRepository.findByUseDb(true)) {
+        for (RssList rss : rssListRepository.findByUseDbAndInternal(true, false)) {
             try {
                 URL feedSource = new URL(rss.getUrl());
                 SyndFeedInput input = new SyndFeedInput();
@@ -159,6 +162,8 @@ public class RssLoadService {
         }
 
         rssFeedRepository.saveAll(rssFeedList);
+        rssFeedRepository.saveAll(rssMakeService.makeRss());
+
         simpMessagingTemplate.convertAndSend("/topic/feed/update", true);
     }
 

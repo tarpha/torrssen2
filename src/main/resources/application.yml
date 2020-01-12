@@ -26,3 +26,17 @@ crypto:
 daum-movie-tv:
     search-url: https://suggest-bar.daum.net/suggest
     limit: 10
+
+internal-rss:
+    base-url: https://torrenthaja12.com/bbs/board.php
+    page-query: page
+    max-page: 1
+    board-query: bo_table
+    tv-boards: >
+        torrent_drama,
+        torrent_ent,
+        torrent_docu
+    other-boards: >
+        torrent_movie,
+        torrent_kmovie
+

@@ -7,7 +7,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.tarpha'
-version = '0.9.33'
+version = '0.9.34'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -27,6 +27,7 @@ ext {
 	jsonSmartVersion = '2.3'
 	asyncHttpClientVersion = '2.10.1'
 	btVersion = '1.8'
+	jsoupVersion = '1.12.1'
 }
 
 configurations {
@@ -74,6 +75,8 @@ dependencies {
 	implementation "com.github.atomashpolskiy:bt-core:${btVersion}"
 	implementation "com.github.atomashpolskiy:bt-http-tracker-client:${btVersion}"
 	implementation "com.github.atomashpolskiy:bt-dht:${btVersion}"
+
+	implementation "org.jsoup:jsoup:${jsoupVersion}"
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 

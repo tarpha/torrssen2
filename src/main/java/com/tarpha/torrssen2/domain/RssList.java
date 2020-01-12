@@ -29,6 +29,8 @@ public class RssList {
     private Boolean downloadAll = false;
 
     private String downloadPath;
+
+    private Boolean internal = false;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date createDt = new Date();

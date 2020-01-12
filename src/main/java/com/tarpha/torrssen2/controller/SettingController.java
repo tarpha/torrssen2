@@ -139,6 +139,11 @@ public class SettingController {
         return rssListRepository.findAll();
     }
 
+    @GetMapping(value = "/rss-list-use")
+    public List<RssList> getUseRssList() {
+        return rssListRepository.findByUseDb(true);
+    }
+
     @PostMapping(value = "/rss-list")
     public void setRssList(@RequestBody List<RssList> list) {
         List<RssList> deleteList = new ArrayList<>();

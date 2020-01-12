@@ -220,6 +220,42 @@ SELECT 'LIMIT_COUNT' key
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'LIMIT_COUNT');
 
 INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'PROXY_HOST' key
+     , '' value
+     , 'host' type
+     , false required
+     , 'PROXY 호스트'
+     , 'FEED 관리'
+     , 43
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'PROXY_HOST');
+
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'PROXY_PORT' key
+     , '' value
+     , 'number' type
+     , false required
+     , 'PROXY 포트'
+     , 'FEED 관리'
+     , 44
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'PROXY_PORT');
+
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
+SELECT 'USE_INTERNAL_RSS' key
+     , 'FALSE' value
+     , 'boolean' type
+     , true required
+     , '내장 RSS 사용'
+     , 'FEED 관리'
+     , 45
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'USE_INTERNAL_RSS');
+
+INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
 SELECT 'USE_LOGIN' key
      , 'FALSE' value
      , 'boolean' type
@@ -339,6 +375,81 @@ SELECT 'TELEGRAM_TEST' key
 ) x
 WHERE NOT EXISTS(SELECT * FROM SETTING WHERE key = 'TELEGRAM_TEST');
 
+INSERT INTO RSS_LIST(name, link_key, show, tv_series, url, use_db, download_all, download_path, internal, create_dt) SELECT * FROM (
+SELECT 'torrssen(드라마)' name
+     , 'link' link_key
+     , false show
+     , true tv_series
+     , 'torrent_drama' url
+     , false use_db
+     , false download_all
+     , null download_path
+     , true internal
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM RSS_LIST WHERE name = 'torrssen(드라마)')
+AND   EXISTS(SELECT * FROM SETTING WHERE key = 'USE_INTERNAL_RSS' AND UPPER(value) = 'TRUE');
+
+INSERT INTO RSS_LIST(name, link_key, show, tv_series, url, use_db, download_all, download_path, internal, create_dt) SELECT * FROM (
+SELECT 'torrssen(예능)' name
+     , 'link' link_key
+     , false show
+     , true tv_series
+     , 'torrent_ent' url
+     , false use_db
+     , false download_all
+     , null download_path
+     , true internal
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM RSS_LIST WHERE name = 'torrssen(예능)')
+AND   EXISTS(SELECT * FROM SETTING WHERE key = 'USE_INTERNAL_RSS' AND UPPER(value) = 'TRUE');
+
+INSERT INTO RSS_LIST(name, link_key, show, tv_series, url, use_db, download_all, download_path, internal, create_dt) SELECT * FROM (
+SELECT 'torrssen(다큐)' name
+     , 'link' link_key
+     , false show
+     , true tv_series
+     , 'torrent_docu' url
+     , false use_db
+     , false download_all
+     , null download_path
+     , true internal
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM RSS_LIST WHERE name = 'torrssen(다큐)')
+AND   EXISTS(SELECT * FROM SETTING WHERE key = 'USE_INTERNAL_RSS' AND UPPER(value) = 'TRUE');
+
+INSERT INTO RSS_LIST(name, link_key, show, tv_series, url, use_db, download_all, download_path, internal, create_dt) SELECT * FROM (
+SELECT 'torrssen(외국영화)' name
+     , 'link' link_key
+     , false show
+     , false tv_series
+     , 'torrent_movie' url
+     , false use_db
+     , false download_all
+     , null download_path
+     , true internal
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM RSS_LIST WHERE name = 'torrssen(외국영화)')
+AND   EXISTS(SELECT * FROM SETTING WHERE key = 'USE_INTERNAL_RSS' AND UPPER(value) = 'TRUE');
+
+INSERT INTO RSS_LIST(name, link_key, show, tv_series, url, use_db, download_all, download_path, internal, create_dt) SELECT * FROM (
+SELECT 'torrssen(한국영화)' name
+     , 'link' link_key
+     , false show
+     , false tv_series
+     , 'torrent_kmovie' url
+     , false use_db
+     , false download_all
+     , null download_path
+     , true internal
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM RSS_LIST WHERE name = 'torrssen(한국영화)')
+AND   EXISTS(SELECT * FROM SETTING WHERE key = 'USE_INTERNAL_RSS' AND UPPER(value) = 'TRUE');
+
 -- INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
 -- SELECT 'CORS_URL' key
 --      , '' value
@@ -387,3 +498,5 @@ UPDATE RSS_LIST SET download_all = false WHERE download_all IS NULL;
 ALTER TABLE IF EXISTS DOWNLOAD_LIST ALTER COLUMN URI VARCHAR(2048);
 ALTER TABLE IF EXISTS DOWNLOAD_LIST ALTER COLUMN FILE_NAME VARCHAR(1024);
 ALTER TABLE IF EXISTS SEEN_LIST ALTER COLUMN LINK VARCHAR(2048);
+
+UPDATE RSS_LIST SET internal = false WHERE internal IS NULL;

@@ -65,6 +65,7 @@
 									</v-flex>
 									<v-flex xs12>
 										<v-text-field
+                      v-if="!item.internal"
 											v-model="item.url" 
 											label="주소"
 											required
