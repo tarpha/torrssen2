@@ -125,34 +125,46 @@ public class RssMakeService {
         return rssFeedList;
     }
 
-    private Document getDoc(String urlString) throws Exception {
-        URL url = new URL(urlString);
+    private Document getDoc(String urlString) {
+        URL url;
+        HttpURLConnection uc = null;
 
-        Optional<Setting> optionalHost = settingRepository.findByKey("PROXY_HOST");
-        Optional<Setting> optionalPort = settingRepository.findByKey("PROXY_PORT");
-        if (optionalHost.isPresent() && optionalPort.isPresent()) {
-            log.info("Use Proxy");
-            String proxyHost = optionalHost.get().getValue();
-            int proxyPort = Integer.parseInt(optionalPort.get().getValue());
+        try {
+            url = new URL(urlString);
 
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-            HttpURLConnection uc = (HttpURLConnection)url.openConnection(proxy);
-            uc.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.13) Gecko/20150702 Firefox/3.6.13 (.NET CLR 3.5.30729)");
+            Optional<Setting> optionalHost = settingRepository.findByKey("PROXY_HOST");
+            Optional<Setting> optionalPort = settingRepository.findByKey("PROXY_PORT");
+            if (optionalHost.isPresent() && optionalPort.isPresent()) {
+                log.debug("Use Proxy");
+                String proxyHost = optionalHost.get().getValue();
+                int proxyPort = Integer.parseInt(optionalPort.get().getValue());
 
-            uc.connect();
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+                uc = (HttpURLConnection)url.openConnection(proxy);
+                uc.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.13) Gecko/20150702 Firefox/3.6.13 (.NET CLR 3.5.30729)");
 
-            String line = null;
-            StringBuffer tmp = new StringBuffer();
-            BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
-            
-            while ((line = in.readLine()) != null) {
-                tmp.append(line);
+                uc.connect();
+
+                String line = null;
+                StringBuffer tmp = new StringBuffer();
+                BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
+                
+                while ((line = in.readLine()) != null) {
+                    tmp.append(line);
+                }
+
+                in.close();
+
+                return Jsoup.parse(String.valueOf(tmp));
+            } else {
+                log.debug("No Proxy");
+                return Jsoup.connect(urlString).get();
             }
-
-            return Jsoup.parse(String.valueOf(tmp));
-        } else {
-            log.info("No Proxy");
-            return Jsoup.connect(urlString).get();
+        } catch(Exception e) {
+            log.error(e.toString());
+            return null;
+        } finally {
+            if(uc != null) uc.disconnect();
         }
         
     }
