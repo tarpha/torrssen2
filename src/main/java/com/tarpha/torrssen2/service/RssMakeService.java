@@ -34,20 +34,32 @@ import org.jsoup.select.Elements;
 @Slf4j
 public class RssMakeService {
 
-    @Value("${internal-rss.base-url}")
-    private String baseUrl;
+    @Value("${internal-rss1.base-url}")
+    private String baseUrl1;
 
-    @Value("${internal-rss.page-query}")
-    private String pageQuery;
+    @Value("${internal-rss1.page-query}")
+    private String pageQuery1;
 
-    @Value("${internal-rss.max-page}")
-    private int maxPage;
+    @Value("${internal-rss1.max-page}")
+    private int maxPage1;
 
-    @Value("${internal-rss.board-query}")
-    private String boardQuery;
+    @Value("${internal-rss1.board-query}")
+    private String boardQuery1;
 
-    // @Value("${internal-rss.tv-boards}")
-    // private String[] tvBoards;
+    @Value("${internal-rss2.base-url}")
+    private String baseUrl2;
+
+    @Value("${internal-rss2.page-html}")
+    private String pageHtml2;
+
+    @Value("${internal-rss2.max-page}")
+    private int maxPage2;
+
+    @Value("${internal-rss1.tv-boards}")
+    private String[] tvBoards1;
+
+    @Value("${internal-rss2.tv-boards}")
+    private String[] tvBoards2;
 
     // @Value("${internal-rss.other-boards}")
     // private String[] otherBoards;
@@ -67,62 +79,116 @@ public class RssMakeService {
         // Document doc = getDoc("https://torrenthaja12.com/bbs/board.php?bo_table=torrent_drama");
         // for(BoardVO board: boardList) {
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
-            for(int page = 1; page <= maxPage; page++ ) {
+            rssFeedList.addAll(makeRss1(rss));
+            rssFeedList.addAll(makeRss2(rss));
+        }
 
-                try {
-                    // String url = baseUrl + "?" + boardQuery + "=" + board.getName() + "&" + pageQuery + "=" + page;
-                    String url = baseUrl + "?" + boardQuery + "=" + rss.getUrl() + "&" + pageQuery + "=" + page;
-                    log.debug(url);
-                    Document doc = getDoc(url);
-                    Elements els = doc.select(".board-list-body table tr td .td-subject");
-                    
-                    for(int i = els.size() -1; i >= 0; i--) {
-                        Element item = els.get(i).select("a").last();
-                        String title = item.text();
-                        String magnet = getMagnetString(item.absUrl("href"));
-                        log.debug(title + "|" + magnet);
+        return rssFeedList;
+    }
 
-                        RssFeed rssFeed = new RssFeed();
-                        rssFeed.setTitle(title);
-                        rssFeed.setRssSite(rss.getName());
-                        rssFeed.setLink(magnet);
-                        rssFeed.setTvSeries(rss.getTvSeries());
-                        rssFeed.setRssTitleByTitle(title);
-                        rssFeed.setRssEpisodeByTitle(title);
-                        rssFeed.setRssSeasonByTitle(title);
-                        rssFeed.setRssQualityBytitle(title);
-                        rssFeed.setRssReleaseGroupByTitle(title);
-                        rssFeed.setRssDateBytitle(title);
+    private List<RssFeed> makeRss1(RssList rss) {
+        List<RssFeed> rssFeedList = new ArrayList<>();
 
-                        String[] rssTitleSplit = StringUtils.split(rssFeed.getRssTitle());
-                        if (rssTitleSplit.length == 1) {
-                            rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
-                        } else {
-                            for (int j = rssTitleSplit.length - 1; j > 0; j--) {
-                                StringBuffer posterTitle = new StringBuffer();
-                                for (int k = 0; k <= j; k++) {
-                                    posterTitle.append(rssTitleSplit[k] + " ");
-                                }
-                                String posterUrl = daumMovieTvService
-                                        .getPoster(StringUtils.trim(posterTitle.toString()));
-                                if (!StringUtils.isEmpty(posterUrl)) {
-                                    rssFeed.setRssPoster(posterUrl);
-                                    break;
-                                }
-                            }
-                        }
+        for(int page = 1; page <= maxPage1; page++ ) {
 
-                        rssFeedList.add(rssFeed);
-                    }
-
-                } catch(Exception e) {
-                    log.error(e.toString());
-                }
+            try {
+                // String url = baseUrl + "?" + boardQuery + "=" + board.getName() + "&" + pageQuery + "=" + page;
+                String url = baseUrl1 + "?" + boardQuery1 + "=" + rss.getUrl() + "&" + pageQuery1 + "=" + page;
+                log.debug(url);
+                Document doc = getDoc(url);
+                Elements els = doc.select(".board-list-body table tr td .td-subject");
                 
+                for(int i = els.size() -1; i >= 0; i--) {
+                    Element item = els.get(i).select("a").last();
+                    String title = item.text();
+                    String magnet = getMagnetString1(item.absUrl("href"));
+                    log.debug(title + "|" + magnet);
+
+                    rssFeedList.add(makeFeed(title, magnet, rss));
+                }
+
+            } catch(Exception e) {
+                log.error(e.toString());
             }
         }
 
         return rssFeedList;
+    }
+
+    private List<RssFeed> makeRss2(RssList rss) {
+        List<RssFeed> rssFeedList = new ArrayList<>();
+
+        for(int page = 1; page <= maxPage2; page++ ) {
+
+            try {
+                String targetBoard = null;
+
+                for(int i = 0; i < tvBoards1.length; i++) {
+                    if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {
+                        targetBoard = tvBoards2[i];
+                    }
+                }
+
+                if(StringUtils.isBlank(targetBoard)) {
+                    return rssFeedList;
+                }
+
+                String url = baseUrl2 + "/" + targetBoard + "/" + pageHtml2 + page + ".htm";
+                log.debug(url);
+                Document doc = getDoc(url);
+                Elements els = doc.select("#main_body tr td.subject");
+
+                for(int i = els.size() -1; i >= 0; i--) {
+                    Element item = els.get(i).select("a").last();
+                    log.debug(item.text() + ":" + item.attr("href"));
+                    String title = item.text();
+                    log.debug(baseUrl2 + item.attr("href").substring(2));
+                    String magnet = getMagnetString2(baseUrl2 + item.attr("href").substring(2));
+                    log.debug(title + "|" + magnet);
+
+                    rssFeedList.add(makeFeed(title, magnet, rss));
+                }
+
+            } catch(Exception e) {
+                log.error(e.toString());
+            }
+        }
+
+        return rssFeedList;
+    }
+
+    private RssFeed makeFeed(String title, String magnet, RssList rss) {
+        RssFeed rssFeed = new RssFeed();
+        rssFeed.setTitle(title);
+        rssFeed.setRssSite(rss.getName());
+        rssFeed.setLink(magnet);
+        rssFeed.setTvSeries(rss.getTvSeries());
+        rssFeed.setRssTitleByTitle(title);
+        rssFeed.setRssEpisodeByTitle(title);
+        rssFeed.setRssSeasonByTitle(title);
+        rssFeed.setRssQualityBytitle(title);
+        rssFeed.setRssReleaseGroupByTitle(title);
+        rssFeed.setRssDateBytitle(title);
+
+        String[] rssTitleSplit = StringUtils.split(rssFeed.getRssTitle());
+        if (rssTitleSplit.length == 1) {
+            rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
+        } else {
+            for (int j = rssTitleSplit.length - 1; j > 0; j--) {
+                StringBuffer posterTitle = new StringBuffer();
+                for (int k = 0; k <= j; k++) {
+                    posterTitle.append(rssTitleSplit[k] + " ");
+                }
+                String posterUrl = daumMovieTvService
+                        .getPoster(StringUtils.trim(posterTitle.toString()));
+                if (!StringUtils.isEmpty(posterUrl)) {
+                    rssFeed.setRssPoster(posterUrl);
+                    break;
+                }
+            }
+        }
+
+        return rssFeed;
     }
 
     private Document getDoc(String urlString) {
@@ -169,7 +235,7 @@ public class RssMakeService {
         
     }
 
-    private String getMagnetString(String urlString) throws Exception {
+    private String getMagnetString1(String urlString) throws Exception {
         Document doc = getDoc(urlString);
 
         Element el = doc.selectFirst(".btn.btn-success.btn-xs");
@@ -182,6 +248,13 @@ public class RssMakeService {
         } else {
             return null;
         }
+    }
+
+    private String getMagnetString2(String urlString) throws Exception {
+        Document doc = getDoc(urlString);
+        Element el = doc.selectFirst("div + b + a");
+
+        return el.attr("href");
     }
     
 }
