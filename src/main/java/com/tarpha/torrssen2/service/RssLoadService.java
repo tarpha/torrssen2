@@ -164,6 +164,16 @@ public class RssLoadService {
         for(RssFeed rssFeed: rssMakeService.makeRss()) {
             if (!rssFeedRepository.findByLink(rssFeed.getLink()).isPresent()) {
                 rssFeedList.add(rssFeed);
+
+                Optional<RssList> optioalRss = rssListRepository.findByName(rssFeed.getRssSite());
+                if(optioalRss.isPresent()) {
+                    if(optioalRss.get().getDownloadAll()) {
+                        download(rssFeed, optioalRss.get());
+                    }
+                }
+
+                // Watch List를 체크하여 다운로드 요청한다.
+                checkWatchList(rssFeed, null);
             }
         }
 
