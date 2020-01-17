@@ -53,10 +53,17 @@
 											:required="item.required"
 										></v-text-field>
 										<v-combobox 
-											v-else-if="item.type == 'boolean'"
+											v-else-if="item.type == 'boolean' && item.key != 'DARK_THEME'"
 											v-model="item.value" 
 											:label="item.label" 
 											:items="['TRUE', 'FALSE']"
+											:required="item.required"
+										></v-combobox>
+                    <v-combobox 
+											v-else-if="item.type == 'boolean' && item.key == 'DARK_THEME'"
+											v-model="item.value" 
+											:label="item.label" 
+											:items="['TRUE', 'FALSE', 'AUTO']"
 											:required="item.required"
 										></v-combobox>
 										<v-combobox 
@@ -247,6 +254,13 @@ export default {
         }
         this.$store.commit('snackbar/show', msg)
         axios.get('/api/setting/DARK_THEME').then(res => {
+          if (res.data === 'AUTO') {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+              res.data = 'TRUE'
+            } else {
+              res.data = 'FALSE'
+            }
+          }
           this.$store.commit('setDark', res.data === 'TRUE')
         })
         this.close()

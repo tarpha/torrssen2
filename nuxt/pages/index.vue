@@ -108,6 +108,13 @@
         }
       })
       axios.get('/api/setting/DARK_THEME').then(res => {
+        if (res.data === 'AUTO') {
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            res.data = 'TRUE'
+          } else {
+            res.data = 'FALSE'
+          }
+        }
         this.$store.commit('setDark', res.data === 'TRUE')
       })
       axios.get('/api/setting/version').then(res => {
