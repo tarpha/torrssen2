@@ -193,6 +193,28 @@ public class RssLoadService {
     public void asyncLoadRss() {
         loadRss();
     }
+
+    public boolean checkWatchListQuality(RssFeed rssFeed, WatchList watchList) {
+        boolean checkQuality = false;
+
+        if (StringUtils.isBlank(watchList.getQuality())) {
+            watchList.setQuality("100p");
+        }
+
+        try {
+            if (StringUtils.endsWithIgnoreCase(watchList.getQuality(), "P+")) {
+                checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(), "P")) 
+                    >= Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P+"));
+            } else {
+                checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(), "P")) 
+                    == Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P"));
+            }
+        } catch (NumberFormatException e) {
+            log.error(e.getMessage());
+        }
+
+        return checkQuality;
+    }
  
     /**
      * Feed가 WatchList에 존재할 경우 다운로드 요청을 한다.
@@ -242,25 +264,26 @@ public class RssLoadService {
 
             boolean seenDone = false;
             boolean subtitleDone = false;
-            boolean checkQuality = false;
+            // boolean checkQuality = false;
 
-            if (StringUtils.isBlank(watchList.getQuality())) {
-                watchList.setQuality("100p");
-            }
+            // if (StringUtils.isBlank(watchList.getQuality())) {
+            //     watchList.setQuality("100p");
+            // }
 
-            try {
-                if (StringUtils.endsWithIgnoreCase(watchList.getQuality(), "P+")) {
-                    checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(),
-                            "P")) >= Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P+"));
-                } else {
-                    checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(),
-                            "P")) == Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P"));
-                }
-            } catch (NumberFormatException e) {
-                log.error(e.getMessage());
-            }
+            // try {
+            //     if (StringUtils.endsWithIgnoreCase(watchList.getQuality(), "P+")) {
+            //         checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(), "P")) 
+            //             >= Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P+"));
+            //     } else {
+            //         checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(), "P")) 
+            //             == Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P"));
+            //     }
+            // } catch (NumberFormatException e) {
+            //     log.error(e.getMessage());
+            // }
 
-            if (!checkQuality) {
+            // if (!checkQuality) {
+            if(checkWatchListQuality(rssFeed, watchList)) {
                 log.info("Rejected by Quality: " + rssFeed.getTitle());
                 return;
             }
