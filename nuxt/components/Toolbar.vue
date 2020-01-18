@@ -12,7 +12,7 @@
         v-model="searchText"
         hide-details
         prepend-inner-icon="search"
-        :background-color="dark ? '#333333' : '#f5f5f5'"
+        :background-color="dark ? 'rgb(33,33,33)' : '#f5f5f5'"
         solo
         clearable
         flat

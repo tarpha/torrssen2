@@ -283,7 +283,7 @@ public class RssLoadService {
             // }
 
             // if (!checkQuality) {
-            if(checkWatchListQuality(rssFeed, watchList)) {
+            if(!checkWatchListQuality(rssFeed, watchList)) {
                 log.info("Rejected by Quality: " + rssFeed.getTitle());
                 return;
             }
