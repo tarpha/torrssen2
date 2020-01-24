@@ -371,6 +371,7 @@ public class RssLoadService {
         seenList.setSeason(rssFeed.getRssSeason());
         seenList.setEpisode(rssFeed.getRssEpisode());
         seenList.setRenameStatus(StringUtils.isBlank(rename) ? "N/A" : "false");
+        seenList.setQuality(rssFeed.getRssQuality());
 
         if (StringUtils.contains(rssFeed.getTitle(), "자막") && !StringUtils.startsWith(rssFeed.getLink(), "magnet")) {
             seenList.setSubtitle(true);

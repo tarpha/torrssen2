@@ -48,6 +48,7 @@
 						<td>{{ props.item.title }}</td>
 						<td>{{ props.item.downloadPath }}</td>
 						<td>{{ props.item.episode }}</td>
+            <td>{{ props.item.quality }}</td>
             <td>{{ props.item.renameStatus }}</td>
 					</template>
 				</v-data-table>
@@ -89,6 +90,7 @@ export default {
         { text: '제목', value: 'title', sortable: false },
         { text: '다운로드 경로', value: 'downloadPath', sortable: false },
         { text: '에피소드', value: 'episode', sortable: false },
+        { text: '화질', value: 'quality', sortable: false },
         { text: '파일명 변경 상태', value: 'renameStatus', sortable: false }
       ]
     }
