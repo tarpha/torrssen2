@@ -292,15 +292,27 @@ public class RssLoadService {
             }
 
             if (watchList.getSeries()) {
-                if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                if (StringUtils.contains(watchList.getQuality(), ',')) {
+                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
                         rssFeed.getRssEpisode(), false, rssFeed.getRssQuality()) > 0) {
-                    seenDone = true;
-                }
+                        seenDone = true;
+                    }
 
-                if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
-                        rssFeed.getRssEpisode(), true, rssFeed.getRssQuality()) > 0 || !watchList.getSubtitle()) {
-                    subtitleDone = true;
-                }
+                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                            rssFeed.getRssEpisode(), true, rssFeed.getRssQuality()) > 0 || !watchList.getSubtitle()) {
+                        subtitleDone = true;
+                    }
+                } else {
+                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                        rssFeed.getRssEpisode(), false) > 0) {
+                        seenDone = true;
+                    }
+
+                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                            rssFeed.getRssEpisode(), true) > 0 || !watchList.getSubtitle()) {
+                        subtitleDone = true;
+                    }
+                }  
             } else {
                 if (seenListRepository.findFirstByLinkAndSubtitle(rssFeed.getLink(), false).isPresent()) {
                     seenDone = true;

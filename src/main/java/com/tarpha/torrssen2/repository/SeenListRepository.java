@@ -18,6 +18,17 @@ public interface SeenListRepository extends JpaRepository<SeenList, Long> {
                 "AND    subtitle = ?5 " +
                 "OR    (title = ?2 AND " + 
                 "       season = ?3 AND " + 
+                "       episode = ?4) "
+      , nativeQuery = true)
+    public int countByParams(String link, String title, String season, String episode, boolean subtitle);
+
+    @Query(
+        value = "SELECT count(1) cnt " + 
+                "FROM   SEEN_LIST " +
+                "WHERE  link = ?1 " +
+                "AND    subtitle = ?5 " +
+                "OR    (title = ?2 AND " + 
+                "       season = ?3 AND " + 
                 "       episode = ?4 AND" +
                 "       quality = ?6)"
       , nativeQuery = true)
