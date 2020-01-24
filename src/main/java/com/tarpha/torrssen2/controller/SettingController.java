@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -236,8 +237,10 @@ public class SettingController {
     }
 
     @PostMapping(value = "/watch-list/delete")
+    @Transactional
     public void deleteWatchList(@RequestBody WatchList watchList) {
         watchListRepository.delete(watchList);
+        seenListRepository.deleteByTitle(watchList.getTitle());
     }
     
     @GetMapping(value = "/seen-list")
@@ -253,6 +256,11 @@ public class SettingController {
     @PostMapping(value = "/seen-list/delete/all")
     public void deleteAllSeenList() {
         seenListRepository.deleteAll();
+    }
+
+    @PostMapping(value = "/seen-list/delete/adjust")
+    public void deleteAdjustSeenList() {
+        seenListRepository.adjustList();
     }
 
     @GetMapping(value = "/download-list")

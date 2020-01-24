@@ -22,6 +22,13 @@
           >
             전체 삭제
           </v-btn>
+          <v-btn
+            color="primary"
+            flat="flat"
+            @click="adjust"
+          >
+            정리
+          </v-btn>
         </template>
       </v-toolbar>
 				<v-data-table
@@ -108,7 +115,7 @@ export default {
         })
       }
     },
-    deleteAll: function (item) {
+    deleteAll: function () {
       if (confirm('전체 항목을 삭제하시겠습니까?')) {
         axios.post('/api/setting/seen-list/delete/all').then(res => {
           let msg = '삭제되었습니다.'
@@ -116,6 +123,20 @@ export default {
             msg = '삭제하지 못했습니다.'
           }
           this.items = []
+          this.$store.commit('snackbar/show', msg)
+        })
+      }
+    },
+    adjust: function () {
+      if (confirm('자동 다운로드에 없는 항목을 삭제하시겠습니까?')) {
+        axios.post('/api/setting/seen-list/delete/adjust').then(res => {
+          let msg = '삭제되었습니다.'
+          if (res.status !== 200) {
+            msg = '삭제하지 못했습니다.'
+          }
+          axios.get('/api/setting/seen-list?sort=createDt,desc').then(res => {
+            this.items = res.data
+          })
           this.$store.commit('snackbar/show', msg)
         })
       }

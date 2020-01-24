@@ -163,7 +163,7 @@
 							<v-text-field
 								v-model="editedItem.quality" 
 								label="화질"
-								hint="+로 상위 화질 검색 ex) 720p+"
+								hint="+로 상위 화질 검색 ,로 복수 화질 설정"
 							></v-text-field>
 						</v-flex>
 						<v-flex xs6>

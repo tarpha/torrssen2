@@ -202,7 +202,10 @@ public class RssLoadService {
         }
 
         try {
-            if (StringUtils.endsWithIgnoreCase(watchList.getQuality(), "P+")) {
+            if (StringUtils.contains(watchList.getQuality(), ',')) {
+                checkQuality = StringUtils.containsIgnoreCase(watchList.getQuality(), rssFeed.getRssQuality());
+
+            } else if (StringUtils.endsWithIgnoreCase(watchList.getQuality(), "P+")) {
                 checkQuality = Integer.parseInt(StringUtils.removeIgnoreCase(rssFeed.getRssQuality(), "P")) 
                     >= Integer.parseInt(StringUtils.removeIgnoreCase(watchList.getQuality(), "P+"));
             } else {
@@ -235,8 +238,8 @@ public class RssLoadService {
             log.info("Matched Feed: " + rssFeed.getTitle());
 
             try {
-                if (optionalWatchList.get().getRssList() != null && optionalWatchList.get().getRssList().size() > 0) {
-                    if (!optionalWatchList.get().getRssList().contains(rssFeed.getRssSite())) {
+                if (watchList.getRssList() != null && watchList.getRssList().size() > 0) {
+                    if (!watchList.getRssList().contains(rssFeed.getRssSite())) {
                         log.info("Skipped by RSS List");
                         return;
                     }
@@ -290,12 +293,12 @@ public class RssLoadService {
 
             if (watchList.getSeries()) {
                 if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
-                        rssFeed.getRssEpisode(), false) > 0) {
+                        rssFeed.getRssEpisode(), false, rssFeed.getRssQuality()) > 0) {
                     seenDone = true;
                 }
 
                 if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
-                        rssFeed.getRssEpisode(), true) > 0 || !watchList.getSubtitle()) {
+                        rssFeed.getRssEpisode(), true, rssFeed.getRssQuality()) > 0 || !watchList.getSubtitle()) {
                     subtitleDone = true;
                 }
             } else {
@@ -406,7 +409,9 @@ public class RssLoadService {
             if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
                 Optional<Setting> limitCnt = settingRepository.findByKey("LIMIT_COUNT");
                 if (limitCnt.isPresent()) {
-                    rssFeedRepository.deleteByLimitCount(Integer.parseInt(limitCnt.get().getValue()));
+                    int cnt = Integer.parseInt(limitCnt.get().getValue());
+                    rssFeedRepository.deleteByLimitCount(cnt);
+                    downloadListRepository.deleteByLimitCount(cnt);
                 }
             }
         }
