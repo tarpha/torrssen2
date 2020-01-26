@@ -33,7 +33,7 @@ public class DaumMovieTvService {
     private CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
     public String getPoster(String query) {
-        log.info("Get Poster: " + query);
+        // log.debug("Get Poster: " + query);
         CloseableHttpResponse response = null;
 
         try {
@@ -46,7 +46,7 @@ public class DaumMovieTvService {
             response = httpClient.execute(httpGet);
 
             JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
-            log.debug(json.toString());
+            // log.debug(json.toString());
 
             if(json.has("items")) {
                 JSONArray jarr = json.getJSONArray("items");

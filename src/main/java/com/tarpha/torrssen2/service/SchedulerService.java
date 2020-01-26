@@ -119,7 +119,7 @@ public class SchedulerService {
             }
         }
 
-        log.info("=== Transmission Stop Seeding ===");
+        // log.debug("=== Transmission Stop Seeding ===");
         List<DownloadList> list = transmissionService.torrentGet(null);
         List<Long> ids = new ArrayList<Long>();
         for (DownloadList down : list) {
@@ -165,7 +165,7 @@ public class SchedulerService {
 
     public void downloadStationJob() {
         // 다운로드 스테이션 완료 체크
-        log.info("=== Download Station Check Done ===");
+        log.debug("=== Download Station Check Done ===");
         List<DownloadList> list = downloadStationService.list();
 
         boolean doneDelete = false;

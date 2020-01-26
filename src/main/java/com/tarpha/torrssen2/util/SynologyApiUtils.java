@@ -60,7 +60,7 @@ public class SynologyApiUtils {
     }
 
     protected boolean initialize() {
-        log.info("Initialize File Station Http Client");
+        log.debug("Initialize File Station Http Client");
         HttpResponse response = null;
 
         this.username = settingService.getSettingValue("DS_USERNAME");

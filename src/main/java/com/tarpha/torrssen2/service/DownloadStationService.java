@@ -66,7 +66,7 @@ public class DownloadStationService extends SynologyApiUtils {
     }
 
     public List<DownloadList> list() {
-        log.info("Download Station list");
+        log.debug("Download Station list");
         List<DownloadList> ret = new ArrayList<DownloadList>();
 
         try {
@@ -102,7 +102,7 @@ public class DownloadStationService extends SynologyApiUtils {
     }
 
     public DownloadList getInfo(String id) {
-        log.info("Download Station getInfo");
+        log.debug("Download Station getInfo");
         DownloadList ret = null;
 
         try {
@@ -131,7 +131,7 @@ public class DownloadStationService extends SynologyApiUtils {
     }
 
     public List<DownloadList> getInfo(List<String> ids) {
-        log.info("Download Station getInfo");
+        log.debug ("Download Station getInfo");
         List<DownloadList> ret = new ArrayList<DownloadList>();
 
         try {
@@ -160,7 +160,7 @@ public class DownloadStationService extends SynologyApiUtils {
     }
 
     public boolean create(String uri, String downloadDir) {
-        log.info("Download Station create");
+        log.debug("Download Station create");
         boolean ret = false;
 
         List<NameValuePair> form = new ArrayList<NameValuePair>();
@@ -192,7 +192,7 @@ public class DownloadStationService extends SynologyApiUtils {
     }
 
     public boolean delete(List<String> ids) {
-        log.info("Download Station delete");
+        log.debug("Download Station delete");
         boolean ret = true;
         
         try {

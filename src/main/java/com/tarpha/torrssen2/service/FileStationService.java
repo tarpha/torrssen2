@@ -24,7 +24,7 @@ public class FileStationService extends SynologyApiUtils {
     }
 
     public boolean createFolder(String path, String name) {
-        log.info("File Station createFolder");
+        log.debug("File Station createFolder");
         boolean ret = false;
 
         try {
@@ -94,7 +94,7 @@ public class FileStationService extends SynologyApiUtils {
     }
 
     public String move(List<String> paths, String dest) {
-        log.info("File Station CopyMove");
+        log.debug("File Station CopyMove");
         String taskId = null;
 
         try {
@@ -177,7 +177,7 @@ public class FileStationService extends SynologyApiUtils {
     }
 
     public boolean delete(String path) {
-        log.info("File Station Delete");
+        log.debug("File Station Delete");
         boolean ret = false;
 
         try {
@@ -210,7 +210,7 @@ public class FileStationService extends SynologyApiUtils {
     }
 
     public boolean rename(String path, String name) {
-        log.info("File Station Rename");
+        log.debug("File Station Rename");
         boolean ret = false;
 
         try {

@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -86,6 +87,7 @@ public class RssLoadService {
         List<RssFeed> rssFeedList = new ArrayList<RssFeed>();
 
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, false)) {
+            log.info("Load RSS Site : " + rss.getName());
             try {
                 URL feedSource = new URL(rss.getUrl());
                 SyndFeedInput input = new SyndFeedInput();
@@ -140,10 +142,10 @@ public class RssLoadService {
                             // rssFeed.setRssPoster(daumMovieTvService.getPoster(rssFeed.getRssTitle()));
                             rssFeedList.add(rssFeed);
 
-                            log.info("Add Feed: " + rssFeed.getTitle());
+                            log.debug("Add Feed: " + rssFeed.getTitle());
 
                             if(rss.getDownloadAll()) {
-                                log.info("RSS Download Repuest All: " + rssFeed.getTitle());
+                                log.debug("RSS Download Repuest All: " + rssFeed.getTitle());
                                 download(rssFeed, rss);
                             }
 
@@ -352,7 +354,7 @@ public class RssLoadService {
                             return;
                         }
                     } catch (NumberFormatException e) {
-                        log.info(e.getMessage());
+                        log.error(e.toString());
                     }
                 }
 
@@ -416,6 +418,7 @@ public class RssLoadService {
         downloadListRepository.save(download);
     }
 
+    @Transactional
     private void deleteFeed() {
         Optional<Setting> optionalSetting = settingRepository.findByKey("USE_LIMIT");
         if (optionalSetting.isPresent()) {
@@ -444,7 +447,7 @@ public class RssLoadService {
                 if (StringUtils.startsWith(rssFeed.getLink(), "magnet")
                     || StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(rssFeed.getLink()), "torrent")) {
                     int torrentAddedId = transmissionService.torrentAdd(rssFeed.getLink(), path);
-                    log.info("Transmission ID: " + torrentAddedId);
+                    log.debug("Transmission ID: " + torrentAddedId);
     
                     if (torrentAddedId > 0) {
                         // Add to Seen
@@ -492,7 +495,7 @@ public class RssLoadService {
                 }
             } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
                 Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
-                log.info("Embeded ID: " + torrentAddedId);
+                log.debug("Embeded ID: " + torrentAddedId);
 
                 if (torrentAddedId > 0) {
                     // Add to Seen
@@ -519,7 +522,7 @@ public class RssLoadService {
                 if (StringUtils.startsWith(rssFeed.getLink(), "magnet")
                     || StringUtils.equalsIgnoreCase(FilenameUtils.getExtension(rssFeed.getLink()), "torrent")) {
                     int torrentAddedId = transmissionService.torrentAdd(rssFeed.getLink(), path);
-                    log.info("Transmission ID: " + torrentAddedId);
+                    log.debug("Transmission ID: " + torrentAddedId);
     
                     if (torrentAddedId > 0) {
                         // Add to Seen
@@ -565,7 +568,7 @@ public class RssLoadService {
                 }
             } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
                 Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
-                log.info("Embeded ID: " + torrentAddedId);
+                log.debug("Embeded ID: " + torrentAddedId);
 
                 if (torrentAddedId > 0) {
                     // Add to Seen
