@@ -265,6 +265,7 @@ public class RssMakeService {
                 }
 
                 in.close();
+                uc.disconnect();
 
                 return Jsoup.parse(String.valueOf(tmp));
             } else {
