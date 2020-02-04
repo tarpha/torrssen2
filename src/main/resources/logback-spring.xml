@@ -39,7 +39,7 @@
     </root>
 
     <springProfile name="default">
-        <logger name="com.tarpha" level="error" additivity="false">
+        <logger name="com.tarpha" level="info" additivity="false">
             <appender-ref ref="RollingFile" />
             <appender-ref ref="Console" />
         </logger>
