@@ -91,6 +91,8 @@ public class RssMakeService {
     }
 
     private List<RssFeed> makeRss1(RssList rss) {
+        log.info("Load RSS Site1 : " + rss.getName());
+        
         List<RssFeed> rssFeedList = new ArrayList<>();
 
         for(int page = 1; page <= maxPage1; page++ ) {
@@ -131,6 +133,8 @@ public class RssMakeService {
     }
 
     private List<RssFeed> makeRss2(RssList rss) {
+        log.info("Load RSS Site2 : " + rss.getName());
+        
         List<RssFeed> rssFeedList = new ArrayList<>();
 
         for(int page = 1; page <= maxPage2; page++ ) {

@@ -86,6 +86,22 @@ public class RssLoadService {
 
         List<RssFeed> rssFeedList = new ArrayList<RssFeed>();
 
+        for(RssFeed rssFeed: rssMakeService.makeRss()) {
+            if (!rssFeedRepository.findByLink(rssFeed.getLink()).isPresent()) {
+                rssFeedList.add(rssFeed);
+
+                Optional<RssList> optioalRss = rssListRepository.findByName(rssFeed.getRssSite());
+                if(optioalRss.isPresent()) {
+                    if(optioalRss.get().getDownloadAll()) {
+                        download(rssFeed, optioalRss.get());
+                    }
+                }
+
+                // Watch List를 체크하여 다운로드 요청한다.
+                checkWatchList(rssFeed, null);
+            }
+        }
+
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, false)) {
             log.info("Load RSS Site : " + rss.getName());
             try {
@@ -160,22 +176,6 @@ public class RssLoadService {
             } catch (Exception e) {
                 //Feed Site에 대한 Exception 처리
                 log.error(e.getMessage());
-            }
-        }
-
-        for(RssFeed rssFeed: rssMakeService.makeRss()) {
-            if (!rssFeedRepository.findByLink(rssFeed.getLink()).isPresent()) {
-                rssFeedList.add(rssFeed);
-
-                Optional<RssList> optioalRss = rssListRepository.findByName(rssFeed.getRssSite());
-                if(optioalRss.isPresent()) {
-                    if(optioalRss.get().getDownloadAll()) {
-                        download(rssFeed, optioalRss.get());
-                    }
-                }
-
-                // Watch List를 체크하여 다운로드 요청한다.
-                checkWatchList(rssFeed, null);
             }
         }
 
