@@ -37,7 +37,7 @@ public class SchedulerConfig implements SchedulingConfigurer {
         threadPoolTaskScheduler.initialize();
         scheduledTaskRegistrar.setTaskScheduler(threadPoolTaskScheduler);
 
-        scheduledTaskRegistrar.addTriggerTask(() -> rssLoadService.loadRss(), t -> {
+        scheduledTaskRegistrar.addTriggerTask(() -> rssLoadService.asyncLoadRss(), t -> {
             Calendar nextExecutionTime = new GregorianCalendar();
             Date lastActualExecutionTime = t.lastActualExecutionTime();
             nextExecutionTime.setTime(lastActualExecutionTime != null ? lastActualExecutionTime : new Date());
