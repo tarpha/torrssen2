@@ -77,6 +77,8 @@ public class RssMakeService {
     @Autowired
     private DaumMovieTvService daumMovieTvService;
 
+    private final int TIMEOUT_VALUE = 30000;
+
     public List<RssFeed> makeRss() {
         List<RssFeed> rssFeedList = new ArrayList<>();
 
@@ -134,7 +136,7 @@ public class RssMakeService {
 
     private List<RssFeed> makeRss2(RssList rss) {
         log.info("Load RSS Site2 : " + rss.getName());
-        
+
         List<RssFeed> rssFeedList = new ArrayList<>();
 
         for(int page = 1; page <= maxPage2; page++ ) {
@@ -256,6 +258,7 @@ public class RssMakeService {
 
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
                 uc = (HttpsURLConnection)url.openConnection(proxy);
+                uc.setConnectTimeout(TIMEOUT_VALUE);
                 uc.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.13) Gecko/20150702 Firefox/3.6.13 (.NET CLR 3.5.30729)");
 
                 uc.connect();
