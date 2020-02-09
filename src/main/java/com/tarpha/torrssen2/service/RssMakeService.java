@@ -259,6 +259,7 @@ public class RssMakeService {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
                 uc = (HttpsURLConnection)url.openConnection(proxy);
                 uc.setConnectTimeout(TIMEOUT_VALUE);
+                uc.setReadTimeout(TIMEOUT_VALUE);
                 uc.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.13) Gecko/20150702 Firefox/3.6.13 (.NET CLR 3.5.30729)");
 
                 uc.connect();
