@@ -50,20 +50,20 @@ public class RssMakeService {
     @Value("${internal-rss1.board-query}")
     private String boardQuery1;
 
-    @Value("${internal-rss2.base-url}")
-    private String baseUrl2;
+    // @Value("${internal-rss2.base-url}")
+    // private String baseUrl2;
 
-    @Value("${internal-rss2.page-html}")
-    private String pageHtml2;
+    // @Value("${internal-rss2.page-html}")
+    // private String pageHtml2;
 
-    @Value("${internal-rss2.max-page}")
-    private int maxPage2;
+    // @Value("${internal-rss2.max-page}")
+    // private int maxPage2;
 
-    @Value("${internal-rss1.tv-boards}")
-    private String[] tvBoards1;
+    // @Value("${internal-rss1.tv-boards}")
+    // private String[] tvBoards1;
 
-    @Value("${internal-rss2.tv-boards}")
-    private String[] tvBoards2;
+    // @Value("${internal-rss2.tv-boards}")
+    // private String[] tvBoards2;
 
     // @Value("${internal-rss.other-boards}")
     // private String[] otherBoards;
@@ -86,7 +86,7 @@ public class RssMakeService {
         // for(BoardVO board: boardList) {
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
             rssFeedList.addAll(makeRss1(rss));
-            rssFeedList.addAll(makeRss2(rss));
+            // rssFeedList.addAll(makeRss2(rss));
         }
 
         return rssFeedList;
@@ -98,96 +98,81 @@ public class RssMakeService {
         List<RssFeed> rssFeedList = new ArrayList<>();
 
         for(int page = 1; page <= maxPage1; page++ ) {
-
-            // try {
-                // String url = baseUrl + "?" + boardQuery + "=" + board.getName() + "&" + pageQuery + "=" + page;
-                String url = baseUrl1 + "?" + boardQuery1 + "=" + rss.getUrl() + "&" + pageQuery1 + "=" + page;
-                // log.debug(url);
-                Document doc = getDoc(url);
-                Elements els = null;
+            String url = baseUrl1 + "?" + boardQuery1 + "=" + rss.getUrl() + "&" + pageQuery1 + "=" + page;
+            Document doc = getDoc(url);
+            Elements els = null;
+            
+            try {
+                els = doc.select(".board-list-body table tr td .td-subject");
                 
-                try {
-                    els = doc.select(".board-list-body table tr td .td-subject");
-                    
-                    for(int i = els.size() -1; i >= 0; i--) {
-                        try {
-                            Element item = els.get(i).select("a").last();
-                            String title = item.text();
-                            String magnet = getMagnetString1(item.absUrl("href"));
-                            log.debug(title + "|" + magnet);
+                for(int i = els.size() -1; i >= 0; i--) {
+                    try {
+                        Element item = els.get(i).select("a").last();
+                        String title = item.text();
+                        String magnet = getMagnetString1(item.absUrl("href"));
+                        log.debug(title + "|" + magnet);
 
-                            rssFeedList.add(makeFeed(title, magnet, rss));
-                        } catch (Exception e) {
-                            log.error(els.get(i).select("a").last().text() + "/" + e.toString());
-                        }
+                        rssFeedList.add(makeFeed(title, magnet, rss));
+                    } catch (Exception e) {
+                        log.error(els.get(i).select("a").last().text() + "/" + e.toString());
                     }
-
-                } catch (NullPointerException e) {
-                    log.error(baseUrl1 + " / " + e.toString());
                 }
 
-            // } catch(Exception e) {
-            //     log.error(e.toString());
-            // }
+            } catch (NullPointerException e) {
+                log.error(baseUrl1 + " / " + e.toString());
+            }
         }
 
         return rssFeedList;
     }
 
-    private List<RssFeed> makeRss2(RssList rss) {
-        log.info("Load RSS Site2 : " + rss.getName());
+    // private List<RssFeed> makeRss2(RssList rss) {
+    //     log.info("Load RSS Site2 : " + rss.getName());
 
-        List<RssFeed> rssFeedList = new ArrayList<>();
+    //     List<RssFeed> rssFeedList = new ArrayList<>();
 
-        for(int page = 1; page <= maxPage2; page++ ) {
+    //     for(int page = 1; page <= maxPage2; page++ ) {
+    //         String targetBoard = null;
 
-            // try {
-                String targetBoard = null;
+    //         for(int i = 0; i < tvBoards1.length; i++) {
+    //             if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {
+    //                 targetBoard = tvBoards2[i];
+    //             }
+    //         }
 
-                for(int i = 0; i < tvBoards1.length; i++) {
-                    if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {
-                        targetBoard = tvBoards2[i];
-                    }
-                }
+    //         if(StringUtils.isBlank(targetBoard)) {
+    //             return rssFeedList;
+    //         }
 
-                if(StringUtils.isBlank(targetBoard)) {
-                    return rssFeedList;
-                }
+    //         String url = baseUrl2 + "/" + targetBoard + "/" + pageHtml2 + page + ".htm";
+    //         Document doc = getDoc(url);
+    //         Elements els = null;
+            
+    //         try {
+    //             els = doc.select("#main_body tr td.subject");
 
-                String url = baseUrl2 + "/" + targetBoard + "/" + pageHtml2 + page + ".htm";
-                // log.debug(url);
-                Document doc = getDoc(url);
-                Elements els = null;
-                
-                try {
-                    els = doc.select("#main_body tr td.subject");
+    //             for(int i = els.size() -1; i >= 0; i--) {
+    //                 try{
+    //                     Element item = els.get(i).select("a").last();
+    //                     log.debug(item.text() + ":" + item.attr("href"));
+    //                     String title = item.text();
+    //                     log.debug(baseUrl2 + item.attr("href").substring(2));
+    //                     String magnet = getMagnetString2(baseUrl2 + item.attr("href").substring(2));
+    //                     log.debug(title + "|" + magnet);
 
-                    for(int i = els.size() -1; i >= 0; i--) {
-                        try{
-                            Element item = els.get(i).select("a").last();
-                            log.debug(item.text() + ":" + item.attr("href"));
-                            String title = item.text();
-                            log.debug(baseUrl2 + item.attr("href").substring(2));
-                            String magnet = getMagnetString2(baseUrl2 + item.attr("href").substring(2));
-                            log.debug(title + "|" + magnet);
+    //                     rssFeedList.add(makeFeed(title, magnet, rss));
+    //                 } catch(Exception e) {
+    //                     log.error(els.get(i).select("a").last().text() + "/" + e.toString());
+    //                 }
+    //             }
 
-                            rssFeedList.add(makeFeed(title, magnet, rss));
-                        } catch(Exception e) {
-                            log.error(els.get(i).select("a").last().text() + "/" + e.toString());
-                        }
-                    }
+    //         } catch ( NullPointerException e) {
+    //             log.error(baseUrl2 + " / " + e.toString());
+    //         }
+    //     }
 
-                } catch ( NullPointerException e) {
-                    log.error(baseUrl2 + " / " + e.toString());
-                }
-
-            // } catch(Exception e) {
-            //     log.error(e.toString());
-            // }
-        }
-
-        return rssFeedList;
-    }
+    //     return rssFeedList;
+    // }
 
     private RssFeed makeFeed(String title, String magnet, RssList rss) {
         RssFeed rssFeed = new RssFeed();
@@ -304,11 +289,11 @@ public class RssMakeService {
         }
     }
 
-    private String getMagnetString2(String urlString) throws Exception {
-        Document doc = getDoc(urlString);
-        Element el = doc.selectFirst("div + b + a");
+    // private String getMagnetString2(String urlString) throws Exception {
+    //     Document doc = getDoc(urlString);
+    //     Element el = doc.selectFirst("div + b + a");
 
-        return el.attr("href");
-    }
+    //     return el.attr("href");
+    // }
     
 }

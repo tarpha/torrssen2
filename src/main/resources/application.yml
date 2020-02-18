@@ -40,12 +40,12 @@ internal-rss1:
         torrent_movie,
         torrent_kmovie
 
-internal-rss2:
-    base-url: https://torrentwal.com
-    page-html: torrent
-    max-page: 1
-    tv-boards: >
-        torrent_tv,
-        torrent_variety,
-        torrent_docu
+# internal-rss2:
+#     base-url: https://torrentwal.com
+#     page-html: torrent
+#     max-page: 1
+#     tv-boards: >
+#         torrent_tv,
+#         torrent_variety,
+#         torrent_docu
 
