@@ -17,7 +17,7 @@
           <v-icon v-if="item.watch" size="1.2em" color="yellow darken-3">star</v-icon>
           <v-icon v-if="item.downloaded || stomp.done" size="1.2em" color="red darken-3">done</v-icon>
           <v-icon v-if="item.link && !item.link.startsWith('magnet')" size="1.2em">attachment</v-icon>
-          {{ item.rssTitle }}
+          {{ item.tvSeries === false ? item.title : item.rssTitle }}
           <v-icon v-if="item.desc && item.desc.startsWith('http')" size="1.2em" @click="openUrl(item.desc)">scatter_plot</v-icon>
         </v-list-tile-title>
 				<v-list-tile-sub-title

@@ -23,6 +23,7 @@ Torrent RSS Site를 등록/관리하고, 다운로드를 요청/관리하고, �
 
 ## 수정이력
 
+- 0.9.42: tvSeries 여부에 따른 Feed Title rule 변경
 - 0.9.41: 내장 RSS 한 곳 제거
 - 0.9.40: Scheduler hang 현상 조치(시도)
 - 0.9.39: 내장 RSS SSL 오류 수정

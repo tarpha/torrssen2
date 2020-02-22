@@ -7,7 +7,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.tarpha'
-version = '0.9.41'
+version = '0.9.42'
 sourceCompatibility = '1.8'
 
 repositories {
