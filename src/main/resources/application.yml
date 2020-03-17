@@ -28,7 +28,7 @@ daum-movie-tv:
     limit: 10
 
 internal-rss1:
-    base-url: https://torrenthaja12.com/bbs/board.php
+    base-url: https://torrenthaja.com/bbs/board.php
     page-query: page
     max-page: 1
     board-query: bo_table
