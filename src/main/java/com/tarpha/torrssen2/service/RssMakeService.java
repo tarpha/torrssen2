@@ -29,6 +29,8 @@ import com.tarpha.torrssen2.repository.RssListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -50,20 +52,20 @@ public class RssMakeService {
     @Value("${internal-rss1.board-query}")
     private String boardQuery1;
 
-    // @Value("${internal-rss2.base-url}")
-    // private String baseUrl2;
+    @Value("${internal-rss2.base-url}")
+    private String baseUrl2;
 
-    // @Value("${internal-rss2.page-html}")
-    // private String pageHtml2;
+    @Value("${internal-rss2.page-html}")
+    private String pageHtml2;
 
-    // @Value("${internal-rss2.max-page}")
-    // private int maxPage2;
+    @Value("${internal-rss2.max-page}")
+    private int maxPage2;
 
     // @Value("${internal-rss1.tv-boards}")
     // private String[] tvBoards1;
 
-    // @Value("${internal-rss2.tv-boards}")
-    // private String[] tvBoards2;
+    @Value("${internal-rss2.tv-boards}")
+    private String[] tvBoards2;
 
     // @Value("${internal-rss.other-boards}")
     // private String[] otherBoards;
@@ -82,11 +84,9 @@ public class RssMakeService {
     public List<RssFeed> makeRss() {
         List<RssFeed> rssFeedList = new ArrayList<>();
 
-        // Document doc = getDoc("https://torrenthaja12.com/bbs/board.php?bo_table=torrent_drama");
-        // for(BoardVO board: boardList) {
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
             rssFeedList.addAll(makeRss1(rss));
-            // rssFeedList.addAll(makeRss2(rss));
+            rssFeedList.addAll(makeRss2(rss));
         }
 
         return rssFeedList;
@@ -126,53 +126,58 @@ public class RssMakeService {
         return rssFeedList;
     }
 
-    // private List<RssFeed> makeRss2(RssList rss) {
-    //     log.info("Load RSS Site2 : " + rss.getName());
+    private List<RssFeed> makeRss2(RssList rss) {
+        log.info("Load RSS Site2 : " + rss.getName());
 
-    //     List<RssFeed> rssFeedList = new ArrayList<>();
+        List<RssFeed> rssFeedList = new ArrayList<>();
 
-    //     for(int page = 1; page <= maxPage2; page++ ) {
-    //         String targetBoard = null;
+        for(int page = 1; page <= maxPage2; page++ ) {
+            String targetBoard = null;
 
-    //         for(int i = 0; i < tvBoards1.length; i++) {
-    //             if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {
-    //                 targetBoard = tvBoards2[i];
-    //             }
-    //         }
+            for(int i = 0; i < tvBoards2.length; i++) {
+                if(StringUtils.equals(tvBoards2[i], rss.getUrl())) {
+                    targetBoard = tvBoards2[i];
+                }
+            }
 
-    //         if(StringUtils.isBlank(targetBoard)) {
-    //             return rssFeedList;
-    //         }
+            if(StringUtils.isBlank(targetBoard)) {
+                return rssFeedList;
+            }
 
-    //         String url = baseUrl2 + "/" + targetBoard + "/" + pageHtml2 + page + ".htm";
-    //         Document doc = getDoc(url);
-    //         Elements els = null;
+            String url = baseUrl2 + "/" + targetBoard + "/list?p&" + pageHtml2 + "=" + page;
+            log.info(url);
+            Document doc = getDoc(url);
+
+            Elements els = null;
             
-    //         try {
-    //             els = doc.select("#main_body tr td.subject");
+            try {
+                els = doc.select("script");
 
-    //             for(int i = els.size() -1; i >= 0; i--) {
-    //                 try{
-    //                     Element item = els.get(i).select("a").last();
-    //                     log.debug(item.text() + ":" + item.attr("href"));
-    //                     String title = item.text();
-    //                     log.debug(baseUrl2 + item.attr("href").substring(2));
-    //                     String magnet = getMagnetString2(baseUrl2 + item.attr("href").substring(2));
-    //                     log.debug(title + "|" + magnet);
+                for(int i = els.size() -1; i >= 0; i--) {
+                    Pattern pattern = Pattern.compile(".*pageItems\\s*=\\s*(\\[.*\\]).*", Pattern.CASE_INSENSITIVE);
+                    Matcher matcher = pattern.matcher(els.get(i).toString());
 
-    //                     rssFeedList.add(makeFeed(title, magnet, rss));
-    //                 } catch(Exception e) {
-    //                     log.error(els.get(i).select("a").last().text() + "/" + e.toString());
-    //                 }
-    //             }
+                    if (matcher.matches()) {
+                        JSONArray jsonArray = new JSONArray(matcher.group(1));
 
-    //         } catch ( NullPointerException e) {
-    //             log.error(baseUrl2 + " / " + e.toString());
-    //         }
-    //     }
+                       for(int j = 0; j < jsonArray.length(); j++) {
+                           JSONObject jsonObj = jsonArray.getJSONObject(j);
+                           String title = jsonObj.getString("fn");
+                           String magnet = "magnet:?xt=urn:btih:" + jsonObj.getString("hs");
 
-    //     return rssFeedList;
-    // }
+                           rssFeedList.add(makeFeed(title, magnet, rss));
+                       }
+
+                    }
+                }
+
+            } catch ( NullPointerException e) {
+                log.error(baseUrl2 + " / " + e.toString());
+            }
+        }
+
+        return rssFeedList;
+    }
 
     private RssFeed makeFeed(String title, String magnet, RssList rss) {
         RssFeed rssFeed = new RssFeed();

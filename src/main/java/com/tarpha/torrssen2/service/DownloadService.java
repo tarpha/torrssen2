@@ -40,9 +40,6 @@ public class DownloadService {
     @Autowired
     private HttpDownloadService httpDownloadService;
 
-    @Autowired
-    private BtService btService;
-
     public DownloadList getInfo(long id) {
         String app = settingService.getDownloadApp();
         if(StringUtils.equals(app, "DOWNLOAD_STATION")) {
@@ -59,9 +56,6 @@ public class DownloadService {
             } else {
                 return httpDownloadService.getInfo(id);
             }
-        } else if(StringUtils.equals(app, "EMBEDDED")) {
-            btService.check();
-            return btService.getInfo(id);
         }
 
         return null;
@@ -76,9 +70,6 @@ public class DownloadService {
             ret = downloadStationService.list();
         } else if (StringUtils.equals(app, "TRANSMISSION")) {
             ret = transmissionService.torrentGet(null);
-        } else if(StringUtils.equals(app, "EMBEDDED")) {
-            btService.check();
-            ret = btService.list();
         }
 
         return ret;
@@ -128,8 +119,6 @@ public class DownloadService {
                 httpDownloadService.createTransmission(download);
             }
             
-        } else if(StringUtils.equals(app, "EMBEDDED")) {
-            ret = btService.create(download.getUri(), download.getDownloadPath(), download.getName());
         }
 
         if(ret > 0L) {
@@ -164,8 +153,6 @@ public class DownloadService {
             List<Long> ids = new ArrayList<>();
             ids.add(download.getId());
             res = transmissionService.torrentRemove(ids);
-        } else if(StringUtils.equals(app, "EMBEDDED")) {
-            res = btService.remove(download.getId());
         }
 
         if(res) {

@@ -450,6 +450,21 @@ SELECT 'torrssen(한국영화)' name
 WHERE NOT EXISTS(SELECT * FROM RSS_LIST WHERE name = 'torrssen(한국영화)')
 AND   EXISTS(SELECT * FROM SETTING WHERE key = 'USE_INTERNAL_RSS' AND UPPER(value) = 'TRUE');
 
+INSERT INTO RSS_LIST(name, link_key, show, tv_series, url, use_db, download_all, download_path, internal, create_dt) SELECT * FROM (
+SELECT 'torrssen(국내 TV)' name
+     , 'link' link_key
+     , false show
+     , false tv_series
+     , 'kt' url
+     , false use_db
+     , false download_all
+     , null download_path
+     , true internal
+     , CURRENT_TIMESTAMP create_dt
+) x
+WHERE NOT EXISTS(SELECT * FROM RSS_LIST WHERE name = 'torrssen(국내 TV)')
+AND   EXISTS(SELECT * FROM SETTING WHERE key = 'USE_INTERNAL_RSS' AND UPPER(value) = 'TRUE');
+
 -- INSERT INTO SETTING(key, value, type, required, label, group_label, order_id, create_dt) SELECT * FROM (
 -- SELECT 'CORS_URL' key
 --      , '' value

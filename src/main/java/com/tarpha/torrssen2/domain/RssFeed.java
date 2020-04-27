@@ -46,6 +46,8 @@ public class RssFeed {
 
     private String rssDate;
 
+    private String watchTitle;
+
     private Long downloadId;
 
     private Boolean downloading = false;
@@ -149,6 +151,8 @@ public class RssFeed {
             rssReleaseGroup = "BluRay";
         } else if (StringUtils.containsIgnoreCase(title, "WEBRip")) {
             rssReleaseGroup = "WEBRip";
+        }  else if (StringUtils.containsIgnoreCase(title, "Deresisi")) {
+            rssReleaseGroup = "Deresisi";
         }
 
         this.rssReleaseGroup = rssReleaseGroup;

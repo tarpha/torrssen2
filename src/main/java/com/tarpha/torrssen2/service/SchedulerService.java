@@ -45,9 +45,6 @@ public class SchedulerService {
     private FileStationService fileStationService;
 
     @Autowired
-    private BtService btService;
-
-    @Autowired
     private TelegramService telegramService;
 
     public void runTask() {
@@ -57,8 +54,6 @@ public class SchedulerService {
                 transmissionJob();
             } else if (StringUtils.equals(optionalSetting.get().getValue(), "DOWNLOAD_STATION")) {
                 downloadStationJob();
-            } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
-                btService.check();
             }
         }
     }
@@ -69,9 +64,6 @@ public class SchedulerService {
         if (optionalSetting.isPresent()) {
             if (Boolean.parseBoolean(optionalSetting.get().getValue())) {
                 try {
-                    while (btService.list().size() > 0) {
-                        Thread.sleep(60000);
-                    }
                     File script = new File(File.separator, "kill.sh");
                     boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
                     if (script.isFile()) {
@@ -83,7 +75,7 @@ public class SchedulerService {
                         log.debug("run ps -ef kill");
                         Runtime.getRuntime().exec("ps - ef | grep torrssen2.jar | awk '{print $1}' | xargs kill");
                     }
-                } catch (InterruptedException | IOException e) {
+                } catch (IOException e) {
                     log.error(e.getMessage());
                 }
             }

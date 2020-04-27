@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.2.2.RELEASE'
+	id 'org.springframework.boot' version '2.2.6.RELEASE'
 	id "io.freefair.lombok" version "3.6.4"
 	id 'java'
 }
@@ -7,7 +7,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.tarpha'
-version = '0.9.42'
+version = '0.9.43'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -72,9 +72,9 @@ dependencies {
 
 	implementation "org.asynchttpclient:async-http-client:${asyncHttpClientVersion}"
 
-	implementation "com.github.atomashpolskiy:bt-core:${btVersion}"
-	implementation "com.github.atomashpolskiy:bt-http-tracker-client:${btVersion}"
-	implementation "com.github.atomashpolskiy:bt-dht:${btVersion}"
+	// implementation "com.github.atomashpolskiy:bt-core:${btVersion}"
+	// implementation "com.github.atomashpolskiy:bt-http-tracker-client:${btVersion}"
+	// implementation "com.github.atomashpolskiy:bt-dht:${btVersion}"
 
 	implementation "org.jsoup:jsoup:${jsoupVersion}"
 

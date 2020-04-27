@@ -68,9 +68,6 @@ public class RssLoadService {
     private DownloadStationService downloadStationService;
 
     @Autowired
-    private BtService btService;
-
-    @Autowired
     private DaumMovieTvService daumMovieTvService;
 
     @Autowired
@@ -239,6 +236,8 @@ public class RssLoadService {
             WatchList watchList = optionalWatchList.get();
             log.info("Matched Feed: " + rssFeed.getTitle());
 
+            rssFeed.setWatchTitle(watchList.getTitle());
+
             try {
                 if (watchList.getRssList() != null && watchList.getRssList().size() > 0) {
                     if (!watchList.getRssList().contains(rssFeed.getRssSite())) {
@@ -295,22 +294,26 @@ public class RssLoadService {
 
             if (watchList.getSeries()) {
                 if (StringUtils.contains(watchList.getQuality(), ',')) {
-                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                    // if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getWatchTitle(), rssFeed.getRssSeason(),
                         rssFeed.getRssEpisode(), false, rssFeed.getRssQuality()) > 0) {
                         seenDone = true;
                     }
 
-                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                    // if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getWatchTitle(), rssFeed.getRssSeason(),
                             rssFeed.getRssEpisode(), true, rssFeed.getRssQuality()) > 0 || !watchList.getSubtitle()) {
                         subtitleDone = true;
                     }
                 } else {
-                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                    // if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getWatchTitle(), rssFeed.getRssSeason(),
                         rssFeed.getRssEpisode(), false) > 0) {
                         seenDone = true;
                     }
 
-                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                    // if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getRssTitle(), rssFeed.getRssSeason(),
+                    if (seenListRepository.countByParams(rssFeed.getLink(), rssFeed.getWatchTitle(), rssFeed.getRssSeason(),
                             rssFeed.getRssEpisode(), true) > 0 || !watchList.getSubtitle()) {
                         subtitleDone = true;
                     }
@@ -367,7 +370,8 @@ public class RssLoadService {
 
     private void addToSeenList(RssFeed rssFeed, String path, String rename) {
         SeenList seenList = new SeenList();
-        seenList.setTitle(rssFeed.getRssTitle());
+        // seenList.setTitle(rssFeed.getRssTitle());
+        seenList.setTitle(rssFeed.getWatchTitle());
         seenList.setLink(rssFeed.getLink());
         seenList.setDownloadPath(path);
         seenList.setSeason(rssFeed.getRssSeason());
@@ -493,17 +497,6 @@ public class RssLoadService {
                         addToDownloadList(0L, rssFeed, watchList, path);
                     }
                 }
-            } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
-                Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
-                log.debug("Embeded ID: " + torrentAddedId);
-
-                if (torrentAddedId > 0) {
-                    // Add to Seen
-                    addToSeenList(rssFeed, path, watchList.getRename());
-
-                    // Add to Download List
-                    addToDownloadList((long) torrentAddedId, rssFeed, watchList, path);
-                }
             }
         }
     }
@@ -565,17 +558,6 @@ public class RssLoadService {
                     if (isExist == false) {
                         addToDownloadList(0L, rssFeed, path);
                     }
-                }
-            } else if (StringUtils.equals(optionalSetting.get().getValue(), "EMBEDDED")) {
-                Long torrentAddedId = btService.create(rssFeed.getLink(), path, rssFeed.getTitle());
-                log.debug("Embeded ID: " + torrentAddedId);
-
-                if (torrentAddedId > 0) {
-                    // Add to Seen
-                    // addToSeenList(rssFeed, path);
-
-                    // Add to Download List
-                    addToDownloadList((long) torrentAddedId, rssFeed, path);
                 }
             }
         }
