@@ -454,7 +454,7 @@ INSERT INTO RSS_LIST(name, link_key, show, tv_series, url, use_db, download_all,
 SELECT 'torrssen(국내 TV)' name
      , 'link' link_key
      , false show
-     , false tv_series
+     , true tv_series
      , 'kt' url
      , false use_db
      , false download_all
