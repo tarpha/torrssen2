@@ -1,0 +1,14 @@
+HELP.md
+.git
+.gradle
+.DS_Store
+/build/*
+/bin/*
+logs/*
+/docker/*
+**/node_modules
+nuxt/dist/*
+gradle/wrapper/*
+
+### VS Code ###
+.vscode/*

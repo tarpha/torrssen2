@@ -4,6 +4,7 @@ HELP.md
 /build/
 /bin/
 logs/
+src/main/resources/static/*
 !gradle/wrapper/gradle-wrapper.jar
 
 ### STS ###
