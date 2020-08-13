@@ -3,6 +3,7 @@ RUN mkdir /torrssen2
 COPY . /torrssen2
 WORKDIR /torrssen2/nuxt
 RUN npm install && npm run build -- --spa
+RUN [ ! -d ../src/main/resources/static ] && mkdir -p ../src/main/resources/static
 RUN rm -rf ../src/main/resources/static/*
 RUN cp -R dist/* ../src/main/resources/static
 
