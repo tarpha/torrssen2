@@ -127,6 +127,9 @@ public class DownloadService {
         }
 
         if(download.getAuto()) {
+            if(StringUtils.isBlank(download.getRssTitle())) {
+                return -999L;
+            }
             WatchList watchList = new WatchList();
             watchList.setTitle(download.getRssTitle());
             watchList.setDownloadPath(download.getDownloadPath());
