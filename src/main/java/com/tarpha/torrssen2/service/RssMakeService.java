@@ -6,21 +6,21 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+// import java.io.BufferedReader;
+// import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.URL;
+// import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+// import javax.net.ssl.HttpsURLConnection;
+// import javax.net.ssl.SSLContext;
+// import javax.net.ssl.TrustManager;
+// import javax.net.ssl.X509TrustManager;
 
 import com.tarpha.torrssen2.domain.RssFeed;
 import com.tarpha.torrssen2.domain.RssList;
@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
+import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -70,6 +71,18 @@ public class RssMakeService {
     // @Value("${internal-rss.other-boards}")
     // private String[] otherBoards;
 
+    @Value("${internal-rss3.base-url}")
+    private String baseUrl3;
+
+    @Value("${internal-rss3.page-query}")
+    private String pageQuery3;
+
+    @Value("${internal-rss3.max-page}")
+    private int maxPage3;
+
+    @Value("${internal-rss3.board-query}")
+    private String boardQuery3;
+
     @Autowired
     private SettingRepository settingRepository;
 
@@ -79,7 +92,11 @@ public class RssMakeService {
     @Autowired
     private DaumMovieTvService daumMovieTvService;
 
-    private final int TIMEOUT_VALUE = 30000;
+    private String sessionId;
+
+    // private final int TIMEOUT_VALUE = 30000;
+
+    private final String SESSION_KEY = "PHPSESSID";
 
     public List<RssFeed> makeRss() {
         List<RssFeed> rssFeedList = new ArrayList<>();
@@ -87,6 +104,7 @@ public class RssMakeService {
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
             rssFeedList.addAll(makeRss1(rss));
             rssFeedList.addAll(makeRss2(rss));
+            rssFeedList.addAll(makeRss3(rss));
         }
 
         return rssFeedList;
@@ -94,6 +112,8 @@ public class RssMakeService {
 
     private List<RssFeed> makeRss1(RssList rss) {
         log.info("Load RSS Site1 : " + rss.getName());
+
+        sessionId = null;
         
         List<RssFeed> rssFeedList = new ArrayList<>();
 
@@ -128,6 +148,8 @@ public class RssMakeService {
 
     private List<RssFeed> makeRss2(RssList rss) {
         log.info("Load RSS Site2 : " + rss.getName());
+
+        sessionId = null;
 
         List<RssFeed> rssFeedList = new ArrayList<>();
 
@@ -179,6 +201,47 @@ public class RssMakeService {
         return rssFeedList;
     }
 
+    private List<RssFeed> makeRss3(RssList rss) {
+        log.info("Load RSS Site3 : {}, {}", rss.getName(), maxPage3);
+
+        sessionId = null;
+        
+        List<RssFeed> rssFeedList = new ArrayList<>();
+
+        for(int page = 1; page <= maxPage3; page++ ) {
+            String url = baseUrl3 + "?" + boardQuery3 + "=" + rss.getUrl() + "&" + pageQuery3 + "=" + page;
+
+            log.debug("uri: {}", url);
+
+            Document doc = getDoc(url);
+
+
+            Elements els = null;
+            
+            try {
+                els = doc.select(".row.rankrow.rowdown li");
+                
+                for(int i = els.size() -1; i >= 0; i--) {
+                    try {
+                        Element item = els.get(i).select("a").last();
+                        String title = item.select("span").last().text();
+                        String magnet = getTorrentLink3(item.absUrl("href"));
+                        log.debug(title + "|" + magnet);
+
+                        rssFeedList.add(makeFeed(title, magnet, rss));
+                    } catch (Exception e) {
+                        log.error(els.get(i).select("a").last().text() + "/" + e.toString());
+                    }
+                }
+
+            } catch (NullPointerException e) {
+                log.error(baseUrl1 + " / " + e.toString());
+            }
+        }
+
+        return rssFeedList;
+    }
+
     private RssFeed makeFeed(String title, String magnet, RssList rss) {
         RssFeed rssFeed = new RssFeed();
         rssFeed.setTitle(title);
@@ -214,69 +277,118 @@ public class RssMakeService {
     }
 
     private Document getDoc(String urlString) {
-        URL url;
-        HttpsURLConnection uc = null;
+        // URL url;
+        // HttpsURLConnection uc = null;
 
         try {
-            url = new URL(urlString);
+            // url = new URL(urlString);
 
             Optional<Setting> optionalHost = settingRepository.findByKey("PROXY_HOST");
             Optional<Setting> optionalPort = settingRepository.findByKey("PROXY_PORT");
 
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return null;
-                    }
-                    public void checkClientTrusted(
-                        java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                    public void checkServerTrusted(
-                        java.security.cert.X509Certificate[] certs, String authType) {
-                    }
-                }
-            };
+            // TrustManager[] trustAllCerts = new TrustManager[]{
+            //     new X509TrustManager() {
+            //         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            //             return null;
+            //         }
+            //         public void checkClientTrusted(
+            //             java.security.cert.X509Certificate[] certs, String authType) {
+            //         }
+            //         public void checkServerTrusted(
+            //             java.security.cert.X509Certificate[] certs, String authType) {
+            //         }
+            //     }
+            // };
             
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            // SSLContext sc = SSLContext.getInstance("SSL");
+            // sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            // HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
             if (optionalHost.isPresent() && optionalPort.isPresent()) {
                 log.debug("Use Proxy");
+
                 String proxyHost = optionalHost.get().getValue();
-                int proxyPort = Integer.parseInt(optionalPort.get().getValue());
+                String strPort = optionalPort.get().getValue();
+
+                if(StringUtils.isEmpty(proxyHost) || StringUtils.isEmpty(strPort)) {
+                    log.error("Proxy info is EMPTY {}:{}", proxyHost, strPort);
+
+                    return null;
+                }
+                
+                int proxyPort = Integer.parseInt(strPort);
+
+                // Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+                // uc = (HttpsURLConnection)url.openConnection(proxy);
+                // uc.setConnectTimeout(TIMEOUT_VALUE);
+                // uc.setReadTimeout(TIMEOUT_VALUE);
+                // uc.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.13) Gecko/20150702 Firefox/3.6.13 (.NET CLR 3.5.30729)");
+
+                // uc.connect();
+
+                // sessionId = uc.getHeaderField("Set-Cookie");
+
+                // String line = null;
+                // StringBuffer tmp = new StringBuffer();
+                // BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
+                
+                // while ((line = in.readLine()) != null) {
+                //     tmp.append(line);
+                // }
+
+                // in.close();
+                // uc.disconnect();
+
+                // return Jsoup.parse(String.valueOf(tmp));
+
+                Response res;
 
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-                uc = (HttpsURLConnection)url.openConnection(proxy);
-                uc.setConnectTimeout(TIMEOUT_VALUE);
-                uc.setReadTimeout(TIMEOUT_VALUE);
-                uc.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.2.13) Gecko/20150702 Firefox/3.6.13 (.NET CLR 3.5.30729)");
 
-                uc.connect();
+                if(StringUtils.isNotEmpty(sessionId)) {
+                    res = Jsoup.connect(urlString).cookie(SESSION_KEY, sessionId).proxy(proxy).execute();
 
-                String line = null;
-                StringBuffer tmp = new StringBuffer();
-                BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
-                
-                while ((line = in.readLine()) != null) {
-                    tmp.append(line);
+                    log.debug("set sessionId: {}", sessionId);
+                } else {
+                    res = Jsoup.connect(urlString).proxy(proxy).execute();
+                    sessionId = res.cookie(SESSION_KEY);
+
+                    log.debug("get sessionId: {}", sessionId);
                 }
 
-                in.close();
-                uc.disconnect();
+                log.debug("PHPSESSID: {}", sessionId);
 
-                return Jsoup.parse(String.valueOf(tmp));
+                return res.parse();
             } else {
-                log.debug("No Proxy");
-                return Jsoup.connect(urlString).get();
+                log.debug("No Proxy {}", urlString);
+
+                Response res;
+
+                if(StringUtils.isNotEmpty(sessionId)) {
+                    res = Jsoup.connect(urlString).cookie(SESSION_KEY, sessionId).execute();
+
+                    log.debug("res: {}", res);
+                    log.debug("set sessionId: {}", sessionId);
+                } else {
+                    res = Jsoup.connect(urlString).execute();
+                    sessionId = res.cookie(SESSION_KEY);
+
+                    log.debug("get sessionId: {}", sessionId);
+                }
+
+                log.debug("PHPSESSID: {}", sessionId);
+
+                return res.parse();
             }
         } catch(Exception e) {
+            //log.debug("error: {}", e.);
             log.error(urlString + " / " + e.toString());
+
             return null;
         } finally {
-            if(uc != null) uc.disconnect();
+            // if(uc != null) uc.disconnect();
         }
-        
+
     }
 
     private String getMagnetString1(String urlString) throws Exception {
@@ -292,6 +404,32 @@ public class RssMakeService {
         } else {
             return null;
         }
+    }
+
+    private String getTorrentLink3(String urlString) throws Exception {
+        Document doc = getDoc(urlString);
+
+        Element el = doc.select(".btn.btn-color.btn-xs.view_file_download").get(1);
+
+        String uri = el.attr("href");
+
+        Optional<Setting> optionalHost = settingRepository.findByKey("PROXY_HOST");
+        Optional<Setting> optionalPort = settingRepository.findByKey("PROXY_PORT");
+
+        Response res;
+
+        if (optionalHost.isPresent() && optionalPort.isPresent()) {
+            String proxyHost = optionalHost.get().getValue();
+            int proxyPort = Integer.parseInt(optionalPort.get().getValue());
+
+            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+
+            res = Jsoup.connect(uri).cookie("PHPSESSID", sessionId).proxy(proxy).followRedirects(false).execute();
+        } else {
+            res = Jsoup.connect(uri).cookie("PHPSESSID", sessionId).followRedirects(false).execute();
+        }
+
+        return res.header("location");
     }
 
     // private String getMagnetString2(String urlString) throws Exception {

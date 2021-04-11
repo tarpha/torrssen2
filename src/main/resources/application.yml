@@ -47,3 +47,12 @@ internal-rss2:
     tv-boards: >
         kt
 
+internal-rss3:
+    base-url: https://www.torrentdia2.com/bbs/board.php
+    page-query: page
+    max-page: 1
+    board-query: bo_table
+    tv-boards: >
+        torrent_drama,
+        torrent_ent,
+        torrent_docu

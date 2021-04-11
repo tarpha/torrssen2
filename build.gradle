@@ -7,7 +7,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.tarpha'
-version = '0.9.44'
+version = '0.9.45'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -27,7 +27,7 @@ ext {
 	jsonSmartVersion = '2.3'
 	asyncHttpClientVersion = '2.10.1'
 	btVersion = '1.8'
-	jsoupVersion = '1.12.1'
+	jsoupVersion = '1.13.1'
 }
 
 configurations {
