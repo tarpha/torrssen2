@@ -167,7 +167,7 @@ public class RssMakeService {
             }
 
             String url = baseUrl2 + "/" + targetBoard + "/list?p&" + pageHtml2 + "=" + page;
-            log.info(url);
+            //log.info(url);
             Document doc = getDoc(url);
 
             Elements els = null;
@@ -202,7 +202,7 @@ public class RssMakeService {
     }
 
     private List<RssFeed> makeRss3(RssList rss) {
-        log.info("Load RSS Site3 : {}, {}", rss.getName(), maxPage3);
+        log.info("Load RSS Site3 : {}", rss.getName());
 
         sessionId = null;
         
@@ -211,7 +211,7 @@ public class RssMakeService {
         for(int page = 1; page <= maxPage3; page++ ) {
             String url = baseUrl3 + "?" + boardQuery3 + "=" + rss.getUrl() + "&" + pageQuery3 + "=" + page;
 
-            log.debug("uri: {}", url);
+            //log.info("Load RSS Site3 : {}", url);
 
             Document doc = getDoc(url);
 
@@ -219,12 +219,16 @@ public class RssMakeService {
             Elements els = null;
             
             try {
-                els = doc.select(".row.rankrow.rowdown li");
+                els = doc.select("tbody tr td.list-subject");
                 
                 for(int i = els.size() -1; i >= 0; i--) {
                     try {
+                        if(els.get(i).hasClass("pr_subject")) {
+                            continue;
+                        }
+
                         Element item = els.get(i).select("a").last();
-                        String title = item.select("span").last().text();
+                        String title = item.text() ;
                         String magnet = getTorrentLink3(item.absUrl("href"));
                         log.debug(title + "|" + magnet);
 
