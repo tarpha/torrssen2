@@ -151,8 +151,10 @@ public class RssFeed {
             rssReleaseGroup = "BluRay";
         } else if (StringUtils.containsIgnoreCase(title, "WEBRip")) {
             rssReleaseGroup = "WEBRip";
-        }  else if (StringUtils.containsIgnoreCase(title, "Deresisi")) {
+        } else if (StringUtils.containsIgnoreCase(title, "Deresisi")) {
             rssReleaseGroup = "Deresisi";
+        } else if (StringUtils.containsIgnoreCase(title, "F1RST")) {
+            rssReleaseGroup = "F1RST";
         }
 
         this.rssReleaseGroup = rssReleaseGroup;
