@@ -34,7 +34,7 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
+// import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 @Service
@@ -102,7 +102,7 @@ public class RssMakeService {
         List<RssFeed> rssFeedList = new ArrayList<>();
 
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
-            rssFeedList.addAll(makeRss1(rss));
+            //rssFeedList.addAll(makeRss1(rss));
             rssFeedList.addAll(makeRss2(rss));
             //rssFeedList.addAll(makeRss3(rss));
         }
@@ -110,41 +110,41 @@ public class RssMakeService {
         return rssFeedList;
     }
 
-    private List<RssFeed> makeRss1(RssList rss) {
-        log.info("Load RSS Site1 : " + rss.getName());
+    // private List<RssFeed> makeRss1(RssList rss) {
+    //     log.info("Load RSS Site1 : " + rss.getName());
 
-        sessionId = null;
+    //     sessionId = null;
         
-        List<RssFeed> rssFeedList = new ArrayList<>();
+    //     List<RssFeed> rssFeedList = new ArrayList<>();
 
-        for(int page = 1; page <= maxPage1; page++ ) {
-            String url = baseUrl1 + "?" + boardQuery1 + "=" + rss.getUrl() + "&" + pageQuery1 + "=" + page;
-            Document doc = getDoc(url);
-            Elements els = null;
+    //     for(int page = 1; page <= maxPage1; page++ ) {
+    //         String url = baseUrl1 + "?" + boardQuery1 + "=" + rss.getUrl() + "&" + pageQuery1 + "=" + page;
+    //         Document doc = getDoc(url);
+    //         Elements els = null;
             
-            try {
-                els = doc.select(".board-list-body table tr td .td-subject");
+    //         try {
+    //             els = doc.select(".board-list-body table tr td .td-subject");
                 
-                for(int i = els.size() -1; i >= 0; i--) {
-                    try {
-                        Element item = els.get(i).select("a").last();
-                        String title = item.text();
-                        String magnet = getMagnetString1(item.absUrl("href"));
-                        log.debug(title + "|" + magnet);
+    //             for(int i = els.size() -1; i >= 0; i--) {
+    //                 try {
+    //                     Element item = els.get(i).select("a").last();
+    //                     String title = item.text();
+    //                     String magnet = getMagnetString1(item.absUrl("href"));
+    //                     log.debug(title + "|" + magnet);
 
-                        rssFeedList.add(makeFeed(title, magnet, rss));
-                    } catch (Exception e) {
-                        log.error(els.get(i).select("a").last().text() + "/" + e.toString());
-                    }
-                }
+    //                     rssFeedList.add(makeFeed(title, magnet, rss));
+    //                 } catch (Exception e) {
+    //                     log.error(els.get(i).select("a").last().text() + "/" + e.toString());
+    //                 }
+    //             }
 
-            } catch (NullPointerException e) {
-                log.error(baseUrl1 + " / " + e.toString());
-            }
-        }
+    //         } catch (NullPointerException e) {
+    //             log.error(baseUrl1 + " / " + e.toString());
+    //         }
+    //     }
 
-        return rssFeedList;
-    }
+    //     return rssFeedList;
+    // }
 
     private List<RssFeed> makeRss2(RssList rss) {
         log.info("Load RSS Site2 : " + rss.getName());
@@ -157,7 +157,7 @@ public class RssMakeService {
             String targetBoard = null;
 
             for(int i = 0; i < tvBoards2.length; i++) {
-                if(StringUtils.equals(tvBoards2[i], rss.getUrl())) {
+                if(StringUtils.equals(tvBoards2[i], rss.getUrl())) {                    
                     targetBoard = tvBoards2[i];
                 }
             }
@@ -167,7 +167,6 @@ public class RssMakeService {
             }
 
             String url = baseUrl2 + "/" + targetBoard + "/list?p&" + pageHtml2 + "=" + page;
-            //log.info(url);
             Document doc = getDoc(url);
 
             Elements els = null;
@@ -175,9 +174,11 @@ public class RssMakeService {
             try {
                 els = doc.select("script");
 
+                log.debug(els.toString());
+
                 for(int i = els.size() -1; i >= 0; i--) {
                     Pattern pattern = Pattern.compile(".*pageItems\\s*=\\s*(\\[.*\\]).*", Pattern.CASE_INSENSITIVE);
-                    Matcher matcher = pattern.matcher(els.get(i).toString());
+                    Matcher matcher = pattern.matcher(els.get(i).toString().replace("\n", "").replace("\r", ""));
 
                     if (matcher.matches()) {
                         JSONArray jsonArray = new JSONArray(matcher.group(1));
@@ -201,50 +202,50 @@ public class RssMakeService {
         return rssFeedList;
     }
 
-    private List<RssFeed> makeRss3(RssList rss) {
-        log.info("Load RSS Site3 : {}", rss.getName());
+    // private List<RssFeed> makeRss3(RssList rss) {
+    //     log.info("Load RSS Site3 : {}", rss.getName());
 
-        sessionId = null;
+    //     sessionId = null;
         
-        List<RssFeed> rssFeedList = new ArrayList<>();
+    //     List<RssFeed> rssFeedList = new ArrayList<>();
 
-        for(int page = 1; page <= maxPage3; page++ ) {
-            String url = baseUrl3 + "?" + boardQuery3 + "=" + rss.getUrl() + "&" + pageQuery3 + "=" + page;
+    //     for(int page = 1; page <= maxPage3; page++ ) {
+    //         String url = baseUrl3 + "?" + boardQuery3 + "=" + rss.getUrl() + "&" + pageQuery3 + "=" + page;
 
-            //log.info("Load RSS Site3 : {}", url);
+    //         //log.info("Load RSS Site3 : {}", url);
 
-            Document doc = getDoc(url);
+    //         Document doc = getDoc(url);
 
 
-            Elements els = null;
+    //         Elements els = null;
             
-            try {
-                els = doc.select("tbody tr td.list-subject");
+    //         try {
+    //             els = doc.select("tbody tr td.list-subject");
                 
-                for(int i = els.size() -1; i >= 0; i--) {
-                    try {
-                        if(els.get(i).hasClass("pr_subject")) {
-                            continue;
-                        }
+    //             for(int i = els.size() -1; i >= 0; i--) {
+    //                 try {
+    //                     if(els.get(i).hasClass("pr_subject")) {
+    //                         continue;
+    //                     }
 
-                        Element item = els.get(i).select("a").last();
-                        String title = item.text() ;
-                        String magnet = getTorrentLink3(item.absUrl("href"));
-                        log.debug(title + "|" + magnet);
+    //                     Element item = els.get(i).select("a").last();
+    //                     String title = item.text() ;
+    //                     String magnet = getTorrentLink3(item.absUrl("href"));
+    //                     log.debug(title + "|" + magnet);
 
-                        rssFeedList.add(makeFeed(title, magnet, rss));
-                    } catch (Exception e) {
-                        log.error(els.get(i).select("a").last().text() + "/" + e.toString());
-                    }
-                }
+    //                     rssFeedList.add(makeFeed(title, magnet, rss));
+    //                 } catch (Exception e) {
+    //                     log.error(els.get(i).select("a").last().text() + "/" + e.toString());
+    //                 }
+    //             }
 
-            } catch (NullPointerException e) {
-                log.error(baseUrl1 + " / " + e.toString());
-            }
-        }
+    //         } catch (NullPointerException e) {
+    //             log.error(baseUrl1 + " / " + e.toString());
+    //         }
+    //     }
 
-        return rssFeedList;
-    }
+    //     return rssFeedList;
+    // }
 
     private RssFeed makeFeed(String title, String magnet, RssList rss) {
         RssFeed rssFeed = new RssFeed();
@@ -395,46 +396,46 @@ public class RssMakeService {
 
     }
 
-    private String getMagnetString1(String urlString) throws Exception {
-        Document doc = getDoc(urlString);
+    // private String getMagnetString1(String urlString) throws Exception {
+    //     Document doc = getDoc(urlString);
 
-        Element el = doc.selectFirst(".btn.btn-success.btn-xs");
+    //     Element el = doc.selectFirst(".btn.btn-success.btn-xs");
 
-        Pattern pattern = Pattern.compile("magnet_link\\(\\'(.{1,})\\'\\);", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(el.attr("onclick"));
+    //     Pattern pattern = Pattern.compile("magnet_link\\(\\'(.{1,})\\'\\);", Pattern.CASE_INSENSITIVE);
+    //     Matcher matcher = pattern.matcher(el.attr("onclick"));
 
-        if (matcher.matches()) {
-            return "magnet:?xt=urn:btih:" + matcher.group(1);
-        } else {
-            return null;
-        }
-    }
+    //     if (matcher.matches()) {
+    //         return "magnet:?xt=urn:btih:" + matcher.group(1);
+    //     } else {
+    //         return null;
+    //     }
+    // }
 
-    private String getTorrentLink3(String urlString) throws Exception {
-        Document doc = getDoc(urlString);
+    // private String getTorrentLink3(String urlString) throws Exception {
+    //     Document doc = getDoc(urlString);
 
-        Element el = doc.select(".btn.btn-color.btn-xs.view_file_download").get(1);
+    //     Element el = doc.select(".btn.btn-color.btn-xs.view_file_download").get(1);
 
-        String uri = el.attr("href");
+    //     String uri = el.attr("href");
 
-        Optional<Setting> optionalHost = settingRepository.findByKey("PROXY_HOST");
-        Optional<Setting> optionalPort = settingRepository.findByKey("PROXY_PORT");
+    //     Optional<Setting> optionalHost = settingRepository.findByKey("PROXY_HOST");
+    //     Optional<Setting> optionalPort = settingRepository.findByKey("PROXY_PORT");
 
-        Response res;
+    //     Response res;
 
-        if (optionalHost.isPresent() && optionalPort.isPresent()) {
-            String proxyHost = optionalHost.get().getValue();
-            int proxyPort = Integer.parseInt(optionalPort.get().getValue());
+    //     if (optionalHost.isPresent() && optionalPort.isPresent()) {
+    //         String proxyHost = optionalHost.get().getValue();
+    //         int proxyPort = Integer.parseInt(optionalPort.get().getValue());
 
-            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+    //         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
 
-            res = Jsoup.connect(uri).cookie("PHPSESSID", sessionId).proxy(proxy).followRedirects(false).execute();
-        } else {
-            res = Jsoup.connect(uri).cookie("PHPSESSID", sessionId).followRedirects(false).execute();
-        }
+    //         res = Jsoup.connect(uri).cookie("PHPSESSID", sessionId).proxy(proxy).followRedirects(false).execute();
+    //     } else {
+    //         res = Jsoup.connect(uri).cookie("PHPSESSID", sessionId).followRedirects(false).execute();
+    //     }
 
-        return res.header("location");
-    }
+    //     return res.header("location");
+    // }
 
     // private String getMagnetString2(String urlString) throws Exception {
     //     Document doc = getDoc(urlString);
