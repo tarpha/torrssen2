@@ -24,8 +24,8 @@ crypto:
     key: 3t6w9z$C&F)J@NcRfUjWnZr4u7x!A%D*
 
 daum-movie-tv:
-    search-url: https://suggest-bar.daum.net/suggest
-    limit: 10
+    search-url: https://search.daum.net/search?w=tot&rtmaxcoll=TVP&q=%s
+    # limit: 10
 
 internal-rss1:
     base-url: https://torrenthaja.com/bbs/board.php
