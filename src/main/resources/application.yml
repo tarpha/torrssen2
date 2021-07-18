@@ -60,6 +60,6 @@ internal-rss3:
 internal-rss4:
     base_url: https://torrentqq97.com/torrent
     page-html: page
-    max-page: 2
+    max-page: 1
     tv-boards: >
         med.html
