@@ -56,3 +56,10 @@ internal-rss3:
         torrent_drama,
         torrent_ent,
         torrent_docu
+
+internal-rss4:
+    base_url: https://torrentqq97.com/torrent
+    page-html: page
+    max-page: 2
+    tv-boards: >
+        med.html
