@@ -41,7 +41,7 @@ internal-rss1:
         torrent_kmovie
 
 internal-rss2:
-    base-url: https://4.torrentube.net
+    base-url: https://15.torrentube.net
     page-html: page
     max-page: 1
     tv-boards: >
