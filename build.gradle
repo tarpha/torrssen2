@@ -7,7 +7,7 @@ plugins {
 apply plugin: 'io.spring.dependency-management'
 
 group = 'com.tarpha'
-version = '0.9.50'
+version = '0.9.51'
 sourceCompatibility = '1.8'
 
 repositories {
@@ -28,6 +28,7 @@ ext {
 	asyncHttpClientVersion = '2.10.1'
 	btVersion = '1.8'
 	jsoupVersion = '1.13.1'
+	// htmlunitVersion = '2.55.0'
 }
 
 configurations {
@@ -77,6 +78,8 @@ dependencies {
 	// implementation "com.github.atomashpolskiy:bt-dht:${btVersion}"
 
 	implementation "org.jsoup:jsoup:${jsoupVersion}"
+
+	// implementation "net.sourceforge.htmlunit:htmlunit:${htmlunitVersion}"
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 

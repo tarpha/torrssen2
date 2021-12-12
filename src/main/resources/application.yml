@@ -58,8 +58,17 @@ internal-rss3:
         torrent_docu
 
 internal-rss4:
-    base_url: https://torrentqq97.com/torrent
+    base_url: https://torrentqq120.com/torrent
     page-html: page
     max-page: 1
     tv-boards: >
         med.html
+
+internal-rss5:
+    base_url: https://torrentsome14.com
+    page-html: page
+    max-page: 1
+    tv-boards: >
+        v-2-13,
+        v-4-16
+        

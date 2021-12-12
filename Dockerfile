@@ -1,8 +1,11 @@
 FROM node:current-alpine
+ENV NODE_OPTIONS --openssl-legacy-provider
 RUN mkdir /torrssen2
 COPY . /torrssen2
 WORKDIR /torrssen2/nuxt
-RUN npm install && npm run build -- --spa
+#RUN apt install -y yarn
+RUN yarn && yarn build --spa
+#RUN npm install && npm run build -- --spa
 RUN mkdir -p ../src/main/resources/static
 RUN cp -R dist/* ../src/main/resources/static
 
