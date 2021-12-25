@@ -101,17 +101,29 @@ public class RssMakeService {
     // @Value("${internal-rss4.tv-boards}")
     // private String[] tvBoards4;
 
-    @Value("${internal-rss5.base-url}")
-    private String baseUrl5;
+    // @Value("${internal-rss5.base-url}")
+    // private String baseUrl5;
 
-    @Value("${internal-rss5.page-html}")
-    private String pageHtml5;
+    // @Value("${internal-rss5.page-html}")
+    // private String pageHtml5;
 
-    @Value("${internal-rss5.max-page}")
-    private int maxPage5;
+    // @Value("${internal-rss5.max-page}")
+    // private int maxPage5;
 
-    @Value("${internal-rss5.tv-boards}")
-    private String[] tvBoards5;
+    // @Value("${internal-rss5.tv-boards}")
+    // private String[] tvBoards5;
+
+    @Value("${internal-rss6.base-url}")
+    private String baseUrl6;
+
+    @Value("${internal-rss6.page-html}")
+    private String pageHtml6;
+
+    @Value("${internal-rss6.max-page}")
+    private int maxPage6;
+
+    @Value("${internal-rss6.tv-boards}")
+    private String[] tvBoards6;
 
     @Autowired
     private SettingRepository settingRepository;
@@ -126,11 +138,13 @@ public class RssMakeService {
 
     // private WebClient webClient;
 
-    private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36";
+    // private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36";
 
     // private final int TIMEOUT_VALUE = 30000;
 
     private final String SESSION_KEY = "PHPSESSID";
+
+    private final int SLEEP_SECOND = 10;
 
     public List<RssFeed> makeRss() {
         List<RssFeed> rssFeedList = new ArrayList<>();
@@ -140,7 +154,7 @@ public class RssMakeService {
             // rssFeedList.addAll(makeRss2(rss));
             // rssFeedList.addAll(makeRss3(rss));
             // rssFeedList.addAll(makeRss4(rss));
-            rssFeedList.addAll(makeRss5(rss));
+            rssFeedList.addAll(makeRss6(rss));
         }
 
         return rssFeedList;
@@ -368,11 +382,11 @@ public class RssMakeService {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
 
                 if(StringUtils.isNotEmpty(sessionId)) {
-                    res = Jsoup.connect(urlString).cookie(SESSION_KEY, sessionId).proxy(proxy).userAgent(USER_AGENT).execute();
+                    res = Jsoup.connect(urlString).cookie(SESSION_KEY, sessionId).proxy(proxy).execute();
 
                     log.debug("set sessionId: {}", sessionId);
                 } else {
-                    res = Jsoup.connect(urlString).proxy(proxy).userAgent(USER_AGENT).execute();
+                    res = Jsoup.connect(urlString).proxy(proxy).execute();
                     sessionId = res.cookie(SESSION_KEY);
 
                     log.debug("get sessionId: {}", sessionId);
@@ -417,6 +431,7 @@ public class RssMakeService {
         }
 
     }
+   
 
     // private String getMagnetString1(String urlString) throws Exception {
     //     Document doc = getDoc(urlString);
@@ -529,19 +544,80 @@ public class RssMakeService {
     //     return el.attr("href");
     // }
 
-    private List<RssFeed> makeRss5(RssList rss) {
-        log.info("Load RSS Site5 : {}, {} ", rss.getName(), rss.getUrl());
+    // private List<RssFeed> makeRss5(RssList rss) {
+    //     log.info("Load RSS Site5 : {}, {} ", rss.getName(), rss.getUrl());
+
+    //     sessionId = null;
+
+    //     List<RssFeed> rssFeedList = new ArrayList<>();
+
+    //     for(int page = 1; page <= maxPage5; page++ ) {
+    //         String targetBoard = null;
+
+    //         for(int i = 0; i < tvBoards1.length; i++) {
+    //             if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
+    //                 targetBoard = tvBoards5[i];
+    //             }
+    //         }
+
+    //         if(StringUtils.isBlank(targetBoard)) {
+    //             return rssFeedList;
+    //         }
+
+    //         String url = baseUrl5 + "/" + targetBoard + "?&" + pageHtml5 + "=" + page;
+    //         Document doc = getDoc(url);
+
+    //         Elements els = null;
+
+    //         try {
+    //             //<div class="flex-auto px-2 truncate">
+    //             els = doc.select("div.flex-auto.px-2.truncate");
+
+    //             log.debug(els.toString());
+
+    //             for(int i = els.size() -1; i >= 0; i--) {
+    //                 Element item = els.get(i).select("a").get(0);
+    //                 String title = item.attr("title");
+    //                 String magnet = getTorrentLink5(item.absUrl("href"));
+
+    //                 log.debug("rss5: {}, {}", new Object[]{title, magnet});
+
+    //                 rssFeedList.add(makeFeed(title, magnet, rss));
+    //             }
+
+    //         } catch ( Exception e) {
+    //             log.error(baseUrl5+ " / " + e.toString());
+    //         }
+    //     }
+
+    //     return rssFeedList;
+    // }
+
+    // private String getTorrentLink5(String urlString) throws Exception {
+    //     Document doc = getDoc(urlString);
+
+    //     // <div class="border-b">
+    //     // <div class="p-2 border-b border-dashed"><span class="font-semibold">Info Hash:</span> ab9f75470bd1a51e7e89ffe8b163b81975fd3d7d</div>
+    //     Element el = doc.select("div.border-b div.p-2.border-b.border-dashed").first();
+
+    //     log.debug(el.toString());
+
+    //     return "magnet:?xt=urn:btih:" + el.text().replace("Info Hash:", "").trim();
+    // }
+
+    private List<RssFeed> makeRss6(RssList rss) {
+        log.info("Load RSS Site6 : {}, {} ", rss.getName(), rss.getUrl());
 
         sessionId = null;
 
         List<RssFeed> rssFeedList = new ArrayList<>();
 
-        for(int page = 1; page <= maxPage5; page++ ) {
+        for(int page = 1; page <= maxPage6; page++ ) {
             String targetBoard = null;
 
             for(int i = 0; i < tvBoards1.length; i++) {
                 if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
-                    targetBoard = tvBoards5[i];
+                    targetBoard = tvBoards6[i];
                 }
             }
 
@@ -549,45 +625,45 @@ public class RssMakeService {
                 return rssFeedList;
             }
 
-            String url = baseUrl5 + "/" + targetBoard + "?&" + pageHtml5 + "=" + page;
+            String url = baseUrl6 + "/" + targetBoard + "?" + pageHtml6 + "=" + page;
             Document doc = getDoc(url);
 
             Elements els = null;
 
             try {
-                //<div class="flex-auto px-2 truncate">
-                els = doc.select("div.flex-auto.px-2.truncate");
+                //<dd class="list_cut" style="padding-top:18px;">
+                els = doc.select("dd.list_cut");
 
                 log.debug(els.toString());
 
                 for(int i = els.size() -1; i >= 0; i--) {
                     Element item = els.get(i).select("a").get(0);
-                    String title = item.attr("title");
-                    String magnet = getTorrentLink5(item.absUrl("href"));
+                    String title = item.text();
+                    String magnet = getTorrentLink6(item.absUrl("href"));
 
-                    log.debug("rss5: {}, {}", new Object[]{title, magnet});
+                    log.debug("rss6: {}, {}", new Object[]{title, magnet});
 
                     rssFeedList.add(makeFeed(title, magnet, rss));
+
+                    Thread.sleep(SLEEP_SECOND * 1000);
                 }
 
             } catch ( Exception e) {
-                log.error(baseUrl5+ " / " + e.toString());
+                log.error(baseUrl6+ " / " + e.toString());
             }
         }
 
         return rssFeedList;
     }
 
-    private String getTorrentLink5(String urlString) throws Exception {
+    private String getTorrentLink6(String urlString) throws Exception {
         Document doc = getDoc(urlString);
 
-        // <div class="border-b">
-        // <div class="p-2 border-b border-dashed"><span class="font-semibold">Info Hash:</span> ab9f75470bd1a51e7e89ffe8b163b81975fd3d7d</div>
-        Element el = doc.select("div.border-b div.p-2.border-b.border-dashed").first();
+        Element el = doc.select("section table a[href]").first();
 
-        log.debug(el.toString());
+        log.debug("getTorrentLink6 {} {}", urlString, el.toString());
 
-        return "magnet:?xt=urn:btih:" + el.text().replace("Info Hash:", "").trim();
+        return el.attr("href");
     }
     
 }

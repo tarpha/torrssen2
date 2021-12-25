@@ -22,6 +22,7 @@ Torrent RSS Site를 등록/관리하고, 다운로드를 요청/관리하고, �
 
 ## 수정이력
 
+- 0.9.52: minor update
 - 0.9.51: 내장 RSS 한 곳 추가
 - 0.9.50: minor update
 - 0.9.49: 내장 RSS 한 곳 추가

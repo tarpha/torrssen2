@@ -40,35 +40,11 @@ internal-rss1:
         torrent_movie,
         torrent_kmovie
 
-internal-rss2:
-    base-url: https://15.torrentube.net
+internal-rss6:
+    base_url: https://www.torrentnori12.com/
     page-html: page
     max-page: 1
     tv-boards: >
-        kt
-
-internal-rss3:
-    base-url: https://www.torrentdia2.com/bbs/board.php
-    page-query: page
-    max-page: 1
-    board-query: bo_table
-    tv-boards: >
-        torrent_drama,
-        torrent_ent,
-        torrent_docu
-
-internal-rss4:
-    base_url: https://torrentqq120.com/torrent
-    page-html: page
-    max-page: 1
-    tv-boards: >
-        med.html
-
-internal-rss5:
-    base_url: https://torrentsome14.com
-    page-html: page
-    max-page: 1
-    tv-boards: >
-        v-2-13,
-        v-4-16
+        tdrama,
+        tent
         
