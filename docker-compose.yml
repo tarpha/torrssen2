@@ -1,0 +1,20 @@
+version: "3.3"
+services:
+  torrssen2:
+    image: tarpha/torrssen2:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /docker/torrssen:/root/data
+    links:
+      - php
+      - tunnel
+  php:
+    image: php:7.2-apache
+    restart: unless-stopped
+    volumes:
+     - /docker/php:/var/www/html
+  tunnel:
+    image: sadeghhayeri/green-tunnel:latest
+    restart: unless-stopped
