@@ -41,7 +41,7 @@ internal-rss1:
         torrent_kmovie
 
 internal-rss6:
-    base_url: https://www.torrentnori12.com/
+    base_url: https://www.torrentnori13.com/
     page-html: page
     max-page: 1
     tv-boards: >
