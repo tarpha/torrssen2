@@ -41,10 +41,10 @@ internal-rss1:
         torrent_kmovie
 
 internal-rss6:
-    base_url: https://www.torrentnori13.com/
-    page-html: page
+    base_url: https://torrentmax2.net/max
+    page-html: p
     max-page: 1
     tv-boards: >
-        tdrama,
-        tent
+        DRAMA,
+        VARIETY
         

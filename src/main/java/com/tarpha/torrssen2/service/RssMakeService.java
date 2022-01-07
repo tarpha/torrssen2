@@ -544,67 +544,6 @@ public class RssMakeService {
     //     return el.attr("href");
     // }
 
-    // private List<RssFeed> makeRss5(RssList rss) {
-    //     log.info("Load RSS Site5 : {}, {} ", rss.getName(), rss.getUrl());
-
-    //     sessionId = null;
-
-    //     List<RssFeed> rssFeedList = new ArrayList<>();
-
-    //     for(int page = 1; page <= maxPage5; page++ ) {
-    //         String targetBoard = null;
-
-    //         for(int i = 0; i < tvBoards1.length; i++) {
-    //             if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
-    //                 targetBoard = tvBoards5[i];
-    //             }
-    //         }
-
-    //         if(StringUtils.isBlank(targetBoard)) {
-    //             return rssFeedList;
-    //         }
-
-    //         String url = baseUrl5 + "/" + targetBoard + "?&" + pageHtml5 + "=" + page;
-    //         Document doc = getDoc(url);
-
-    //         Elements els = null;
-
-    //         try {
-    //             //<div class="flex-auto px-2 truncate">
-    //             els = doc.select("div.flex-auto.px-2.truncate");
-
-    //             log.debug(els.toString());
-
-    //             for(int i = els.size() -1; i >= 0; i--) {
-    //                 Element item = els.get(i).select("a").get(0);
-    //                 String title = item.attr("title");
-    //                 String magnet = getTorrentLink5(item.absUrl("href"));
-
-    //                 log.debug("rss5: {}, {}", new Object[]{title, magnet});
-
-    //                 rssFeedList.add(makeFeed(title, magnet, rss));
-    //             }
-
-    //         } catch ( Exception e) {
-    //             log.error(baseUrl5+ " / " + e.toString());
-    //         }
-    //     }
-
-    //     return rssFeedList;
-    // }
-
-    // private String getTorrentLink5(String urlString) throws Exception {
-    //     Document doc = getDoc(urlString);
-
-    //     // <div class="border-b">
-    //     // <div class="p-2 border-b border-dashed"><span class="font-semibold">Info Hash:</span> ab9f75470bd1a51e7e89ffe8b163b81975fd3d7d</div>
-    //     Element el = doc.select("div.border-b div.p-2.border-b.border-dashed").first();
-
-    //     log.debug(el.toString());
-
-    //     return "magnet:?xt=urn:btih:" + el.text().replace("Info Hash:", "").trim();
-    // }
-
     private List<RssFeed> makeRss6(RssList rss) {
         log.info("Load RSS Site6 : {}, {} ", rss.getName(), rss.getUrl());
 
@@ -625,20 +564,22 @@ public class RssMakeService {
                 return rssFeedList;
             }
 
-            String url = baseUrl6 + "/" + targetBoard + "?" + pageHtml6 + "=" + page;
+            String url = baseUrl6 + "/" + targetBoard + "/" + pageHtml6 + page;
             Document doc = getDoc(url);
 
             Elements els = null;
 
             try {
-                //<dd class="list_cut" style="padding-top:18px;">
-                els = doc.select("dd.list_cut");
+                els = doc.select("div.wr-subject");
 
                 log.debug(els.toString());
 
                 for(int i = els.size() -1; i >= 0; i--) {
                     Element item = els.get(i).select("a").get(0);
                     String title = item.text();
+
+                    log.debug(item.absUrl("href"));
+
                     String magnet = getTorrentLink6(item.absUrl("href"));
 
                     log.debug("rss6: {}, {}", new Object[]{title, magnet});
@@ -659,7 +600,8 @@ public class RssMakeService {
     private String getTorrentLink6(String urlString) throws Exception {
         Document doc = getDoc(urlString);
 
-        Element el = doc.select("section table a[href]").first();
+        // <li class="list-group-item en font-14 break-word">
+        Element el = doc.select("li.list-group-item a[href]").first();
 
         log.debug("getTorrentLink6 {} {}", urlString, el.toString());
 
