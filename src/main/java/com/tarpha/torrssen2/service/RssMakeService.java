@@ -6,26 +6,11 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-// import java.io.BufferedReader;
-// import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-// import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-// import java.util.regex.Matcher;
-// import java.util.regex.Pattern;
-
-// import com.gargoylesoftware.htmlunit.BrowserVersion;
-// import com.gargoylesoftware.htmlunit.ProxyConfig;
-// import com.gargoylesoftware.htmlunit.WebClient;
-// import com.gargoylesoftware.htmlunit.html.HtmlPage;
-
-// import javax.net.ssl.HttpsURLConnection;
-// import javax.net.ssl.SSLContext;
-// import javax.net.ssl.TrustManager;
-// import javax.net.ssl.X509TrustManager;
 
 import com.tarpha.torrssen2.domain.RssFeed;
 import com.tarpha.torrssen2.domain.RssList;
@@ -34,84 +19,18 @@ import com.tarpha.torrssen2.repository.RssListRepository;
 import com.tarpha.torrssen2.repository.SettingRepository;
 
 import org.apache.commons.lang3.StringUtils;
-// import org.json.JSONArray;
-// import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-// import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 @Service
 @Slf4j
 public class RssMakeService {
 
-    // @Value("${internal-rss1.base-url}")
-    // private String baseUrl1;
-
-    // @Value("${internal-rss1.page-query}")
-    // private String pageQuery1;
-
-    // @Value("${internal-rss1.max-page}")
-    // private int maxPage1;
-
-    // @Value("${internal-rss1.board-query}")
-    // private String boardQuery1;
-
-    // @Value("${internal-rss2.base-url}")
-    // private String baseUrl2;
-
-    // @Value("${internal-rss2.page-html}")
-    // private String pageHtml2;
-
-    // @Value("${internal-rss2.max-page}")
-    // private int maxPage2;
-
     @Value("${internal-rss1.tv-boards}")
     private String[] tvBoards1;
-
-    // @Value("${internal-rss2.tv-boards}")
-    // private String[] tvBoards2;
-
-    // @Value("${internal-rss.other-boards}")
-    // private String[] otherBoards;
-
-    // @Value("${internal-rss3.base-url}")
-    // private String baseUrl3;
-
-    // @Value("${internal-rss3.page-query}")
-    // private String pageQuery3;
-
-    // @Value("${internal-rss3.max-page}")
-    // private int maxPage3;
-
-    // @Value("${internal-rss3.board-query}")
-    // private String boardQuery3;
-
-    // @Value("${internal-rss4.base-url}")
-    // private String baseUrl4;
-
-    // @Value("${internal-rss4.page-html}")
-    // private String pageHtml4;
-
-    // @Value("${internal-rss4.max-page}")
-    // private int maxPage4;
-
-    // @Value("${internal-rss4.tv-boards}")
-    // private String[] tvBoards4;
-
-    // @Value("${internal-rss5.base-url}")
-    // private String baseUrl5;
-
-    // @Value("${internal-rss5.page-html}")
-    // private String pageHtml5;
-
-    // @Value("${internal-rss5.max-page}")
-    // private int maxPage5;
-
-    // @Value("${internal-rss5.tv-boards}")
-    // private String[] tvBoards5;
 
     @Value("${internal-rss6.base-url}")
     private String baseUrl6;
@@ -124,6 +43,18 @@ public class RssMakeService {
 
     @Value("${internal-rss6.tv-boards}")
     private String[] tvBoards6;
+
+    @Value("${internal-rss7.base-url}")
+    private String baseUrl7;
+
+    @Value("${internal-rss7.page-html}")
+    private String pageHtml7;
+
+    @Value("${internal-rss7.max-page}")
+    private int maxPage7;
+
+    @Value("${internal-rss7.tv-boards}")
+    private String[] tvBoards7;
 
     @Autowired
     private SettingRepository settingRepository;
@@ -155,147 +86,11 @@ public class RssMakeService {
             // rssFeedList.addAll(makeRss3(rss));
             // rssFeedList.addAll(makeRss4(rss));
             rssFeedList.addAll(makeRss6(rss));
+            rssFeedList.addAll(makeRss7(rss));
         }
 
         return rssFeedList;
     }
-
-    // private List<RssFeed> makeRss1(RssList rss) {
-    //     log.info("Load RSS Site1 : " + rss.getName());
-
-    //     sessionId = null;
-        
-    //     List<RssFeed> rssFeedList = new ArrayList<>();
-
-    //     for(int page = 1; page <= maxPage1; page++ ) {
-    //         String url = baseUrl1 + "?" + boardQuery1 + "=" + rss.getUrl() + "&" + pageQuery1 + "=" + page;
-    //         Document doc = getDoc(url);
-    //         Elements els = null;
-            
-    //         try {
-    //             els = doc.select(".board-list-body table tr td .td-subject");
-                
-    //             for(int i = els.size() -1; i >= 0; i--) {
-    //                 try {
-    //                     Element item = els.get(i).select("a").last();
-    //                     String title = item.text();
-    //                     String magnet = getMagnetString1(item.absUrl("href"));
-    //                     log.debug(title + "|" + magnet);
-
-    //                     rssFeedList.add(makeFeed(title, magnet, rss));
-    //                 } catch (Exception e) {
-    //                     log.error(els.get(i).select("a").last().text() + "/" + e.toString());
-    //                 }
-    //             }
-
-    //         } catch (NullPointerException e) {
-    //             log.error(baseUrl1 + " / " + e.toString());
-    //         }
-    //     }
-
-    //     return rssFeedList;
-    // }
-
-    // private List<RssFeed> makeRss2(RssList rss) {
-    //     log.info("Load RSS Site2 : " + rss.getName());
-
-    //     sessionId = null;
-
-    //     List<RssFeed> rssFeedList = new ArrayList<>();
-
-    //     for(int page = 1; page <= maxPage2; page++ ) {
-    //         String targetBoard = null;
-
-    //         for(int i = 0; i < tvBoards2.length; i++) {
-    //             if(StringUtils.equals(tvBoards2[i], rss.getUrl())) {                    
-    //                 targetBoard = tvBoards2[i];
-    //             }
-    //         }
-
-    //         if(StringUtils.isBlank(targetBoard)) {
-    //             return rssFeedList;
-    //         }
-
-    //         String url = baseUrl2 + "/" + targetBoard + "/list?p&" + pageHtml2 + "=" + page;
-    //         Document doc = getDoc(url);
-
-    //         Elements els = null;
-            
-    //         try {
-    //             els = doc.select("script");
-
-    //             log.debug(els.toString());
-
-    //             for(int i = els.size() -1; i >= 0; i--) {
-    //                 Pattern pattern = Pattern.compile(".*pageItems\\s*=\\s*(\\[.*\\]).*", Pattern.CASE_INSENSITIVE);
-    //                 Matcher matcher = pattern.matcher(els.get(i).toString().replace("\n", "").replace("\r", ""));
-
-    //                 if (matcher.matches()) {
-    //                     JSONArray jsonArray = new JSONArray(matcher.group(1));
-
-    //                    for(int j = 0; j < jsonArray.length(); j++) {
-    //                        JSONObject jsonObj = jsonArray.getJSONObject(j);
-    //                        String title = jsonObj.getString("fn");
-    //                        String magnet = "magnet:?xt=urn:btih:" + jsonObj.getString("hs");
-
-    //                        rssFeedList.add(makeFeed(title, magnet, rss));
-    //                    }
-
-    //                 }
-    //             }
-
-    //         } catch ( NullPointerException e) {
-    //             log.error(baseUrl2 + " / " + e.toString());
-    //         }
-    //     }
-
-    //     return rssFeedList;
-    // }
-
-    // private List<RssFeed> makeRss3(RssList rss) {
-    //     log.info("Load RSS Site3 : {}", rss.getName());
-
-    //     sessionId = null;
-        
-    //     List<RssFeed> rssFeedList = new ArrayList<>();
-
-    //     for(int page = 1; page <= maxPage3; page++ ) {
-    //         String url = baseUrl3 + "?" + boardQuery3 + "=" + rss.getUrl() + "&" + pageQuery3 + "=" + page;
-
-    //         //log.info("Load RSS Site3 : {}", url);
-
-    //         Document doc = getDoc(url);
-
-
-    //         Elements els = null;
-            
-    //         try {
-    //             els = doc.select("tbody tr td.list-subject");
-                
-    //             for(int i = els.size() -1; i >= 0; i--) {
-    //                 try {
-    //                     if(els.get(i).hasClass("pr_subject")) {
-    //                         continue;
-    //                     }
-
-    //                     Element item = els.get(i).select("a").last();
-    //                     String title = item.text() ;
-    //                     String magnet = getTorrentLink3(item.absUrl("href"));
-    //                     log.debug(title + "|" + magnet);
-
-    //                     rssFeedList.add(makeFeed(title, magnet, rss));
-    //                 } catch (Exception e) {
-    //                     log.error(els.get(i).select("a").last().text() + "/" + e.toString());
-    //                 }
-    //             }
-
-    //         } catch (NullPointerException e) {
-    //             log.error(baseUrl1 + " / " + e.toString());
-    //         }
-    //     }
-
-    //     return rssFeedList;
-    // }
 
     private RssFeed makeFeed(String title, String magnet, RssList rss) {
         RssFeed rssFeed = new RssFeed();
@@ -604,6 +399,71 @@ public class RssMakeService {
         Element el = doc.select("li.list-group-item a[href]").first();
 
         log.debug("getTorrentLink6 {} {}", urlString, el.toString());
+
+        return el.attr("href");
+    }
+
+    private List<RssFeed> makeRss7(RssList rss) {
+        log.info("Load RSS Site7 : {}, {} ", rss.getName(), rss.getUrl());
+
+        sessionId = null;
+
+        List<RssFeed> rssFeedList = new ArrayList<>();
+
+        for(int page = 1; page <= maxPage7; page++ ) {
+            String targetBoard = null;
+
+            for(int i = 0; i < tvBoards1.length; i++) {
+                if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
+                    targetBoard = tvBoards7[i];
+                }
+            }
+
+            if(StringUtils.isBlank(targetBoard)) {
+                return rssFeedList;
+            }
+
+            String url = baseUrl7 + targetBoard + "&" + pageHtml7 + "=" + page;
+            Document doc = getDoc(url);
+
+            Elements els = null;
+
+            try {
+                els = doc.select("li.tit");
+
+                log.debug(els.toString());
+
+                for(int i = els.size() -1; i >= 0; i--) {
+                    Element item = els.get(i).select("a").get(0);
+                    String title = item.text();
+
+                    log.debug(item.absUrl("href"));
+
+                    String magnet = getTorrentLink7(item.absUrl("href"));
+
+                    log.debug("rss7: {}, {}", new Object[]{title, magnet});
+
+                    if(StringUtils.isNotBlank(magnet)) {
+                        rssFeedList.add(makeFeed(title, magnet, rss));
+                    }
+
+                    Thread.sleep(SLEEP_SECOND * 1000);
+                }
+
+            } catch ( Exception e) {
+                log.error(baseUrl7+ " / " + e.toString());
+            }
+        }
+
+        return rssFeedList;
+    }
+
+    private String getTorrentLink7(String urlString) throws Exception {
+        Document doc = getDoc(urlString);
+
+        Element el = doc.select("table.notice_table a[href]").last();
+
+        log.debug("getTorrentLink7 {} {}", urlString, el.toString());
 
         return el.attr("href");
     }

@@ -47,4 +47,11 @@ internal-rss6:
     tv-boards: >
         DRAMA,
         VARIETY
-        
+      
+internal-rss7:
+    base_url: https://torrentsee89.com/
+    page-html: page
+    max-page: 1
+    tv-boards: >
+        topic/index?category1=2&category2=13,
+        topic/index?category1=4&category2=16
