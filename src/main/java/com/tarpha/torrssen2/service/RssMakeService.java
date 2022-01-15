@@ -439,7 +439,7 @@ public class RssMakeService {
                     try {
                         Element item = els.get(i).select("a").get(0);
                         //String title = StringUtils.removeEnd(item.text(), "_");
-                        String title = item.text().repalceAll("_", "");
+                        String title = item.text().replaceAll("_", "");
                         log.debug(item.absUrl("href"));
 
                         String magnet = getTorrentLink7(item.absUrl("href"));
