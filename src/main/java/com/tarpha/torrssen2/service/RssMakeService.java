@@ -430,31 +430,33 @@ public class RssMakeService {
 
             Elements els = null;
 
-            try {
+            
                 els = doc.select("li.tit");
 
                 log.debug(els.toString());
 
                 for(int i = els.size() -1; i >= 0; i--) {
-                    Element item = els.get(i).select("a").get(0);
-                    String title = item.text();
+                    try {
+                        Element item = els.get(i).select("a").get(0);
+                        String title = item.text();
 
-                    log.debug(item.absUrl("href"));
+                        log.debug(item.absUrl("href"));
 
-                    String magnet = getTorrentLink7(item.absUrl("href"));
+                        String magnet = getTorrentLink7(item.absUrl("href"));
 
-                    log.debug("rss7: {}, {}", new Object[]{title, magnet});
+                        log.debug("rss7: {}, {}", new Object[]{title, magnet});
 
-                    if(StringUtils.isNotBlank(magnet)) {
-                        rssFeedList.add(makeFeed(title, magnet, rss));
+                        if(StringUtils.isNotBlank(magnet)) {
+                            rssFeedList.add(makeFeed(title, magnet, rss));
+                        }
+
+                        Thread.sleep(SLEEP_SECOND * 1000);
+                    } catch ( Exception e) {
+                        log.error(baseUrl7+ " / " + e.toString());
                     }
-
-                    Thread.sleep(SLEEP_SECOND * 1000);
                 }
 
-            } catch ( Exception e) {
-                log.error(baseUrl7+ " / " + e.toString());
-            }
+           
         }
 
         return rssFeedList;
