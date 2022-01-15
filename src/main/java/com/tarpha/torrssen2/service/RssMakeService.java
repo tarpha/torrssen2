@@ -438,12 +438,11 @@ public class RssMakeService {
                 for(int i = els.size() -1; i >= 0; i--) {
                     try {
                         Element item = els.get(i).select("a").get(0);
-                        String title = StringUtils.removeEnd(item.text(), "_");
-
+                        //String title = StringUtils.removeEnd(item.text(), "_");
+                        String title = item.text().repalceAll("_", "");
                         log.debug(item.absUrl("href"));
 
                         String magnet = getTorrentLink7(item.absUrl("href"));
-
                         log.debug("rss7: {}, {}", new Object[]{title, magnet});
 
                         if(StringUtils.isNotBlank(magnet)) {
