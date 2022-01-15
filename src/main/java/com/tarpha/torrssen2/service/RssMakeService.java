@@ -438,7 +438,7 @@ public class RssMakeService {
                 for(int i = els.size() -1; i >= 0; i--) {
                     try {
                         Element item = els.get(i).select("a").get(0);
-                        String title = item.text();
+                        String title = StringUtils.removeEnd(item.text(), "_");
 
                         log.debug(item.absUrl("href"));
 
