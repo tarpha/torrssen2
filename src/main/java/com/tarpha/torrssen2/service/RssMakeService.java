@@ -77,6 +77,8 @@ public class RssMakeService {
 
     private final int SLEEP_SECOND = 10;
 
+    private final int TIMEOUT_SECOND = 60;
+
     public List<RssFeed> makeRss() {
         List<RssFeed> rssFeedList = new ArrayList<>();
 
@@ -177,11 +179,11 @@ public class RssMakeService {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
 
                 if(StringUtils.isNotEmpty(sessionId)) {
-                    res = Jsoup.connect(urlString).cookie(SESSION_KEY, sessionId).proxy(proxy).execute();
+                    res = Jsoup.connect(urlString).cookie(SESSION_KEY, sessionId).proxy(proxy).timeout(TIMEOUT_SECOND * 1000).execute();
 
                     log.debug("set sessionId: {}", sessionId);
                 } else {
-                    res = Jsoup.connect(urlString).proxy(proxy).execute();
+                    res = Jsoup.connect(urlString).proxy(proxy).timeout(TIMEOUT_SECOND * 1000).execute();
                     sessionId = res.cookie(SESSION_KEY);
 
                     log.debug("get sessionId: {}", sessionId);
@@ -201,12 +203,12 @@ public class RssMakeService {
                 Response res;
 
                 if(StringUtils.isNotEmpty(sessionId)) {
-                    res = Jsoup.connect(urlString).cookie(SESSION_KEY, sessionId).execute();
+                    res = Jsoup.connect(urlString).cookie(SESSION_KEY, sessionId).timeout(TIMEOUT_SECOND * 1000).execute();
 
                     log.debug("res: {}", res);
                     log.debug("set sessionId: {}", sessionId);
                 } else {
-                    res = Jsoup.connect(urlString).execute();
+                    res = Jsoup.connect(urlString).timeout(TIMEOUT_SECOND * 1000).execute();
                     sessionId = res.cookie(SESSION_KEY);
 
                     log.debug("get sessionId: {}", sessionId);
