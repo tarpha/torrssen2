@@ -283,7 +283,7 @@ public class RssMakeService {
                 try {
                     Element item = els.get(i).select("a").get(0);
                     // String title = StringUtils.removeEnd(item.text(), "_");
-                    String title = item.text().replaceAll("_", " ");
+                    String title = item.text().replaceAll("_", ".").replaceAll("토렌트씨", "");
 
                     String magnet = getTorrentLink7(item.absUrl("href"));
                     log.debug("rss7: {}, {}", new Object[]{title, magnet});
