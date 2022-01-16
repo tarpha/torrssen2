@@ -67,12 +67,6 @@ public class RssMakeService {
 
     private String sessionId;
 
-    // private WebClient webClient;
-
-    // private final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36";
-
-    // private final int TIMEOUT_VALUE = 30000;
-
     private final String SESSION_KEY = "PHPSESSID";
 
     private final int SLEEP_SECOND = 10;
@@ -83,10 +77,6 @@ public class RssMakeService {
         List<RssFeed> rssFeedList = new ArrayList<>();
 
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
-            // rssFeedList.addAll(makeRss1(rss));
-            // rssFeedList.addAll(makeRss2(rss));
-            // rssFeedList.addAll(makeRss3(rss));
-            // rssFeedList.addAll(makeRss4(rss));
             rssFeedList.addAll(makeRss6(rss));
             rssFeedList.addAll(makeRss7(rss));
         }
@@ -129,36 +119,10 @@ public class RssMakeService {
     }
 
     private Document getDoc(String urlString) {
-        // URL url;
-        // HttpsURLConnection uc = null;
-
+        
         try {
-            // url = new URL(urlString);
-
             Optional<Setting> optionalHost = settingRepository.findByKey("PROXY_HOST");
             Optional<Setting> optionalPort = settingRepository.findByKey("PROXY_PORT");
-
-            // TrustManager[] trustAllCerts = new TrustManager[]{
-            //     new X509TrustManager() {
-            //         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-            //             return null;
-            //         }
-            //         public void checkClientTrusted(
-            //             java.security.cert.X509Certificate[] certs, String authType) {
-            //         }
-            //         public void checkServerTrusted(
-            //             java.security.cert.X509Certificate[] certs, String authType) {
-            //         }
-            //     }
-            // };
-            
-            // SSLContext sc = SSLContext.getInstance("SSL");
-            // sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            // HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-
-            // if(webClient == null) {
-            //     webClient = new WebClient(BrowserVersion.CHROME);
-            // }
 
             if (optionalHost.isPresent() && optionalPort.isPresent()) {
                 log.debug("Use Proxy");
@@ -192,11 +156,6 @@ public class RssMakeService {
                 log.debug("PHPSESSID: {}", sessionId);
 
                 return res.parse();
-                // webClient.getOptions().setProxyConfig(new ProxyConfig(proxyHost, proxyPort, null));
-
-                // HtmlPage page = webClient.getPage(urlString);
-                
-                // return Jsoup.parse(page.asXml());
             } else {
                 log.debug("No Proxy {}", urlString);
 
@@ -223,124 +182,10 @@ public class RssMakeService {
             log.error(urlString + " / " + e.toString());
 
             return null;
-        } finally {
-            // if(uc != null) uc.disconnect();
-        }
+        } 
 
     }
    
-
-    // private String getMagnetString1(String urlString) throws Exception {
-    //     Document doc = getDoc(urlString);
-
-    //     Element el = doc.selectFirst(".btn.btn-success.btn-xs");
-
-    //     Pattern pattern = Pattern.compile("magnet_link\\(\\'(.{1,})\\'\\);", Pattern.CASE_INSENSITIVE);
-    //     Matcher matcher = pattern.matcher(el.attr("onclick"));
-
-    //     if (matcher.matches()) {
-    //         return "magnet:?xt=urn:btih:" + matcher.group(1);
-    //     } else {
-    //         return null;
-    //     }
-    // }
-
-    // private String getTorrentLink3(String urlString) throws Exception {
-    //     Document doc = getDoc(urlString);
-
-    //     Element el = doc.select(".btn.btn-color.btn-xs.view_file_download").get(1);
-
-    //     String uri = el.attr("href");
-
-    //     Optional<Setting> optionalHost = settingRepository.findByKey("PROXY_HOST");
-    //     Optional<Setting> optionalPort = settingRepository.findByKey("PROXY_PORT");
-
-    //     Response res;
-
-    //     if (optionalHost.isPresent() && optionalPort.isPresent()) {
-    //         String proxyHost = optionalHost.get().getValue();
-    //         int proxyPort = Integer.parseInt(optionalPort.get().getValue());
-
-    //         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-
-    //         res = Jsoup.connect(uri).cookie("PHPSESSID", sessionId).proxy(proxy).followRedirects(false).execute();
-    //     } else {
-    //         res = Jsoup.connect(uri).cookie("PHPSESSID", sessionId).followRedirects(false).execute();
-    //     }
-
-    //     return res.header("location");
-    // }
-
-    // private String getMagnetString2(String urlString) throws Exception {
-    //     Document doc = getDoc(urlString);
-    //     Element el = doc.selectFirst("div + b + a");
-
-    //     return el.attr("href");
-    // }
-
-    // private List<RssFeed> makeRss4(RssList rss) {
-    //     log.info("Load RSS Site4 : " + rss.getName());
-
-    //     sessionId = null;
-
-    //     List<RssFeed> rssFeedList = new ArrayList<>();
-
-    //     for(int page = 1; page <= maxPage4; page++ ) {
-    //         String targetBoard = null;
-
-    //         for(int i = 0; i < tvBoards2.length; i++) {
-    //             if(StringUtils.equals(tvBoards2[i], rss.getUrl())) {                    
-    //                 targetBoard = tvBoards4[i];
-    //             }
-    //         }
-
-    //         if(StringUtils.isBlank(targetBoard)) {
-    //             return rssFeedList;
-    //         }
-
-    //         String url = baseUrl4 + "/" + targetBoard + "?&" + pageHtml4 + "=" + page;
-    //         Document doc = getDoc(url);
-
-    //         Elements els = null;
-
-    //         try {
-    //             els = doc.select("div.list-board li.list-item div.wr-subject");
-
-    //             log.debug(els.toString());
-
-    //             for(int i = els.size() -1; i >= 0; i--) {
-    //                 Element item = els.get(i).select("a").get(1);
-    //                 String title = item.text().replaceFirst("N", "");
-    //                 String magnet = getTorrentLink4(item.absUrl("href"));
-
-    //                 log.debug("rss4: {}, {}", new Object[]{title, magnet});
-
-    //                 rssFeedList.add(makeFeed(title, magnet, rss));
-    //             }
-
-    //         } catch ( Exception e) {
-    //             log.error(baseUrl4+ " / " + e.toString());
-    //         }
-    //     }
-
-    //     return rssFeedList;
-    // }
-
-    // private String getTorrentLink4(String urlString) throws Exception {
-    //     Document doc = getDoc(urlString);
-
-    //     Element el = doc.select("tbody tr td ul li").first();
-
-    //     return "magnet:?xt=urn:btih:" + el.text().replace("Info Hash:", "").trim();
-    // }
-
-    // private String getMagnetString2(String urlString) throws Exception {
-    //     Document doc = getDoc(urlString);
-    //     Element el = doc.selectFirst("div + b + a");
-
-    //     return el.attr("href");
-    // }
-
     private List<RssFeed> makeRss6(RssList rss) {
         log.info("Load RSS Site6 : {}, {} ", rss.getName(), rss.getUrl());
 
@@ -429,39 +274,37 @@ public class RssMakeService {
             Document doc = getDoc(url);
 
             Elements els = null;
-
             
-                els = doc.select("li.tit");
+            els = doc.select("li.tit");
 
-                log.debug(els.toString());
+            log.debug(els.toString());
 
-                for(int i = els.size() -1; i >= 0; i--) {
-                    try {
-                        Element item = els.get(i).select("a").get(0);
-                        //String title = StringUtils.removeEnd(item.text(), "_");
-                        String title = item.text().replaceAll("_", "");
-                        log.debug(item.absUrl("href"));
+            for(int i = els.size() -1; i >= 0; i--) {
+                try {
+                    Element item = els.get(i).select("a").get(0);
+                    // String title = StringUtils.removeEnd(item.text(), "_");
+                    String title = item.text().replaceAll("_", "");
 
-                        String magnet = getTorrentLink7(item.absUrl("href"));
-                        log.debug("rss7: {}, {}", new Object[]{title, magnet});
+                    String magnet = getTorrentLink7(item.absUrl("href"));
+                    log.debug("rss7: {}, {}", new Object[]{title, magnet});
 
-                        if(StringUtils.isNotBlank(magnet)) {
-                            rssFeedList.add(makeFeed(title, magnet, rss));
-                        }
-
-                        Thread.sleep(SLEEP_SECOND * 1000);
-                    } catch ( Exception e) {
-                        log.error(baseUrl7+ " / " + e.toString());
+                    if(StringUtils.isNotBlank(magnet)) {
+                        rssFeedList.add(makeFeed(title, magnet, rss));
                     }
-                }
 
-           
+                    Thread.sleep(SLEEP_SECOND * 1000);
+                } catch ( Exception e) {
+                    log.error(baseUrl7+ " / " + e.toString());
+                }
+            }
         }
 
         return rssFeedList;
     }
 
     private String getTorrentLink7(String urlString) throws Exception {
+        log.debug("getTorrentLink7: {}", urlString);
+
         Document doc = getDoc(urlString);
 
         Element el = doc.select("table.notice_table a[href]").last();
