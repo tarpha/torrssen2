@@ -56,6 +56,18 @@ public class RssMakeService {
     @Value("${internal-rss7.tv-boards}")
     private String[] tvBoards7;
 
+    @Value("${internal-rss8.base-url}")
+    private String baseUrl8;
+
+    @Value("${internal-rss8.page-html}")
+    private String pageHtml8;
+
+    @Value("${internal-rss8.max-page}")
+    private int maxPage8;
+
+    @Value("${internal-rss8.tv-boards}")
+    private String[] tvBoards8;
+
     @Autowired
     private SettingRepository settingRepository;
 
@@ -77,8 +89,9 @@ public class RssMakeService {
         List<RssFeed> rssFeedList = new ArrayList<>();
 
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
-            rssFeedList.addAll(makeRss6(rss));
-            rssFeedList.addAll(makeRss7(rss));
+            // rssFeedList.addAll(makeRss6(rss));
+            // rssFeedList.addAll(makeRss7(rss));
+            rssFeedList.addAll(makeRss8(rss));
         }
 
         return rssFeedList;
@@ -310,6 +323,70 @@ public class RssMakeService {
         Element el = doc.select("table.notice_table a[href]").last();
 
         log.debug("getTorrentLink7 {} {}", urlString, el.toString());
+
+        return el.attr("href");
+    }
+
+    private List<RssFeed> makeRss8(RssList rss) {
+        log.info("Load RSS Site8 : {}, {} ", rss.getName(), rss.getUrl());
+
+        sessionId = null;
+
+        List<RssFeed> rssFeedList = new ArrayList<>();
+
+        for(int page = 1; page <= maxPage8; page++ ) {
+            String targetBoard = null;
+
+            for(int i = 0; i < tvBoards1.length; i++) {
+                if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
+                    targetBoard = tvBoards8[i];
+                }
+            }
+
+            if(StringUtils.isBlank(targetBoard)) {
+                return rssFeedList;
+            }
+
+            String url = baseUrl8 + targetBoard + "?" + pageHtml8 + "=" + page;
+            Document doc = getDoc(url);
+
+            Elements els = null;
+            
+            //<li class="flex flex-row pl-2 pr-4 py-3">
+            els = doc.select("li.flex.flex-row.pl-2.pr-4.py-3");
+
+            log.debug(els.toString());
+
+            for(int i = els.size() -1; i >= 0; i--) {
+                try {
+                    Element item = els.get(i).select("a").get(0);
+                    String title = item.text();
+
+                    log.debug(item.absUrl("href"));
+
+                    String magnet = getTorrentLink8(item.absUrl("href"));
+
+                    log.debug("rss8: {}, {}", new Object[]{title, magnet});
+
+                    rssFeedList.add(makeFeed(title, magnet, rss));
+
+                    Thread.sleep(SLEEP_SECOND * 1000);
+                } catch ( Exception e) {
+                    log.error(baseUrl8+ " / " + e.toString());
+                }
+            }
+        }
+
+        return rssFeedList;
+    }
+
+    private String getTorrentLink8(String urlString) throws Exception {
+        Document doc = getDoc(urlString);
+
+        // <div class="flex flex-col p-2 space-y-2">
+        Element el = doc.select("div.flex.flex-col.p-2.space-y-2 a[href]").last();
+
+        log.debug("getTorrentLink8 {} {}", urlString, el.toString());
 
         return el.attr("href");
     }

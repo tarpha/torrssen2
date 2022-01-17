@@ -55,3 +55,11 @@ internal-rss7:
     tv-boards: >
         topic/index?category1=2&category2=13,
         topic/index?category1=4&category2=16
+
+internal-rss8:
+    base_url: https://torrentbam5.com/
+    page-html: page
+    max-page: 1
+    tv-boards: >
+        c/2/13,
+        c/4/16
