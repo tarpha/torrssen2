@@ -388,7 +388,8 @@ public class RssMakeService {
 
         log.debug("getTorrentLink8 {} {}", urlString, el.toString());
 
-        return el.attr("href");
+        //magnet:?xt=urn:
+        return el.attr("href").replace("urn:", "urn:btih:");
     }
     
 }
