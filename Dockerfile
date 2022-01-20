@@ -16,8 +16,10 @@ COPY --from=0 /torrssen2 .
 RUN gradle bootjar
 
 #FROM adoptopenjdk/openjdk8-openj9:alpine-slim
-FROM adoptopenjdk:8-openj9-focal
+#FROM adoptopenjdk:8-openj9-focal
+FROM openjdk/8-jre
 COPY --from=1 /torrssen2/build/libs/torrssen2-*.jar torrssen2.jar
 VOLUME [ "/root/data" ]
 EXPOSE 8080
-CMD [ "java", "-Xshareclasses", "-Xquickstart", "-jar", "torrssen2.jar"]
+#CMD [ "java", "-Xshareclasses", "-Xquickstart", "-jar", "torrssen2.jar"]
+CMD [ "java", "-jar", "torrssen2.jar"]
