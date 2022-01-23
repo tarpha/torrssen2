@@ -91,7 +91,7 @@ public class RssMakeService {
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
             rssFeedList.addAll(makeRss8(rss));
             rssFeedList.addAll(makeRss6(rss));
-            rssFeedList.addAll(makeRss7(rss));
+            // rssFeedList.addAll(makeRss7(rss));
         }
 
         return rssFeedList;
