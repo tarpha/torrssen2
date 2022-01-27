@@ -89,7 +89,7 @@ public class RssMakeService {
         List<RssFeed> rssFeedList = new ArrayList<>();
 
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
-            // rssFeedList.addAll(makeRss8(rss));
+            rssFeedList.addAll(makeRss8(rss));
             rssFeedList.addAll(makeRss7(rss));
             rssFeedList.addAll(makeRss6(rss));
         }
@@ -200,53 +200,58 @@ public class RssMakeService {
     }
    
     private List<RssFeed> makeRss6(RssList rss) {
+        
         log.info("Load RSS Site6 : {}, {} ", rss.getName(), rss.getUrl());
-
+        
         sessionId = null;
 
         List<RssFeed> rssFeedList = new ArrayList<>();
+        
+        try {
+            for(int page = 1; page <= maxPage6; page++ ) {
+                String targetBoard = null;
 
-        for(int page = 1; page <= maxPage6; page++ ) {
-            String targetBoard = null;
-
-            for(int i = 0; i < tvBoards1.length; i++) {
-                if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
-                    targetBoard = tvBoards6[i];
-                }
-            }
-
-            if(StringUtils.isBlank(targetBoard)) {
-                return rssFeedList;
-            }
-
-            String url = baseUrl6 + "/" + targetBoard + "/" + pageHtml6 + page;
-            Document doc = getDoc(url);
-
-            Elements els = null;
-
-            try {
-                els = doc.select("div.wr-subject");
-
-                log.debug(els.toString());
-
-                for(int i = els.size() -1; i >= 0; i--) {
-                    Element item = els.get(i).select("a").get(0);
-                    String title = item.text();
-
-                    log.debug(item.absUrl("href"));
-
-                    String magnet = getTorrentLink6(item.absUrl("href"));
-
-                    log.debug("rss6: {}, {}", new Object[]{title, magnet});
-
-                    rssFeedList.add(makeFeed(title, magnet, rss));
-
-                    Thread.sleep(SLEEP_SECOND * 1000);
+                for(int i = 0; i < tvBoards1.length; i++) {
+                    if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
+                        targetBoard = tvBoards6[i];
+                    }
                 }
 
-            } catch ( Exception e) {
-                log.error(baseUrl6+ " / " + e.toString());
-            }
+                if(StringUtils.isBlank(targetBoard)) {
+                    return rssFeedList;
+                }
+
+                String url = baseUrl6 + "/" + targetBoard + "/" + pageHtml6 + page;
+                Document doc = getDoc(url);
+
+                Elements els = null;
+
+                try {
+                    els = doc.select("div.wr-subject");
+
+                    log.debug(els.toString());
+
+                    for(int i = els.size() -1; i >= 0; i--) {
+                        Element item = els.get(i).select("a").get(0);
+                        String title = item.text();
+
+                        log.debug(item.absUrl("href"));
+
+                        String magnet = getTorrentLink6(item.absUrl("href"));
+
+                        log.debug("rss6: {}, {}", new Object[]{title, magnet});
+
+                        rssFeedList.add(makeFeed(title, magnet, rss));
+
+                        Thread.sleep(SLEEP_SECOND * 1000);
+                    }
+
+                } catch ( Exception e) {
+                    log.error(baseUrl6+ " / " + e.toString());
+                }
+            }        
+        } catch (Exception e) {
+            log.error(e.toString());
         }
 
         return rssFeedList;
@@ -270,46 +275,50 @@ public class RssMakeService {
 
         List<RssFeed> rssFeedList = new ArrayList<>();
 
-        for(int page = 1; page <= maxPage7; page++ ) {
-            String targetBoard = null;
+        try {
+            for(int page = 1; page <= maxPage7; page++ ) {
+                String targetBoard = null;
 
-            for(int i = 0; i < tvBoards1.length; i++) {
-                if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
-                    targetBoard = tvBoards7[i];
-                }
-            }
-
-            if(StringUtils.isBlank(targetBoard)) {
-                return rssFeedList;
-            }
-
-            String url = baseUrl7 + targetBoard + "&" + pageHtml7 + "=" + page;
-            Document doc = getDoc(url);
-
-            Elements els = null;
-            
-            els = doc.select("li.tit");
-
-            log.debug(els.toString());
-
-            for(int i = els.size() -1; i >= 0; i--) {
-                try {
-                    Element item = els.get(i).select("a").get(0);
-                    // String title = StringUtils.removeEnd(item.text(), "_");
-                    String title = item.text().replaceAll("_", ".").replaceAll("토렌트씨", "");
-
-                    String magnet = getTorrentLink7(item.absUrl("href"));
-                    log.debug("rss7: {}, {}", new Object[]{title, magnet});
-
-                    if(StringUtils.isNotBlank(magnet)) {
-                        rssFeedList.add(makeFeed(title, magnet, rss));
+                for(int i = 0; i < tvBoards1.length; i++) {
+                    if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
+                        targetBoard = tvBoards7[i];
                     }
+                }
 
-                    Thread.sleep(SLEEP_SECOND * 1000);
-                } catch ( Exception e) {
-                    log.error(baseUrl7+ " / " + e.toString());
+                if(StringUtils.isBlank(targetBoard)) {
+                    return rssFeedList;
+                }
+
+                String url = baseUrl7 + targetBoard + "&" + pageHtml7 + "=" + page;
+                Document doc = getDoc(url);
+
+                Elements els = null;
+                
+                els = doc.select("li.tit");
+
+                log.debug(els.toString());
+
+                for(int i = els.size() -1; i >= 0; i--) {
+                    try {
+                        Element item = els.get(i).select("a").get(0);
+                        // String title = StringUtils.removeEnd(item.text(), "_");
+                        String title = item.text().replaceAll("_", ".").replaceAll("토렌트씨", "");
+
+                        String magnet = getTorrentLink7(item.absUrl("href"));
+                        log.debug("rss7: {}, {}", new Object[]{title, magnet});
+
+                        if(StringUtils.isNotBlank(magnet)) {
+                            rssFeedList.add(makeFeed(title, magnet, rss));
+                        }
+
+                        Thread.sleep(SLEEP_SECOND * 1000);
+                    } catch ( Exception e) {
+                        log.error(baseUrl7+ " / " + e.toString());
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.error(e.toString());
         }
 
         return rssFeedList;
@@ -334,47 +343,51 @@ public class RssMakeService {
 
         List<RssFeed> rssFeedList = new ArrayList<>();
 
-        for(int page = 1; page <= maxPage8; page++ ) {
-            String targetBoard = null;
+        try {
+            for(int page = 1; page <= maxPage8; page++ ) {
+                String targetBoard = null;
 
-            for(int i = 0; i < tvBoards1.length; i++) {
-                if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
-                    targetBoard = tvBoards8[i];
+                for(int i = 0; i < tvBoards1.length; i++) {
+                    if(StringUtils.equals(tvBoards1[i], rss.getUrl())) {                    
+                        targetBoard = tvBoards8[i];
+                    }
+                }
+
+                if(StringUtils.isBlank(targetBoard)) {
+                    return rssFeedList;
+                }
+
+                String url = baseUrl8 + targetBoard + "?" + pageHtml8 + "=" + page;
+                Document doc = getDoc(url);
+
+                Elements els = null;
+                
+                //<li class="flex flex-row pl-2 pr-4 py-3">
+                els = doc.select("li.flex.flex-row.pl-2.pr-4.py-3");
+
+                log.debug(els.toString());
+
+                for(int i = els.size() -1; i >= 0; i--) {
+                    try {
+                        Element item = els.get(i).select("a").get(0);
+                        String title = item.text();
+
+                        log.debug(item.absUrl("href"));
+
+                        String magnet = getTorrentLink8(item.absUrl("href"));
+
+                        log.debug("rss8: {}, {}", new Object[]{title, magnet});
+
+                        rssFeedList.add(makeFeed(title, magnet, rss));
+
+                        Thread.sleep(SLEEP_SECOND * 1000);
+                    } catch ( Exception e) {
+                        log.error(baseUrl8+ " / " + e.toString());
+                    }
                 }
             }
-
-            if(StringUtils.isBlank(targetBoard)) {
-                return rssFeedList;
-            }
-
-            String url = baseUrl8 + targetBoard + "?" + pageHtml8 + "=" + page;
-            Document doc = getDoc(url);
-
-            Elements els = null;
-            
-            //<li class="flex flex-row pl-2 pr-4 py-3">
-            els = doc.select("li.flex.flex-row.pl-2.pr-4.py-3");
-
-            log.debug(els.toString());
-
-            for(int i = els.size() -1; i >= 0; i--) {
-                try {
-                    Element item = els.get(i).select("a").get(0);
-                    String title = item.text();
-
-                    log.debug(item.absUrl("href"));
-
-                    String magnet = getTorrentLink8(item.absUrl("href"));
-
-                    log.debug("rss8: {}, {}", new Object[]{title, magnet});
-
-                    rssFeedList.add(makeFeed(title, magnet, rss));
-
-                    Thread.sleep(SLEEP_SECOND * 1000);
-                } catch ( Exception e) {
-                    log.error(baseUrl8+ " / " + e.toString());
-                }
-            }
+        } catch (Exception e) {
+            log.error(e.toString());
         }
 
         return rssFeedList;

@@ -57,7 +57,7 @@ internal-rss7:
         topic/index?category1=4&category2=16
 
 internal-rss8:
-    base_url: https://torrentbam6.com/
+    base_url: https://torrentbam7.com/
     page-html: page
     max-page: 1
     tv-boards: >
