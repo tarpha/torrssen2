@@ -90,8 +90,8 @@ public class RssMakeService {
 
         for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
             rssFeedList.addAll(makeRss8(rss));
-            rssFeedList.addAll(makeRss7(rss));
-            rssFeedList.addAll(makeRss6(rss));
+            // rssFeedList.addAll(makeRss7(rss));
+            // rssFeedList.addAll(makeRss6(rss));
         }
 
         return rssFeedList;
@@ -357,13 +357,13 @@ public class RssMakeService {
                     return rssFeedList;
                 }
 
-                String url = baseUrl8 + targetBoard + "?" + pageHtml8 + "=" + page;
+                String url = baseUrl8 + "bbs/board.php?bo_table=" + targetBoard + "&" + pageHtml8 + "=" + page;
                 Document doc = getDoc(url);
 
                 Elements els = null;
                 
-                //<li class="flex flex-row pl-2 pr-4 py-3">
-                els = doc.select("li.flex.flex-row.pl-2.pr-4.py-3");
+                //<div class="wr-subject">
+                els = doc.select("div.wr-subject");
 
                 log.debug(els.toString());
 
@@ -396,13 +396,13 @@ public class RssMakeService {
     private String getTorrentLink8(String urlString) throws Exception {
         Document doc = getDoc(urlString);
 
-        // <div class="flex flex-col p-2 space-y-2">
-        Element el = doc.select("div.flex.flex-col.p-2.space-y-2 a[href]").last();
+        // <li class="list-group-item en font-14 red break-word">
+        Element el = doc.select("li.list-group-item a[href]").first();
 
         log.debug("getTorrentLink8 {} {}", urlString, el.toString());
 
         //magnet:?xt=urn:
-        return el.attr("href").replace("urn:", "urn:btih:");
+        return el.attr("href");
     }
     
 }
