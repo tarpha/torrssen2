@@ -48,7 +48,8 @@ internal-rss6:
         1,
         2
       
-internal-rss7:torrentsee89.com/
+internal-rss7:
+    base_url: https://
     page-html: page
     max-page: 1
     tv-boards: >
