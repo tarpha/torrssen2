@@ -88,9 +88,9 @@ public class RssMakeService {
     public List<RssFeed> makeRss() {
         List<RssFeed> rssFeedList = new ArrayList<>();
 
-        for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
-            rssFeedList.addAll(makeRss8(rss));
-        }
+//        for (RssList rss : rssListRepository.findByUseDbAndInternal(true, true)) {
+//            rssFeedList.addAll(makeRss8(rss));
+//        }
 
         return rssFeedList;
     }
