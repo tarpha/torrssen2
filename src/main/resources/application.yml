@@ -28,17 +28,17 @@ daum-movie-tv:
     # limit: 10
 
 internal-rss1:
-    base-url: https://torrenthaja.com/bbs/board.php
+    base-url: https://
     page-query: page
     max-page: 1
     board-query: bo_table
     tv-boards: >
-        torrent_drama,
-        torrent_ent,
-        torrent_docu
+        1,
+        2,
+        3
     other-boards: >
-        torrent_movie,
-        torrent_kmovie
+        1,
+        2
 
 internal-rss6:
     base_url: https://
