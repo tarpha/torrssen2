@@ -41,26 +41,25 @@ internal-rss1:
         torrent_kmovie
 
 internal-rss6:
-    base_url: https://torrentmax2.net/max
+    base_url: https://
     page-html: p
     max-page: 1
     tv-boards: >
-        DRAMA,
-        VARIETY
+        1,
+        2
       
-internal-rss7:
-    base_url: https://torrentsee89.com/
+internal-rss7:torrentsee89.com/
     page-html: page
     max-page: 1
     tv-boards: >
-        topic/index?category1=2&category2=13,
-        topic/index?category1=4&category2=16
+        1,
+        2
 
 internal-rss8:
-    base_url: https://torrentview.co/
+    base_url: https://
     page-html: page
     max-page: 1
     tv-boards: >
-        drama,
-        enter,
-        tv
+        1,
+        2,
+        3
